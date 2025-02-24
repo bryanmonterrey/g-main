@@ -36,6 +36,7 @@
     "@orca-so/common-sdk": "^0.6.10",
     "@orca-so/whirlpools-sdk": "^0.13.16",
     "@phosphor-icons/react": "^2.1.7",
+    "@pythnetwork/hermes-client": "^2.0.0",
     "@raydium-io/raydium-sdk-v2": "^0.1.115-alpha",
     "@solana/spl-token": "^0.4.12",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
