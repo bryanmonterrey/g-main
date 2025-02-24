@@ -9,7 +9,7 @@ import {
   swapFromSolana,
 } from "@mayanfinance/swap-sdk";
 import { SolanaAgentKit } from "../../agent";
-import { ERC20Permit_ABI } from "@/tools/mayan/ERC20PermitABI.ts";
+import { ERC20Permit_ABI } from "@/tools/mayan/ERC20PermitABI";
 import {
   Contract,
   getDefaultProvider,
@@ -20,7 +20,6 @@ import {
   TypedDataEncoder,
   Wallet,
 } from "ethers";
-import { abi as ERC20Permit_ABI } from "@openzeppelin/contracts/build/contracts/ERC20Permit.json";
 import { VersionedTransaction, Transaction } from "@solana/web3.js";
 import MayanForwarderArtifact from "./MayanForwarderArtifact";
 
