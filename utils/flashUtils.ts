@@ -1,6 +1,6 @@
 import { HermesClient } from "@pythnetwork/hermes-client";
 import { OraclePrice } from "flash-sdk";
-import { AnchorProvider, BN, Wallet } from "@coral-xyz/anchor";
+import { AnchorProvider, BN } from "@coral-xyz/anchor";
 import {
   PoolConfig,
   Token,
@@ -8,9 +8,33 @@ import {
   PerpetualsClient,
   Privilege,
 } from "flash-sdk";
-import { Cluster, PublicKey, Connection, Keypair, VersionedTransaction, Transaction } from "@solana/web3.js";
+import { 
+  Cluster, 
+  PublicKey, 
+  Connection, 
+  Keypair, 
+  VersionedTransaction, 
+  Transaction 
+} from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { SolanaAgentKit } from "@/agent";
+
+// Shared adapter between files - keeping consistency with Orca/Tensor approach
+class SolanaWalletAdapter {
+  constructor(private agent: SolanaAgentKit) {}
+
+  get publicKey() {
+    return this.agent.publicKey;
+  }
+
+  async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
+    return await this.agent.wallet.signTransaction(tx) as T;
+  }
+
+  async signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> {
+    return await this.agent.wallet.signAllTransactions(txs) as T[];
+  }
+}
 
 const POOL_NAMES = [
   "Crypto.1",
@@ -21,40 +45,10 @@ const POOL_NAMES = [
   "Community.3",
 ];
 
-interface WalletAdapter {
-  publicKey: PublicKey;
-  signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
-  signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]>;
-}
-
 const DEFAULT_CLUSTER: Cluster = "mainnet-beta";
 export const POOL_CONFIGS = POOL_NAMES.map((f) =>
   PoolConfig.fromIdsByName(f, DEFAULT_CLUSTER),
 );
-
-export function createPerpClient(
-  connection: Connection,
-  wallet: WalletAdapter | Keypair,
-): PerpetualsClient {
-  const provider = new AnchorProvider(
-    connection,
-    wallet instanceof Keypair ? new Wallet(wallet) : wallet,
-    {
-      commitment: "confirmed",
-      preflightCommitment: "confirmed",
-      skipPreflight: true,
-    }
-  );
-
-  return new PerpetualsClient(
-    provider,
-    POOL_CONFIGS[0].programId,
-    POOL_CONFIGS[0].perpComposibilityProgramId,
-    POOL_CONFIGS[0].fbNftRewardProgramId,
-    POOL_CONFIGS[0].rewardDistributionProgram.programId,
-    {},
-  );
-}
 
 const DUPLICATE_TOKENS = POOL_CONFIGS.map((f) => f.tokens).flat();
 const tokenMap = new Map();
@@ -69,7 +63,7 @@ const PROGRAM_ID = POOL_CONFIGS[0].programId;
 export const OPEN_POSITION_CU = 150_000;
 export const CLOSE_POSITION_CU = 180_000;
 
-const HERMES_URL = "https://hermes.pyth.network"; // Replace with the actual Hermes URL if different
+const HERMES_URL = "https://hermes.pyth.network";
 
 // Create a map of symbol to Pyth price ID
 const PRICE_FEED_IDS = ALL_TOKENS.reduce(
@@ -181,7 +175,6 @@ POOL_CONFIGS.forEach((poolConfig) => {
       (token) => token.mintKey.toString() === market.targetMint.toString(),
     );
 
-    // Find collateral token by matching mintKey
     const collateralToken = ALL_TOKENS.find(
       (token) => token.mintKey.toString() === market.collateralMint.toString(),
     );
@@ -269,7 +262,7 @@ export async function getNftTradingAccountInfo(
           poolConfig.getTokenFromSymbol(collateralCustodySymbol).mintKey,
           nftTradingAccount.owner,
         );
-        // Check if the account exists
+        
         const accountExists =
           await perpClient.provider.connection.getAccountInfo(
             nftOwnerRebateTokenAccountPk,
@@ -293,10 +286,33 @@ export async function getNftTradingAccountInfo(
 /**
  * Creates a new PerpetualsClient instance with the given connection and wallet
  * @param connection Solana connection
- * @param wallet Solana wallet
+ * @param agent SolanaAgentKit instance
  * @returns PerpetualsClient instance
  */
+export function createPerpClient(
+  connection: Connection,
+  agent: SolanaAgentKit,
+): PerpetualsClient {
+  const walletAdapter = new SolanaWalletAdapter(agent);
+  const provider = new AnchorProvider(
+    connection,
+    walletAdapter,
+    {
+      commitment: "confirmed",
+      preflightCommitment: "confirmed",
+      skipPreflight: true,
+    }
+  );
 
+  return new PerpetualsClient(
+    provider,
+    POOL_CONFIGS[0].programId,
+    POOL_CONFIGS[0].perpComposibilityProgramId,
+    POOL_CONFIGS[0].fbNftRewardProgramId,
+    POOL_CONFIGS[0].rewardDistributionProgram.programId,
+    {},
+  );
+}
 
 export function get_flash_privilege(agent: SolanaAgentKit): Privilege {
   const FLASH_PRIVILEGE = agent.config.FLASH_PRIVILEGE || "None";
@@ -310,3 +326,6 @@ export function get_flash_privilege(agent: SolanaAgentKit): Privilege {
       return Privilege.None;
   }
 }
+
+// Export the adapter for use in other files
+export { SolanaWalletAdapter };
