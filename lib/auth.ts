@@ -1,10 +1,10 @@
-import NextAuth, { DefaultSession, NextAuthOptions, User } from "next-auth"
+import { DefaultSession, NextAuthOptions, User } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
+import NextAuth from "next-auth/next"
 import { SupabaseAdapter } from "@auth/supabase-adapter"
 import jwt from "jsonwebtoken"
 import { SigninMessage } from "@/utils/SigninMessage";
 import { getSupabase } from "@/utils/supabase/supabase"
-import DefaultUser from "next-auth";
 import type { JWT } from "next-auth/jwt"
 
 // Define the config object separately
