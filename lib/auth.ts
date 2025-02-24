@@ -5,6 +5,7 @@ import { SupabaseAdapter } from "@auth/supabase-adapter"
 import jwt from "jsonwebtoken"
 import { SigninMessage } from "@/utils/SigninMessage";
 import { getSupabase } from "@/utils/supabase/supabase"
+import { signIn, signOut } from "next-auth/react"
 import type { JWT } from "next-auth/jwt"
 
 // Define the config object separately
@@ -257,8 +258,11 @@ export const authOptions: NextAuthOptions = {
 // Initialize the NextAuth handler
 export const auth = NextAuth(authOptions);
 
-// Export the specific functions
-export const { signIn, signOut } = auth;
+// Add console log here to check if handlers are properly defined
+console.log("Auth handlers:", auth.GET, auth.POST);
+
+
+export { signIn, signOut }
 
 // Export types for TypeScript
 declare module "next-auth" {

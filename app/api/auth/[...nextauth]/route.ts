@@ -1,5 +1,8 @@
-// This is the correct way to export route handlers in Next.js 15
-import { auth } from "@/lib/auth";
+// The correct way for Next.js 15 with App Router
+import NextAuth from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
-export const GET = auth.GET;
-export const POST = auth.POST;
+// Create handler directly in the route file
+const handler = NextAuth(authOptions);
+export const GET = handler.GET;
+export const POST = handler.POST;
