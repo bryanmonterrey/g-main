@@ -21,7 +21,7 @@ export class SolanaListNFTForSaleTool extends Tool {
       // Validate NFT ownership first
       const nftAccount =
         await this.solanaKit.connection.getTokenAccountsByOwner(
-          this.solanaKit.wallet_address,
+          this.solanaKit.publicKey,
           { mint: new PublicKey(parsedInput.nftMint) },
         );
 
