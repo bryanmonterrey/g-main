@@ -15,7 +15,7 @@ const Sidebar = async () => {
    // Pass the session to your data fetching functions
    const [recommended, following] = await Promise.all([
     getRecommended(session),
-    getFollowedUsers()
+    getFollowedUsers(session)
 ]);
 
 
