@@ -1,5 +1,6 @@
 import React from 'react';
 import { Wrapper } from './wrapper';
+import { getServerSession } from "next-auth/next";
 
 import { Following, FollowingSkeleton } from './following';
 import Recommended, { RecommendedSkeleton } from './recommended';
@@ -10,8 +11,13 @@ import { getRecommended } from '@/lib/recommended-service';
 import { getFollowedUsers } from '@/lib/follow-service';
 
 const Sidebar = async () => {
-    const recommended = await getRecommended();
-    const following = await getFollowedUsers();
+    const session = await getServerSession();
+   // Pass the session to your data fetching functions
+   const [recommended, following] = await Promise.all([
+    getRecommended(session),
+    getFollowedUsers()
+]);
+
 
   return (
     <Wrapper>
