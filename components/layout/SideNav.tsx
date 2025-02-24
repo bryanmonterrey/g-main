@@ -14,11 +14,11 @@ import { AgentLogo } from "./AgentLogo";
 import { UserProfile } from "./UserProfile";
 import { MobileNav } from "./MobileNav";
 import { useChatStore } from "@/store/useChatStore";
-import { useTransitionRouter } from 'next-view-transitions';
+import { useRouter } from 'next/navigation';
 import { MOCK_MODELS } from "../chat/ChatInput";
 
 export default function SideNav() {
-	const router = useTransitionRouter();
+	const router = useRouter();
 	const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(true);
 	const [isMobile, setIsMobile] = useState(false);
