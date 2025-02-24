@@ -1,109 +1,105 @@
 import NextAuth, { DefaultSession, User } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
-import { SupabaseAdapter, SupabaseAdapterOptions } from "@auth/supabase-adapter"
+import { SupabaseAdapter } from "@auth/supabase-adapter"
 import jwt from "jsonwebtoken"
 import { SigninMessage } from "@/utils/SigninMessage";
 import { getSupabase } from "@/utils/supabase/supabase"
 import DefaultUser from "next-auth";
 import type { JWT } from "next-auth/jwt"
 
-
-const providers = [
-  CredentialsProvider({
-    name: "web3-auth",
-    credentials: {
-      message: {
-        label: "Message",
-        type: "text",
-      },
-      signature: {
-        label: "Signature",
-        type: "text",
-      },
-      csrfToken: {
-        label: "CSRF Token",
-        type: "text",
-      },
-    },
-    async authorize(credentials): Promise<User | null> {    
-      try {
-        const signinMessage = new SigninMessage(
-          JSON.parse((credentials?.message as string) || "{}")
-        );
-
-        
-
-        const nextAuthUrl = new URL(process.env.NEXTAUTH_URL!);
-
-        if (signinMessage.domain !== nextAuthUrl.host) {
-          throw new Error("Domain mismatch");
-        }
-
-        if (signinMessage.nonce !== credentials.csrfToken) {
-          throw new Error("CSRF token mismatch");
-        }
-
-        const validationResult = await signinMessage.validate(
-          (credentials?.signature as string) || ""
-        );
-
-        if (!validationResult)
-          throw new Error("Could not validate the signed message");
-
-        // Check if user exists in Supabase
-        const supabase = await getSupabase();
-        let { data: user, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("wallet_address", signinMessage.publicKey)
-          .single();
-
-        // If the user doesn't exist, create them
-        if (!user) {
-          try {
-            const supabase = await getSupabase();
-          
-            const { data: newUser, error: insertError } = await supabase
-              .from("users")
-              .insert([{ 
-                id: crypto.randomUUID(),
-                wallet_address: signinMessage.publicKey, 
-                role: "user" 
-              }])
-              .select()
-              .single();
-
-            if (insertError) {
-              console.error("Insert error:", insertError);
-              throw new Error(`Failed to create user: ${insertError.message}`);
-            }
-            user = newUser;
-          } catch (error) {
-            console.error("Insert error details:", error); 
-            console.error("Error creating user:", error);
-            return null;
-          }
-        }
-
-        console.log('user', user);
-        console.log('Authorization successful for wallet:', signinMessage.publicKey);
-        return {
-          id: user.id,
-          walletAddress: user.wallet_address || "",
-          role: user.role || "user",
-        };
-      } catch (error) {
-        console.error("Error during authorization:", error);
-        return null;
-      }
-    },
-  }),
-];
-
-export const { auth, signIn, signOut, handlers} = NextAuth({
+// Define the config object separately
+export const authConfig = {
   debug: !!process.env.AUTH_DEBUG,
   secret: process.env.AUTH_SECRET,
-  providers,
+  providers: [
+    CredentialsProvider({
+      name: "web3-auth",
+      credentials: {
+        message: {
+          label: "Message",
+          type: "text",
+        },
+        signature: {
+          label: "Signature",
+          type: "text",
+        },
+        csrfToken: {
+          label: "CSRF Token",
+          type: "text",
+        },
+      },
+      async authorize(credentials): Promise<User | null> {    
+        try {
+          const signinMessage = new SigninMessage(
+            JSON.parse((credentials?.message as string) || "{}")
+          );
+
+          const nextAuthUrl = new URL(process.env.NEXTAUTH_URL!);
+
+          if (signinMessage.domain !== nextAuthUrl.host) {
+            throw new Error("Domain mismatch");
+          }
+
+          if (signinMessage.nonce !== credentials.csrfToken) {
+            throw new Error("CSRF token mismatch");
+          }
+
+          const validationResult = await signinMessage.validate(
+            (credentials?.signature as string) || ""
+          );
+
+          if (!validationResult)
+            throw new Error("Could not validate the signed message");
+
+          // Check if user exists in Supabase
+          const supabase = await getSupabase();
+          let { data: user, error } = await supabase
+            .from("users")
+            .select("*")
+            .eq("wallet_address", signinMessage.publicKey)
+            .single();
+
+          // If the user doesn't exist, create them
+          if (!user) {
+            try {
+              const supabase = await getSupabase();
+            
+              const { data: newUser, error: insertError } = await supabase
+                .from("users")
+                .insert([{ 
+                  id: crypto.randomUUID(),
+                  wallet_address: signinMessage.publicKey, 
+                  role: "user" 
+                }])
+                .select()
+                .single();
+
+              if (insertError) {
+                console.error("Insert error:", insertError);
+                throw new Error(`Failed to create user: ${insertError.message}`);
+              }
+              user = newUser;
+            } catch (error) {
+              console.error("Insert error details:", error); 
+              console.error("Error creating user:", error);
+              return null;
+            }
+          }
+
+          console.log('user', user);
+          console.log('Authorization successful for wallet:', signinMessage.publicKey);
+          return {
+            id: user.id,
+            walletAddress: user.wallet_address || "",
+            role: user.role || "user",
+          };
+        } catch (error) {
+          console.error("Error during authorization:", error);
+          return null;
+        }
+      },
+    }),
+  ],
   adapter: SupabaseAdapter({
     url: process.env.NEXT_PUBLIC_SUPABASE_URL ?? "",
     secret: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
@@ -115,8 +111,6 @@ export const { auth, signIn, signOut, handlers} = NextAuth({
         url: process.env.NEXT_PUBLIC_SUPABASE_URL,
         hasSecret: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
       })
-      console.log('Providers:', providers);
-      console.log('NextAuth:', NextAuth);  
     },
   },
   session: {
@@ -185,7 +179,7 @@ export const { auth, signIn, signOut, handlers} = NextAuth({
         const signingSecret = process.env.SUPABASE_JWT_SECRET;
         if (signingSecret) {
           const payload = {
-            aud: "authenticated", //shouldnt payload be something else?
+            aud: "authenticated", 
             exp: Math.floor(new Date(Date.now() + 24 * 60 * 60 * 1000).getTime() / 1000),
             sub: user?.id,
             email: user?.email,
@@ -200,12 +194,12 @@ export const { auth, signIn, signOut, handlers} = NextAuth({
     async session({ session, token }) {
       const supabase = await getSupabase();
 
-        // Get the user's data from Supabase to include avatar_url
+      // Get the user's data from Supabase to include avatar_url
       const { data: userData, error } = await supabase
-      .from('users')
-      .select('avatar_url')
-      .eq('id', token.id)
-      .single();
+        .from('users')
+        .select('avatar_url')
+        .eq('id', token.id)
+        .single();
 
       if (session.user) {
         session.user.id = token.id;
@@ -258,8 +252,15 @@ export const { auth, signIn, signOut, handlers} = NextAuth({
       return session;
     },
   },
-});
+};
 
+// Initialize the NextAuth handler
+export const auth = NextAuth(authConfig);
+
+// Export the specific functions
+export const { signIn, signOut } = auth;
+
+// Export types for TypeScript
 declare module "next-auth" {
   interface User {
     walletAddress?: string;
