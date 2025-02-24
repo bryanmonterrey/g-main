@@ -260,7 +260,7 @@ export const authConfig = NextAuth({
   },
 });
 
-export const { auth, signIn, signOut } = NextAuth(authConfig)
+export const { handlers, auth, signIn, signOut } = NextAuth(authConfig)
 
 declare module "next-auth" {
   interface User {
