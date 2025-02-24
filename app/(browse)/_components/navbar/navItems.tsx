@@ -1,42 +1,23 @@
 "use client";
 
 import React from 'react';
-import { useTransitionRouter } from 'next-view-transitions';
+import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Hash, Compass, Users } from 'lucide-react';
-import PopoverWithHint from '@/components/popoverWithHint';
 import { cn } from "@/lib/utils";
 import { useSession } from 'next-auth/react';
 
-interface NavItem {
-  key: string;
-  label: string;
-  path: string;
-  icon?: React.ReactNode;
-  className?: string;
-}
 
-interface PopoverItem {
-  key: string;
-  label: string;
-  url: string;
-  color?: "default" | "primary" | "secondary" | "success" | "warning" | "danger" | string;
-}
 
 interface NavItemsProps {
     session: any;
-    popoverItems: PopoverItem[];
-    handlePopoverItemSelect: (key: string) => void;
   }
 
 export const NavItems: React.FC<NavItemsProps> = ({
-  session,
-  popoverItems,
-  handlePopoverItemSelect
+  session
 }) => {
   const pathname = usePathname();
-  const router = useTransitionRouter();
+  const router = useRouter();
 
   const { data: sessionData } = useSession();
 
@@ -101,28 +82,7 @@ export const NavItems: React.FC<NavItemsProps> = ({
         )
       ))}
 
-      <PopoverWithHint
-        triggerContent={
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-white/80 hover:text-white active:text-white flex items-center justify-center hover:transition-all hover:ease-in-out hover:duration-300 h-6 w-6 active:scale-95 focus-visible:text-white"
-          >
-            <Hash className="text-inherit h-4 w-4 min-h-4 min-w-4 m-auto" strokeWidth={3} />
-          </Button>
-        }
-        popoverContent={
-          <div className="p-4">
-            <p>Menu</p>
-          </div>
-        }
-        items={popoverItems}
-        openLabel="Menu"
-        openHintPlacement="bottom-start"
-        placement="bottom"
-        showArrow={true}
-        onItemSelect={handlePopoverItemSelect}
-      />
+      
     </>
   );
 };
