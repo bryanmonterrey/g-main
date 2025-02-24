@@ -14,7 +14,7 @@ import { CloudOff } from 'lucide-react';
 
 interface UserItemProps {
     username: string;
-    imageUrl: string;
+    avatarUrl: string;
     isLive?: boolean;
 };
 
