@@ -262,10 +262,24 @@ export const authConfig = NextAuth({
 
 export const { handlers, auth, signIn, signOut } = NextAuth(authConfig)
 
+export const GET = handlers.GET;
+export const POST = handlers.POST;
+
 declare module "next-auth" {
   interface User {
     walletAddress?: string;
     role?: string;
+  }
+  
+  interface Session {
+    user: {
+      id: string;
+      role: string;
+      name?: string | null;
+      image?: string | null;
+      walletAddress?: string;
+    } & DefaultSession["user"];
+    supabaseAccessToken?: string;
   }
 }
 
