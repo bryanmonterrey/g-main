@@ -1,5 +1,14 @@
-import { ComputeBudgetProgram } from "@solana/web3.js";
-import { PoolConfig, Side } from "flash-sdk";
+import { 
+  ComputeBudgetProgram, 
+  Transaction, 
+  VersionedTransaction,
+  Connection 
+} from "@solana/web3.js";
+import { 
+  PoolConfig, 
+  Side,
+  Privilege 
+} from "flash-sdk";
 import { BN } from "@coral-xyz/anchor";
 import { SolanaAgentKit } from "../../index";
 import {
@@ -8,10 +17,28 @@ import {
   marketTokenMap,
   getNftTradingAccountInfo,
   fetchOraclePrice,
-  createPerpClient,
   get_flash_privilege,
+  createPerpClient,
+  POOL_CONFIGS
 } from "../../utils/flashUtils";
 import { FlashCloseTradeParams } from "../../types";
+
+// Shared adapter between files
+class SolanaWalletAdapter {
+  constructor(private agent: SolanaAgentKit) {}
+
+  get publicKey() {
+    return this.agent.publicKey;
+  }
+
+  async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
+    return await this.agent.wallet.signTransaction(tx) as T;
+  }
+
+  async signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> {
+    return await this.agent.wallet.signAllTransactions(txs) as T[];
+  }
+}
 
 /**
  * Closes an existing position on Flash.Trade
@@ -59,7 +86,10 @@ export async function flashCloseTrade(
       marketData.pool,
       "mainnet-beta",
     );
-    const perpClient = createPerpClient(agent.connection, agent.wallet);
+    
+    // Use the wallet adapter with the existing createPerpClient function
+    const walletAdapter = new SolanaWalletAdapter(agent);
+    const perpClient = createPerpClient(agent.connection, walletAdapter);
 
     // Calculate price after slippage
     const slippageBpsBN = new BN(100); // 1% slippage
@@ -73,7 +103,7 @@ export async function flashCloseTrade(
 
     // Get NFT trading account info
     const tradingAccounts = await getNftTradingAccountInfo(
-      agent.wallet_address,
+      agent.wallet.publicKey,
       perpClient,
       poolConfig,
       collateralSymbol,

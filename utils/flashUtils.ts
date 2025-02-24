@@ -8,7 +8,7 @@ import {
   PerpetualsClient,
   Privilege,
 } from "flash-sdk";
-import { Cluster, PublicKey, Connection, Keypair } from "@solana/web3.js";
+import { Cluster, PublicKey, Connection, Keypair, VersionedTransaction, Transaction } from "@solana/web3.js";
 import { getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { SolanaAgentKit } from "@/agent";
 
@@ -21,10 +21,40 @@ const POOL_NAMES = [
   "Community.3",
 ];
 
+interface WalletAdapter {
+  publicKey: PublicKey;
+  signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T>;
+  signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]>;
+}
+
 const DEFAULT_CLUSTER: Cluster = "mainnet-beta";
 export const POOL_CONFIGS = POOL_NAMES.map((f) =>
   PoolConfig.fromIdsByName(f, DEFAULT_CLUSTER),
 );
+
+export function createPerpClient(
+  connection: Connection,
+  wallet: WalletAdapter | Keypair,
+): PerpetualsClient {
+  const provider = new AnchorProvider(
+    connection,
+    wallet instanceof Keypair ? new Wallet(wallet) : wallet,
+    {
+      commitment: "confirmed",
+      preflightCommitment: "confirmed",
+      skipPreflight: true,
+    }
+  );
+
+  return new PerpetualsClient(
+    provider,
+    POOL_CONFIGS[0].programId,
+    POOL_CONFIGS[0].perpComposibilityProgramId,
+    POOL_CONFIGS[0].fbNftRewardProgramId,
+    POOL_CONFIGS[0].rewardDistributionProgram.programId,
+    {},
+  );
+}
 
 const DUPLICATE_TOKENS = POOL_CONFIGS.map((f) => f.tokens).flat();
 const tokenMap = new Map();
@@ -266,25 +296,7 @@ export async function getNftTradingAccountInfo(
  * @param wallet Solana wallet
  * @returns PerpetualsClient instance
  */
-export function createPerpClient(
-  connection: Connection,
-  wallet: Keypair,
-): PerpetualsClient {
-  const provider = new AnchorProvider(connection, new Wallet(wallet), {
-    commitment: "confirmed",
-    preflightCommitment: "confirmed",
-    skipPreflight: true,
-  });
 
-  return new PerpetualsClient(
-    provider,
-    POOL_CONFIGS[0].programId,
-    POOL_CONFIGS[0].perpComposibilityProgramId,
-    POOL_CONFIGS[0].fbNftRewardProgramId,
-    POOL_CONFIGS[0].rewardDistributionProgram.programId,
-    {},
-  );
-}
 
 export function get_flash_privilege(agent: SolanaAgentKit): Privilege {
   const FLASH_PRIVILEGE = agent.config.FLASH_PRIVILEGE || "None";

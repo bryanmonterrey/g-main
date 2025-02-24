@@ -1,4 +1,4 @@
-import { ComputeBudgetProgram } from "@solana/web3.js";
+import { ComputeBudgetProgram, Transaction, VersionedTransaction } from "@solana/web3.js";
 import {
   PerpetualsClient,
   OraclePrice,
@@ -20,6 +20,23 @@ import {
   get_flash_privilege,
 } from "../../utils/flashUtils";
 import { FlashTradeParams } from "../../types";
+
+// Shared adapter between files
+class SolanaWalletAdapter {
+  constructor(private agent: SolanaAgentKit) {}
+
+  get publicKey() {
+    return this.agent.publicKey;
+  }
+
+  async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
+    return await this.agent.wallet.signTransaction(tx) as T;
+  }
+
+  async signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> {
+    return await this.agent.wallet.signAllTransactions(txs) as T[];
+  }
+}
 
 /**
  * Opens a new position on Flash.Trade
@@ -75,12 +92,10 @@ export async function flashOpenTrade(
       marketData.pool,
       "mainnet-beta",
     );
-    // Create perpClient with agent's wallet adapter
-    const perpClient = createPerpClient(agent.connection, {
-      publicKey: agent.publicKey,
-      signTransaction: agent.wallet.signTransaction,
-      signAllTransactions: agent.wallet.signAllTransactions,
-    });
+
+    // Create wallet adapter and perpClient
+    const walletAdapter = new SolanaWalletAdapter(agent);
+    const perpClient = createPerpClient(agent.connection, walletAdapter);
 
     // Calculate position parameters
     const leverageBN = new BN(leverage);
@@ -115,7 +130,7 @@ export async function flashOpenTrade(
 
     // Get NFT trading account info
     const tradingAccounts = await getNftTradingAccountInfo(
-      agent.wallet_address,
+      agent.wallet.publicKey,
       perpClient,
       poolConfig,
       collateralSymbol,
