@@ -10,7 +10,7 @@ export const MobileNav = ({ isMobileMenuOpen, setIsMobileMenuOpen }: MobileNavPr
   return (
     <>
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-background z-50 flex items-center px-4 border-b border-border">
-        <Button variant="ghost" size="lg" active onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+        <Button variant="ghost" size="lg" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           <List size={26} weight="bold" />
         </Button>
       </div>
