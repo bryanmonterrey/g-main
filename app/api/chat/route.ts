@@ -6,7 +6,7 @@ import { headers } from 'next/headers';
 export async function POST(req: NextRequest) {
   try {
     // Validate API KEY
-    const headersInstance = headers();
+    const headersInstance = await headers();
     const authorization = headersInstance.get('authorization');
     if (!authorization || authorization !== process.env.API_KEY) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
