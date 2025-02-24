@@ -6,7 +6,7 @@ import { validateEnvironment } from "@/lib/utils";
 import { ChatDeepSeek } from "@langchain/deepseek";
 import { SolanaAgentKit } from "@/agent"; // Changed this import
 import { WalletContextState } from "@solana/wallet-adapter-react";
-import { createSolanaTools } from "@/tools"; 
+import { createSolanaTools } from "@/langchain"; 
 
 export async function initializeAgent(
   modelName: string,
