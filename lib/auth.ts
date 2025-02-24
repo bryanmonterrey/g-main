@@ -100,7 +100,7 @@ const providers = [
   }),
 ];
 
-export const { auth, signIn, signOut, handlers: { GET, POST }, handlers } = NextAuth({
+export const { auth, signIn, signOut, handlers} = NextAuth({
   debug: !!process.env.AUTH_DEBUG,
   secret: process.env.AUTH_SECRET,
   providers,
