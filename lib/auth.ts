@@ -100,7 +100,7 @@ const providers = [
   }),
 ];
 
-export const authConfig = NextAuth({
+export const { auth, signIn, signOut, handlers: { GET, POST }, handlers } = NextAuth({
   debug: !!process.env.AUTH_DEBUG,
   secret: process.env.AUTH_SECRET,
   providers,
@@ -259,11 +259,6 @@ export const authConfig = NextAuth({
     },
   },
 });
-
-export const { auth, signIn, signOut, handlers: { GET, POST }, handlers } = NextAuth(authConfig)
-
-export const GET = handlers.GET;
-export const POST = handlers.POST;
 
 declare module "next-auth" {
   interface User {
