@@ -1,4 +1,4 @@
-import NextAuth, { DefaultSession, User } from "next-auth"
+import NextAuth, { DefaultSession, NextAuthOptions, User } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials";
 import { SupabaseAdapter } from "@auth/supabase-adapter"
 import jwt from "jsonwebtoken"
@@ -8,7 +8,7 @@ import DefaultUser from "next-auth";
 import type { JWT } from "next-auth/jwt"
 
 // Define the config object separately
-export const authConfig = {
+export const authOptions: NextAuthOptions = {
   debug: !!process.env.AUTH_DEBUG,
   secret: process.env.AUTH_SECRET,
   providers: [
@@ -255,7 +255,7 @@ export const authConfig = {
 };
 
 // Initialize the NextAuth handler
-export const auth = NextAuth(authConfig);
+export const auth = NextAuth(authOptions);
 
 // Export the specific functions
 export const { signIn, signOut } = auth;
