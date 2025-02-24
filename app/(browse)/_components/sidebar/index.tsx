@@ -1,6 +1,6 @@
 import React from 'react';
 import { Wrapper } from './wrapper';
-import { useSession } from 'next-auth/next';
+import { useSession } from 'next-auth/react';
 
 import { Following, FollowingSkeleton } from './following';
 import Recommended, { RecommendedSkeleton } from './recommended';
