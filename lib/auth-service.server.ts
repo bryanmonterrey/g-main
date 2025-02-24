@@ -11,7 +11,7 @@ export const getSelf = async (session: any) => { //fixed getself by username
   const supabase = getSupabase(session);
   
   const { data: user, error } = await supabase
-    .from('users')
+    .from('users' as any)
     .select(`
       id,
       username,
@@ -44,7 +44,7 @@ export const getSelfByUsername = async (username: string) => {
   const supabase = getSupabase(session);
   
   const { data: user, error } = await supabase
-    .from('users')
+    .from('users' as any)
     .select(`
       id,
       username,
