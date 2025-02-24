@@ -113,7 +113,7 @@ export default function WalletConnectButton() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative ">
     <WalletMultiButton>
     {session?.user?.image && (
         <DrawerDemo 
