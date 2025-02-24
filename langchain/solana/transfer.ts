@@ -1,6 +1,7 @@
 import { PublicKey } from "@solana/web3.js";
 import { Tool } from "langchain/tools";
 import { SolanaAgentKit } from "../../agent";
+import { transfer } from "../../tools/solana/transfer"; // Import the standalone transfer function
 
 export class SolanaTransferTool extends Tool {
   name = "solana_transfer";
@@ -24,7 +25,9 @@ export class SolanaTransferTool extends Tool {
         ? new PublicKey(parsedInput.mint)
         : undefined;
 
-      const tx = await this.solanaKit.transfer(
+      // Use the imported transfer function instead of calling it directly on solanaKit
+      const tx = await transfer(
+        this.solanaKit,
         recipient,
         parsedInput.amount,
         mintAddress,
