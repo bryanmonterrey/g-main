@@ -10,7 +10,7 @@ export class SolanaMintNFTTool extends Tool {
     collectionMint: string, eg "J1S9H3QjnRtBbbuD4HjPV6RpRhwuk4zKbxsnCHuTgh9w" (required) - The address of the collection to mint into
     name: string, eg "My NFT" (required)
     uri: string, eg "https://example.com/nft.json" (required)
-    recipient?: string, eg "9aUn5swQzUTRanaaTwmszxiv89cvFwUCjEBv1vZCoT1u" (optional) - The wallet to receive the NFT, defaults to agent's wallet which is ${this.solanaKit.wallet_address.toString()}`;
+    recipient?: string, eg "9aUn5swQzUTRanaaTwmszxiv89cvFwUCjEBv1vZCoT1u" (optional) - The wallet to receive the NFT, defaults to agent's wallet which is ${this.solanaKit.publicKey.toString()}`;
 
   constructor(private solanaKit: SolanaAgentKit) {
     super();
@@ -28,7 +28,7 @@ export class SolanaMintNFTTool extends Tool {
         },
         parsedInput.recipient
           ? new PublicKey(parsedInput.recipient)
-          : this.solanaKit.wallet_address,
+          : this.solanaKit.publicKey,
       );
 
       return JSON.stringify({
