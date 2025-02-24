@@ -1,14 +1,12 @@
 import WalletConnectButton from "@/components/wallet/wallet-connect-button";
 import Logo from "./logo";
 import { NavItems } from "./navItems";
-import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 
 
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
-  const router = useRouter();
   
 
   
