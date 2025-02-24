@@ -8,10 +8,10 @@ import { FamilyButton } from "../ui/family-button"
 import { Button } from "../ui/button"
 import { useChatStore } from "@/store/useChatStore";
 import { cn } from "@/lib/utils";
-import { useTransitionRouter } from 'next-view-transitions';
+
 import { Plus, Trash } from "@phosphor-icons/react";
 import { MOCK_MODELS } from "../chat/ChatInput";
-
+import { useRouter } from "next/navigation";
 
 export function FamilyButtonDemo() {
   return (
@@ -31,7 +31,7 @@ let tabs = [
 ]
 
 export function MusicPlayerExample() {
-  const router = useTransitionRouter();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState(0)
   const [direction, setDirection] = useState(0)
   const [isAnimating, setIsAnimating] = useState(false)

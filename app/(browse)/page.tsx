@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { useTransitionRouter } from 'next-view-transitions'
+import { useRouter } from 'next/navigation'
 import Image from "next/image";
 
 import { useSession } from "next-auth/react";
@@ -13,7 +13,7 @@ import { shortenWalletAddress } from "@/lib/functions";
 export default function Home() {
   const { data: session } = useSession();
   console.log("Session data:", session); // Add this
-  const router = useTransitionRouter()
+  const router = useRouter()
 
   useEffect(() => {
     if (session) {

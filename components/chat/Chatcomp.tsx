@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { useTransitionRouter } from 'next-view-transitions';
+import { useRouter } from 'next/navigation';
 import {
 	Coin,
 	ImageSquare,
@@ -210,7 +210,7 @@ interface ChatcompProps {
 
 export function Chatcomp({ sessionId }: ChatcompProps) {
 	const { data: session } = useSession();
-	const router = useTransitionRouter();
+	const router = useRouter();
 	const [input, setInput] = useState("");
 	const [selectedMode, setSelectedMode] = useState(AGENT_MODES[0]);
 	const [wallets, setWallets] = useState([{

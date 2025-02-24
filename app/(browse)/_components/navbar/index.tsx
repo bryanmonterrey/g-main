@@ -1,7 +1,7 @@
-import WalletConnectButton from "@/components/Wallet/wallet-connect-button";
+import WalletConnectButton from "@/components/wallet/wallet-connect-button";
 import Logo from "./logo";
 import { NavItems } from "./navItems";
-import { useTransitionRouter } from 'next-view-transitions';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 
 interface PopoverItem {
@@ -13,7 +13,7 @@ interface PopoverItem {
 
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
-  const router = useTransitionRouter();
+  const router = useRouter();
   const popoverItems: PopoverItem[] = [
     { key: "about", label: "About", url: "/assets/about" },
     { key: "advertisers", label: "Advertisers", url: "/assets/advertisers" },

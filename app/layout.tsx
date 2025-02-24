@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { ViewTransitions } from "next-view-transitions";
+
 import { Analytics } from "@vercel/analytics/react"
 import Providers from '../components/providers';
 
@@ -22,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <Providers>
-    <ViewTransitions>
+    
       <html lang="en" className="hidden-scrollbar">
         <body className={`${inter.className} antialiased hidden-scrollbar`}>       
             
@@ -31,7 +31,7 @@ export default function RootLayout({
           <Analytics />
         </body>
       </html>
-    </ViewTransitions>
+    
     </Providers>   
   );
 }

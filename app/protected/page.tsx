@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useTransitionRouter } from 'next-view-transitions'
-
+import { useRouter } from 'next/navigation'
 import { useSession } from "next-auth/react";
 
 const Page = () => {
   const { data: session } = useSession();
-  const router = useTransitionRouter();
+  const router = useRouter();
 
   useEffect(() => {
     if (!session) {

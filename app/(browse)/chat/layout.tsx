@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SideNav from "@/components/layout/SideNav";
 import { ChatProvider } from "@/components/chat/SolanaAgentProvider";
 
-import { ViewTransitions } from "next-view-transitions";
+
 import { FamilyButtonDemo } from "@/components/chat/sessionbutton";
 
 
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ViewTransitions>
+    
           <ChatProvider>
             <div className="fixed inset-0 flex hidden-scrollbar">
               <main className="flex-1 relative overflow-y-auto hidden-scrollbar scroll-smooth">
@@ -30,6 +30,6 @@ export default function RootLayout({
               </main>
             </div>
           </ChatProvider>
-    </ViewTransitions>
+    
   );
 }
