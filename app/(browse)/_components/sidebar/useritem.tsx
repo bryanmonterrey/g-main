@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/store/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link } from 'next-view-transitions'
+import Link from "next/link";
 import { UserAvatar } from "@/components/useravatar";
 import { LiveBadge } from "@/components/livebadge";
 import Image from "next/image";
@@ -20,7 +20,7 @@ interface UserItemProps {
 
 export const UserItem = ({
     username,
-    imageUrl,
+    avatarUrl,
     isLive,
 }: UserItemProps) => {
     const pathname = usePathname();
@@ -48,7 +48,7 @@ export const UserItem = ({
                 collapsed && "flex justify-center items-center",
             )}>
                 <UserAvatar 
-                imageUrl={imageUrl}
+                avatarUrl={avatarUrl}
                 username={username}
                 isLive={isLive}
                 
