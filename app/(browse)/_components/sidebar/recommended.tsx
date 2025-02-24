@@ -48,7 +48,7 @@ const Recommended = ({
             <UserItem
               key={user.id}
               username={user.username || ''} // Add null check
-              imageUrl={user.avatar_url || ''} // Changed from imageUrl to avatar_url
+              avatarUrl={user.avatar_url || ''} // Changed from imageUrl to avatar_url
               isLive={user.stream?.isLive}
             />
           ))}
