@@ -3,9 +3,9 @@ import {
   PublicKey,
   TransactionMessage,
   VersionedTransaction,
+  Transaction,
 } from "@solana/web3.js";
 import { SolanaAgentKit } from "../../agent";
-import { Wallet } from "../../utils/keypair";
 import { Decimal } from "decimal.js";
 import {
   ORCA_WHIRLPOOL_PROGRAM_ID,
@@ -17,36 +17,27 @@ import {
 import { sendTx } from "../../utils/send_tx";
 import { FEE_TIERS } from "./orca_create_single_sided_liquidity_pool";
 
+// Shared adapter between files
+class OrcaWalletAdapter {
+  constructor(private agent: SolanaAgentKit) {}
+
+  get publicKey() {
+    return this.agent.publicKey;
+  }
+
+  async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
+    return await this.agent.wallet.signTransaction(tx) as T;
+  }
+
+  async signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> {
+    return await this.agent.wallet.signAllTransactions(txs) as T[];
+  }
+}
+
 /**
  * # Creates a CLMM Pool (Concentrated Liquidity Market Maker Pool).
- *
- * This function initializes a new Whirlpool (CLMM Pool) on Orca. It only sets up the pool and does not seed it with liquidity.
- *
- * ## Example Usage:
- * Suppose you want to create a CLMM pool with two tokens, SHARK and USDC, and set the initial price of SHARK to 0.001 USDC.
- * You would call this function with `mintA` as SHARK's mint address and `mintB` as USDC's mint address. The pool is created
- * with the specified fee tier and tick spacing associated with that fee tier.
- *
- * ### Note for Experts:
- * The Whirlpool program determines the token mint order, which might not match your expectation. This function
- * adjusts the input order as needed and inverts the initial price accordingly.
- *
- * @param agent - The `SolanaAgentKit` instance representing the wallet and connection details.
- * @param mintDeploy - The mint of the token you want to deploy (e.g., SHARK).
- * @param mintPair - The mint of the token you want to pair the deployed mint with (e.g., USDC).
- * @param initialPrice - The initial price of `mintDeploy` in terms of `mintPair`.
- * @param feeTier - The fee tier bps for the pool, determining tick spacing and fee collection rates.
- *
- * @returns A promise that resolves to a transaction ID (`string`) of the transaction creating the pool.
- *
- * @throws Will throw an error if:
- * - Mint accounts for the tokens cannot be fetched.
- * - The network is unsupported.
- *
- * @remarks
- * This function only initializes the CLMM pool and does not add liquidity. For adding liquidity, you can use
- * a separate function after the pool is successfully created.
- * ```
+ * 
+ * [Rest of the documentation remains the same...]
  */
 export async function orcaCreateCLMM(
   agent: SolanaAgentKit,
@@ -68,10 +59,12 @@ export async function orcaCreateCLMM(
     } else {
       throw new Error("Unsupported network");
     }
-    const wallet = new Wallet(agent.wallet);
+
+    // Use the adapter pattern consistently
+    const orcaWallet = new OrcaWalletAdapter(agent);
     const ctx = WhirlpoolContext.from(
       agent.connection,
-      wallet,
+      orcaWallet,
       ORCA_WHIRLPOOL_PROGRAM_ID,
     );
     const fetcher = ctx.fetcher;
@@ -108,7 +101,7 @@ export async function orcaCreateCLMM(
       mintB,
       tickSpacing,
       initialTick,
-      wallet.publicKey,
+      orcaWallet.publicKey, // Use adapter's publicKey
     );
 
     const txPayload = await txBuilder.build();

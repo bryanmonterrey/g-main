@@ -1,5 +1,4 @@
 import { SolanaAgentKit } from "../../agent";
-import { Wallet } from "@coral-xyz/anchor";
 import {
   ORCA_WHIRLPOOL_PROGRAM_ID,
   WhirlpoolContext,
@@ -7,6 +6,24 @@ import {
   getAllPositionAccountsByOwner,
   PriceMath,
 } from "@orca-so/whirlpools-sdk";
+import { Transaction, VersionedTransaction } from "@solana/web3.js";
+
+// Shared adapter between files
+class OrcaWalletAdapter {
+  constructor(private agent: SolanaAgentKit) {}
+
+  get publicKey() {
+    return this.agent.publicKey;
+  }
+
+  async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
+    return await this.agent.wallet.signTransaction(tx) as T;
+  }
+
+  async signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> {
+    return await this.agent.wallet.signAllTransactions(txs) as T[];
+  }
+}
 
 interface PositionInfo {
   whirlpoolAddress: string;
@@ -18,58 +35,33 @@ type PositionDataMap = {
   [positionMintAddress: string]: PositionInfo;
 };
 
-/**
- * # Fetches Liquidity Position Data in Orca Whirlpools
- *
- * Fetches data for all liquidity positions owned by the provided wallet, including:
- * - Whirlpool address.
- * - Whether the position is in range.
- * - Distance from the center price to the current price in basis points.
- *
- * ## Parameters
- * - `agent`: The `SolanaAgentKit` instance representing the wallet and connection.
- *
- * ## Returns
- * A JSON string with an object mapping position mint addresses to position details:
- * ```json
- * {
- *   "positionMintAddress1": {
- *     "whirlpoolAddress": "whirlpoolAddress1",
- *     "positionInRange": true,
- *     "distanceFromCenterBps": 250
- *   }
- * }
- * ```
- *
- * ## Throws
- * - If positions cannot be fetched or processed.
- * - If the position mint address is invalid.
- *
- * @param agent - The `SolanaAgentKit` instance.
- * @returns A JSON string with position data.
- */
 export async function orcaFetchPositions(
   agent: SolanaAgentKit,
 ): Promise<string> {
   try {
-    const wallet = new Wallet(agent.wallet);
+    // Use the same adapter pattern
+    const orcaWallet = new OrcaWalletAdapter(agent);
+
     const ctx = WhirlpoolContext.from(
       agent.connection,
-      wallet,
+      orcaWallet,
       ORCA_WHIRLPOOL_PROGRAM_ID,
     );
     const client = buildWhirlpoolClient(ctx);
 
     const positions = await getAllPositionAccountsByOwner({
       ctx,
-      owner: agent.wallet.publicKey,
+      owner: agent.publicKey,
     });
+
     const positionDatas = [
       ...positions.positions.entries(),
       ...positions.positionsWithTokenExtensions.entries(),
     ];
+
     const result: PositionDataMap = {};
     for (const [, positionData] of positionDatas) {
+      // Rest of the position processing remains the same
       const positionMintAddress = positionData.positionMint;
       const whirlpoolAddress = positionData.whirlpool;
       const whirlpool = await client.getPool(whirlpoolAddress);

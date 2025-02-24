@@ -9,6 +9,7 @@ import {
   swapFromSolana,
 } from "@mayanfinance/swap-sdk";
 import { SolanaAgentKit } from "../../agent";
+import { ERC20Permit_ABI } from "@/tools/mayan/ERC20PermitABI.ts";
 import {
   Contract,
   getDefaultProvider,

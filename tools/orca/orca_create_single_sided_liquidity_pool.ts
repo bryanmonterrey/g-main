@@ -3,6 +3,7 @@ import {
   PublicKey,
   TransactionMessage,
   VersionedTransaction,
+  Transaction,
 } from "@solana/web3.js";
 import { SolanaAgentKit } from "../../agent";
 import { BN } from "@coral-xyz/anchor";
@@ -38,6 +39,24 @@ import {
   TOKEN_2022_PROGRAM_ID,
 } from "@solana/spl-token";
 import { sendTx } from "../../utils/send_tx";
+
+// Add the shared adapter
+class OrcaWalletAdapter {
+  constructor(private agent: SolanaAgentKit) {}
+
+  get publicKey() {
+    return this.agent.publicKey;
+  }
+
+  async signTransaction<T extends Transaction | VersionedTransaction>(tx: T): Promise<T> {
+    return await this.agent.wallet.signTransaction(tx) as T;
+  }
+
+  async signAllTransactions<T extends Transaction | VersionedTransaction>(txs: T[]): Promise<T[]> {
+    return await this.agent.wallet.signAllTransactions(txs) as T[];
+  }
+}
+
 
 /**
  * Maps fee tier bps to their corresponding tick spacing values in the Orca Whirlpool protocol.
@@ -124,10 +143,12 @@ export async function orcaCreateSingleSidedLiquidityPool(
     } else {
       throw new Error("Unsupported network");
     }
-    const wallet = new Wallet(agent.wallet);
+
+    const orcaWallet = new OrcaWalletAdapter(agent);
+
     const ctx = WhirlpoolContext.from(
       agent.connection,
-      wallet,
+      orcaWallet,
       ORCA_WHIRLPOOL_PROGRAM_ID,
     );
     const fetcher = ctx.fetcher;
@@ -202,7 +223,7 @@ export async function orcaCreateSingleSidedLiquidityPool(
       tokenVaultBKeypair,
       feeTierKey,
       tickSpacing: tickSpacing,
-      funder: wallet.publicKey,
+      funder: orcaWallet.publicKey,
     };
     const initPoolIx = !TokenExtensionUtil.isV2IxRequiredPool(tokenExtensionCtx)
       ? WhirlpoolIx.initializePoolIx(ctx.program, baseParamsPool)
@@ -234,7 +255,7 @@ export async function orcaCreateSingleSidedLiquidityPool(
         startTick: initialTickArrayStartTick,
         tickArrayPda: initialTickArrayPda,
         whirlpool: whirlpoolPda.publicKey,
-        funder: wallet.publicKey,
+        funder: orcaWallet.publicKey,
       }),
     );
 
@@ -296,13 +317,13 @@ export async function orcaCreateSingleSidedLiquidityPool(
     );
     const positionTokenAccountAddress = getAssociatedTokenAddressSync(
       positionMintPubkey,
-      wallet.publicKey,
+      orcaWallet.publicKey,
       ctx.accountResolverOpts.allowPDAOwnerAddress,
       TOKEN_2022_PROGRAM_ID,
     );
     const params = {
-      funder: wallet.publicKey,
-      owner: wallet.publicKey,
+      funder: orcaWallet.publicKey,
+      owner: orcaWallet.publicKey,
       positionPda,
       positionTokenAccount: positionTokenAccountAddress,
       whirlpool: whirlpoolPda.publicKey,
@@ -320,13 +341,13 @@ export async function orcaCreateSingleSidedLiquidityPool(
 
     const [ataA, ataB] = await resolveOrCreateATAs(
       ctx.connection,
-      wallet.publicKey,
+      orcaWallet.publicKey,
       [
         { tokenMint: mintA, wrappedSolAmountIn: tokenMaxA },
         { tokenMint: mintB, wrappedSolAmountIn: tokenMaxB },
       ],
       () => ctx.fetcher.getAccountRentExempt(),
-      wallet.publicKey,
+      orcaWallet.publicKey,
       undefined,
       ctx.accountResolverOpts.allowPDAOwnerAddress,
       "ata",
@@ -362,7 +383,7 @@ export async function orcaCreateSingleSidedLiquidityPool(
             startTick: tickArrayUpperStartIndex,
             tickArrayPda: tickArrayUpperPda,
             whirlpool: whirlpoolPda.publicKey,
-            funder: wallet.publicKey,
+            funder: orcaWallet.publicKey,
           }),
         );
       } else {
@@ -371,7 +392,7 @@ export async function orcaCreateSingleSidedLiquidityPool(
             startTick: tickArrayLowerStartIndex,
             tickArrayPda: tickArrayLowerPda,
             whirlpool: whirlpoolPda.publicKey,
-            funder: wallet.publicKey,
+            funder: orcaWallet.publicKey,
           }),
         );
       }
@@ -382,7 +403,7 @@ export async function orcaCreateSingleSidedLiquidityPool(
       tokenMaxA,
       tokenMaxB,
       whirlpool: whirlpoolPda.publicKey,
-      positionAuthority: wallet.publicKey,
+      positionAuthority: orcaWallet.publicKey,
       position: positionPda.publicKey,
       positionTokenAccount: positionTokenAccountAddress,
       tokenOwnerAccountA,
