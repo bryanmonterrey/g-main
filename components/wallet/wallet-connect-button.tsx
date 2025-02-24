@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
-import { Wallet } from "lucide-react";
 import bs58 from "bs58";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
