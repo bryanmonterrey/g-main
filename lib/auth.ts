@@ -255,14 +255,6 @@ export const authOptions: NextAuthOptions = {
   },
 };
 
-// Initialize the NextAuth handler
-export const auth = NextAuth(authOptions);
-
-// Add console log here to check if handlers are properly defined
-console.log("Auth handlers:", auth.GET, auth.POST);
-
-
-export { signIn, signOut }
 
 // Export types for TypeScript
 declare module "next-auth" {
