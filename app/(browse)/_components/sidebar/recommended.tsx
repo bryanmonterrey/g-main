@@ -4,7 +4,6 @@ import { useSidebar } from '@/store/sidebar';
 import React from 'react';
 import { UserItem, UserItemSkeleton } from './useritem';
 import { Activity } from 'lucide-react';
-import Hint from '@/components/hint';
 import { Database } from "@/types/supabase";
 
 // Define the user type from your Supabase schema
@@ -36,11 +35,11 @@ const Recommended = ({
         </div>
       )}
       {collapsed && (
-        <Hint label='Trending' placement='right' asChild>
+       
           <div className="flex justify-center items-center mb-2">
             <Activity className='h-4 w-4 text-litepurp' strokeWidth={3.35}/>
           </div>
-        </Hint>
+        
       )}
       <div className='flex items-center justify-center w-full'>
         <ul className="px-1 w-full">

@@ -3,7 +3,6 @@
 import { useSidebar } from "@/store/sidebar";
 import { UserItem, UserItemSkeleton } from "./useritem";
 import { Heart } from 'lucide-react';
-import Hint from "@/components/hint";
 import { Database } from "@/types/supabase";
 
 // Define types based on your Supabase schema
@@ -41,11 +40,11 @@ export const Following = ({
         </div>
       )}
       {collapsed && (
-        <Hint label='Following' placement='right' asChild>
+        
           <div className="flex justify-center items-center pt-[2px] mb-2">
             <Heart className="h-[18px] w-[18px] text-litepurp" strokeWidth={3}/>
           </div>
-        </Hint>
+        
       )}
       <div className='flex items-center justify-center w-full'>
         <ul className="w-full px-1">
