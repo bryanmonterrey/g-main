@@ -144,14 +144,14 @@ export default function WalletConnectButton() {
     {!connected ? (
         <button
           onClick={handleConnectClick}
-          className="px-4 py-2 rounded-md bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+          className="!px-9 !py-3 !rounded-full bg-black hover:bg-gray-800 text-white !font-semibold transition-all duration-300 ease-in-out !text-sm"
         >
           {getButtonText()}
         </button>
       ) : (
         <div className="flex space-x-2">
           <button
-            className="px-4 text-sm py-1 rounded-full bg-black hover:bg-gray-800 text-white font-medium transition-all duration-300 ease-in-out"
+            className="!px-4 !text-sm !py-1 !rounded-full bg-black hover:bg-gray-800 text-white !font-semibold transition-all duration-300 ease-in-out"
           >
             {getButtonText()}
           </button>
