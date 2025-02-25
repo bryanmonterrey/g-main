@@ -31,13 +31,6 @@ export default function Home() {
       )}
       {session && (
         <div className="flex flex-col items-center space-y-2">
-          <Image
-            width={60}
-            height={60}
-            src={session.user?.image || ""}
-            alt="User Image"
-            className="rounded-full"
-          />
           <p>
             <span className="font-semibold">Logged in as:</span>{" "}
             {shortenWalletAddress(session.user?.name as string)}

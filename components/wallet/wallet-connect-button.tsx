@@ -151,7 +151,7 @@ export default function WalletConnectButton() {
       ) : (
         <div className="flex space-x-2">
           <button
-            className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-800 text-white font-medium transition-colors"
+            className="px-4 text-sm py-1 rounded-full bg-black hover:bg-gray-800 text-white font-medium transition-all duration-300 ease-in-out"
           >
             {getButtonText()}
           </button>
@@ -160,7 +160,7 @@ export default function WalletConnectButton() {
     {session?.user?.image && (
         <DrawerDemo 
           username={session.user.name || ''} 
-          avatarUrl={session.user.image}
+          avatarUrl={session.user.image || `https://ui-avatars.com/api/?name=${publicKey?.toString() || 'User'}&background=random`}
           className="flex items-center relative"
           onSignOut={handleWalletDisconnect}
         />
