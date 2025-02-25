@@ -3,7 +3,7 @@
 import { useSidebar } from '@/store/sidebar';
 import React from 'react';
 import { UserItem, UserItemSkeleton } from './useritem';
-import { Activity } from 'lucide-react';
+import { Rocket } from 'lucide-react';
 import { Database } from "@/types/supabase";
 
 // Define the user type from your Supabase schema
@@ -37,7 +37,7 @@ const Recommended = ({
       {collapsed && (
        
           <div className="flex justify-center items-center mb-2">
-            <Activity className='h-4 w-4 text-litepurp' strokeWidth={3.35}/>
+            <Rocket className='h-4 w-4 text-white/90'/>
           </div>
         
       )}
