@@ -155,13 +155,6 @@ export default function WalletConnectButton() {
           >
             {getButtonText()}
           </button>
-          
-          <button
-            onClick={handleWalletDisconnect}
-            className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
-          >
-            Sign Out
-          </button>
         </div>
       )}
     {session?.user?.image && (
@@ -169,9 +162,9 @@ export default function WalletConnectButton() {
           username={session.user.name || ''} 
           avatarUrl={session.user.image}
           className="flex items-center relative"
+          onSignOut={handleWalletDisconnect}
         />
       )}
-
     </div>
   );
 }

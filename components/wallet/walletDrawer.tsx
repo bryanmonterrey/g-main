@@ -11,6 +11,7 @@ interface DrawerDemoProps {
   username: string;
   avatarUrl: string;
   className?: string;
+  onSignOut: () => Promise<void>;
 }
 
 const data = [
@@ -57,7 +58,7 @@ const data = [
 
 const snapPoints = ['148px', '355px', 1];
 
-export function DrawerDemo({ username, avatarUrl, className }: DrawerDemoProps) {
+export function DrawerDemo({ username, avatarUrl, className, onSignOut }: DrawerDemoProps) {
   const [goal, setGoal] = React.useState(350)
   
   const [loading, setLoading] = React.useState(true)
@@ -88,10 +89,27 @@ export function DrawerDemo({ username, avatarUrl, className }: DrawerDemoProps) 
         >
           <div className="bg-zinc-50 h-full w-full grow p-5 flex flex-col rounded-[16px]">
             <div className="max-w-md mx-auto">
-              <Drawer.Title className="font-medium mb-2 text-zinc-900">It supports all directions.</Drawer.Title>
+            <Drawer.Title className="font-medium mb-4 text-zinc-900 flex justify-between items-center">
+                <span>User Profile</span>
+                <button
+                  onClick={onSignOut}
+                  className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+                >
+                  Sign Out
+                </button>
+              </Drawer.Title>
+              <div className="flex items-center gap-4 mb-4">
+                <UserAvatar 
+                  username={username} 
+                  avatarUrl={avatarUrl} 
+                  size="lg"
+                />
+                <div>
+                  <h3 className="font-semibold text-lg">{username}</h3>
+                </div>
+              </div>
               <Drawer.Description className="text-zinc-600 mb-2">
-                This one specifically is not touching the edge of the screen, but that&apos;s not required for a side
-                drawer.
+                Manage your wallet and account settings here.
               </Drawer.Description>
             </div>
           </div>
