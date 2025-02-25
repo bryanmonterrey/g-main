@@ -166,11 +166,11 @@ export default function WalletConnectButton() {
       </button>
     {session?.user?.image && (
         <DrawerDemo 
-          username={session.user.name || ''} 
-          avatarUrl={session.user.image || `https://ui-avatars.com/api/?name=${publicKey?.toString() || 'User'}&background=random`}
-          className="flex items-center relative"
-          onSignOut={handleWalletDisconnect}
-        />
+        username={session.user.name || ''}
+        avatarUrl={session.user.image || '/default.png'} 
+        className="flex items-center relative"
+        onSignOut={handleWalletDisconnect}
+      />
       )}
     </div>
   );
