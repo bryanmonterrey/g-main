@@ -149,7 +149,7 @@ export default function WalletConnectButton() {
   return (
     <div className="relative inline-flex">
       
-      <button
+    <button
         onClick={!connected ? handleConnectClick : () => {}}
         disabled={connecting || disconnecting}
         className={`px-4 py-2 rounded-md font-medium transition-colors ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
@@ -164,7 +164,7 @@ export default function WalletConnectButton() {
           {getButtonText()}
         </span>
       </button>
-    {session?.user?.image && (
+    {session && (
         <DrawerDemo 
         username={session.user.name || ''}
         avatarUrl={session.user.image || '/default.png'} 
