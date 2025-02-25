@@ -16,16 +16,22 @@ import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 
 
 export default function WalletConnectButton() {
-  const { publicKey, connecting, connected, disconnecting, signMessage} =
+  const { publicKey, connecting, connected, disconnecting, signMessage, disconnect} =
     useWallet(); // hook up connecting, disconnecting, signMessage later look at wallet-coonect-button other project solami
   const walletModal = useWalletModal();
   const { status, data: session, update } = useSession();
   const [isSigningIn, setIsSigningIn] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   // Add state for user data
   const [userData, setUserData] = useState({
     username: '',
     avatar_url: ''
   });
+
+  const handleConnectClick = () => {
+    // Show the wallet modal when the connect button is clicked
+    walletModal.setVisible(true);
+  };
 
 
   const handleSignIn = async () => {
@@ -88,18 +94,38 @@ export default function WalletConnectButton() {
 
   const handleWalletDisconnect = async () => {
     if (session && status === "authenticated") {
-      await signOut({ redirect: false });
+      try {
+        setIsSigningOut(true);
+        
+        // First sign out from Next-Auth
+        await signOut({ redirect: false });
+        
+        // Then disconnect the wallet
+        if (disconnect) {
+          await disconnect();
+        }
+        
+        console.log("User signed out successfully");
+      } catch (error) {
+        console.error("Error during sign-out process:", error);
+      } finally {
+        setIsSigningOut(false);
+      }
     }
   };
 
   useEffect(() => {
-    if (connected && status === "unauthenticated" && !isSigningIn) {
+    // Only attempt auto sign-in if not actively signing out
+    if (connected && status === "unauthenticated" && !isSigningIn && !isSigningOut) {
       handleSignIn();
     }
-    if (!connected && status === "authenticated") {
+    
+    // Only handle disconnection if not actively signing out (to avoid loops)
+    if (!connected && status === "authenticated" && !isSigningOut) {
       handleWalletDisconnect();
     }
-  }, [connected, status, isSigningIn]);
+  }, [connected, status, isSigningIn, isSigningOut]);
+
 
   console.log("Current session:", session);
   console.log("Wallet connected:", connected);
@@ -107,15 +133,38 @@ export default function WalletConnectButton() {
 
   const getButtonText = () => {
     if (status === "loading" || isSigningIn) return "Connecting...";
-    if (!publicKey) return "connect";
+    if (isSigningOut) return "Signing Out...";
+    if (!publicKey) return "Connect Wallet";
     return shortenWalletAddress(publicKey.toString());
   };
 
   return (
-    <div className="relative ">
-    <WalletMultiButton>
-    
-    </WalletMultiButton>
+    <div className="relative inline-flex">
+      <WalletMultiButton>
+      </WalletMultiButton>
+    {!connected ? (
+        <button
+          onClick={handleConnectClick}
+          className="px-4 py-2 rounded-md bg-purple-600 hover:bg-purple-700 text-white font-medium transition-colors"
+        >
+          {getButtonText()}
+        </button>
+      ) : (
+        <div className="flex space-x-2">
+          <button
+            className="px-4 py-2 rounded-md bg-gray-700 hover:bg-gray-800 text-white font-medium transition-colors"
+          >
+            {getButtonText()}
+          </button>
+          
+          <button
+            onClick={handleWalletDisconnect}
+            className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
+      )}
     {session?.user?.image && (
         <DrawerDemo 
           username={session.user.name || ''} 

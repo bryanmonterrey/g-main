@@ -1,22 +1,10 @@
 "use client"
 
 import * as React from "react"
-import { Minus, Plus } from "lucide-react"
-import { Bar, BarChart, ResponsiveContainer } from "recharts"
 import { UserAvatar } from "@/components/useravatar"
 import { getSelf } from "@/lib/auth-service";
 
 import { Button } from "@/components/ui/button"
-import {
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer"
-
 import { Drawer } from 'vaul';
 
 interface DrawerDemoProps {
