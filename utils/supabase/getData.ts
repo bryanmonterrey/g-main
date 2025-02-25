@@ -12,7 +12,7 @@ export const getSupabase = (session: any) => {
     // Return client without auth for public data
     return createClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
         auth: {
           persistSession: false
@@ -24,7 +24,7 @@ export const getSupabase = (session: any) => {
   // Return authenticated client
   return createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       global: {
         headers: {
@@ -35,7 +35,7 @@ export const getSupabase = (session: any) => {
         persistSession: false
       },
       db: {
-        schema: 'public'
+        schema: 'next_auth'
       }
     }
   );

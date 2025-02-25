@@ -4,16 +4,16 @@ import { useSidebar } from "@/store/sidebar";
 import { UserItem, UserItemSkeleton } from "./useritem";
 import { Heart } from 'lucide-react';
 import { Database } from "@/types/supabase";
+import { useSession } from "next-auth/react";
 
 // Define types based on your Supabase schema
 type DbFollow = Database['next_auth']['Tables']['follow']['Row'];
 type DbUser = Database['next_auth']['Tables']['users']['Row'];
 
+// Removed stream property and added optional isAuthenticated field
 interface FollowWithUser extends DbFollow {
   following: DbUser & {
-    stream?: {
-      is_live: boolean;
-    } | null;
+    isAuthenticated?: boolean;
   };
 }
 
@@ -25,6 +25,8 @@ export const Following = ({
   data,
 }: FollowingProps) => {
   const { collapsed } = useSidebar((state) => state);
+  const { status } = useSession();
+  const isUserAuthenticated = status === 'authenticated';
 
   if (!data.length) {
     return null;
@@ -40,11 +42,9 @@ export const Following = ({
         </div>
       )}
       {collapsed && (
-        
-          <div className="flex justify-center items-center pt-[2px] mb-2">
-            <Heart className="h-[18px] w-[18px] text-litepurp" strokeWidth={3}/>
-          </div>
-        
+        <div className="flex justify-center items-center pt-[2px] mb-2">
+          <Heart className="h-[18px] w-[18px] text-litepurp" strokeWidth={3}/>
+        </div>
       )}
       <div className='flex items-center justify-center w-full'>
         <ul className="w-full px-1">
@@ -53,7 +53,7 @@ export const Following = ({
               key={follow.following.id}
               username={follow.following.username || ''}
               avatarUrl={follow.following.avatar_url || ''} 
-              isLive={follow.following.stream?.is_live} // Updated to use is_live
+              isAuthenticated={isUserAuthenticated} // Use the current user's auth status
             />
           ))}
         </ul>

@@ -8,20 +8,18 @@ import { useSidebar } from "@/store/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { UserAvatar } from "@/components/useravatar";
-import { LiveBadge } from "@/components/livebadge";
 import Image from "next/image";
-import { CloudOff } from 'lucide-react';
 
 interface UserItemProps {
     username: string;
     avatarUrl: string;
-    isLive?: boolean;
+    isAuthenticated?: boolean;
 };
 
 export const UserItem = ({
     username,
     avatarUrl,
-    isLive,
+    isAuthenticated
 }: UserItemProps) => {
     const pathname = usePathname();
 
@@ -50,29 +48,28 @@ export const UserItem = ({
                 <UserAvatar 
                 avatarUrl={avatarUrl}
                 username={username}
-                isLive={isLive}
-                
+                isLive={isAuthenticated} // Updated to pass isAuthenticated as isLive
                 />
-                {!collapsed && isLive && (
+                {!collapsed && isAuthenticated && (
                     <div className="-space-y-[5px] text-md">
-                    <p className="truncate font-extrabold  mb-0">
+                    <p className="truncate font-extrabold mb-0">
                         {username}
                     </p>
-                    <p className="truncate font-medium  mt-0 text-white/80">
+                    <p className="truncate font-medium mt-0 text-white/80">
                         {username}   
                     </p>
                     </div>
                     
                 )}
-                {!collapsed && !isLive && (
-                    <p className="truncate font-medium  mb-0 text-[#9b9b9b] text-opacity-80">
+                {!collapsed && !isAuthenticated && (
+                    <p className="truncate font-medium mb-0 text-[#9b9b9b] text-opacity-80">
                         {username}
                     </p>
                 )}
-                {!collapsed && isLive && (
-                    <Image src="/live.svg" alt="live" width={10} height={10} className="h-2.5 w-2.5 ml-auto text-black" />
+                {!collapsed && isAuthenticated && (
+                    <Image src="/live.svg" alt="active" width={10} height={10} className="h-2.5 w-2.5 ml-auto text-black" />
                 )}
-                {!collapsed && !isLive &&(
+                {!collapsed && !isAuthenticated &&(
                     <Image src="/zzz.svg" alt="offline" width={16} height={16} className="h-[16px] w-[16px] ml-auto opacity-80 "/>
                     
                 )}
