@@ -35,13 +35,17 @@ export async function initializeAgent(
   validateEnvironment();
   console.log("llm", llm);
 
-  // Updated to use our new SolanaAgentKit
+  // Check if this is a server-side call with limited wallet
+  const isServerSide = !wallet.signTransaction || !wallet.signAllTransactions;
+
+  // Create SolanaAgentKit in read-only mode if server-side
   const solanaAgent = new SolanaAgentKit(
     wallet,
     process.env.RPC_URL!,
     {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY!,
-    }
+    },
+    isServerSide // Pass true for read-only mode if server-side
   );
 
   const tools = createSolanaTools(solanaAgent);

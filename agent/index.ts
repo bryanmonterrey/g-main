@@ -212,7 +212,8 @@ export class SolanaAgentKit {
   constructor(
     wallet: WalletContextState,
     rpc_url: string,
-    config: Config
+    config: Config,
+    readOnlyMode: boolean = false
   ) {
     this.connection = new Connection(rpc_url);
     
@@ -221,15 +222,19 @@ export class SolanaAgentKit {
       throw new Error("Wallet not connected");
     }
 
-    if (!wallet.signTransaction || !wallet.signAllTransactions) {
+      // Only check for signing capabilities if not in read-only mode
+    if (!readOnlyMode && (!wallet.signTransaction || !wallet.signAllTransactions)) {
       throw new Error("Wallet doesn't support signing");
     }
+
+    // Use noopSigner for read-only mode
+    const noopSigner = async (tx: any) => tx;
 
     this.wallet = {
       publicKey: wallet.publicKey,
       secretKey: new Uint8Array(),
-      signTransaction: wallet.signTransaction,
-      signAllTransactions: wallet.signAllTransactions
+      signTransaction: readOnlyMode ? noopSigner : (wallet.signTransaction as (tx: Transaction | VersionedTransaction) => Promise<Transaction | VersionedTransaction>),
+      signAllTransactions: readOnlyMode ? noopSigner : (wallet.signAllTransactions as (txs: (Transaction | VersionedTransaction)[]) => Promise<(Transaction | VersionedTransaction)[]>)
     };
     
     this.publicKey = wallet.publicKey;
