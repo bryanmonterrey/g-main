@@ -46,7 +46,7 @@ export default function Home() {
         Click to go to Protected Route
       </button>
       <div>
-        <div className="flex justify-center items-center h-64 w-64 bg-[url('/bow.svg')] backdrop-blur-lg bg-cover bg-center">
+        <div className="flex justify-center items-center h-64 w-64 bg-[url('/rainbow.svg')] backdrop-blur-lg bg-cover bg-center">
           <div className="h-full w-full background-blur-xl ">
 
           </div>
