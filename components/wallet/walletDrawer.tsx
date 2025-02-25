@@ -8,7 +8,6 @@ import { getSelf } from "@/lib/auth-service";
 
 import { Button } from "@/components/ui/button"
 import {
-  Drawer,
   DrawerClose,
   DrawerContent,
   DrawerDescription,
@@ -17,6 +16,8 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
+
+import { Drawer } from 'vaul';
 
 interface DrawerDemoProps {
   username: string;
@@ -80,8 +81,8 @@ export function DrawerDemo({ username, avatarUrl, className }: DrawerDemoProps) 
   }
 
   return (
-    <Drawer direction="right" snapPoints={snapPoints} activeSnapPoint={snap} setActiveSnapPoint={setSnap} fadeFromIndex={1} >
-      <DrawerTrigger asChild>
+    <Drawer.Root direction="right">
+      <Drawer.Trigger className="flex items-center justify-center">
         <Button variant="ghost" className="">
         <UserAvatar 
             username={username} 
@@ -89,68 +90,25 @@ export function DrawerDemo({ username, avatarUrl, className }: DrawerDemoProps) 
             size="default"
           />
         </Button>
-      </DrawerTrigger>
-      <DrawerContent>
-        <div className="mx-auto w-full max-w-sm z-[150]">
-          <DrawerHeader>
-            <DrawerTitle>Move Goal</DrawerTitle>
-            <DrawerDescription>Set your daily activity goal.</DrawerDescription>
-          </DrawerHeader>
-          <div className="p-4 pb-0">
-            <div className="flex items-center justify-center space-x-2">
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0 rounded-full"
-                onClick={() => onClick(-10)}
-                disabled={goal <= 200}
-              >
-                <Minus />
-                <span className="sr-only">Decrease</span>
-              </Button>
-              <div className="flex-1 text-center">
-                <div className="text-7xl font-bold tracking-tighter">
-                  {goal}
-                </div>
-                <div className="text-[0.70rem] uppercase text-muted-foreground">
-                  Calories/day
-                </div>
-              </div>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 shrink-0 rounded-full"
-                onClick={() => onClick(10)}
-                disabled={goal >= 400}
-              >
-                <Plus />
-                <span className="sr-only">Increase</span>
-              </Button>
-            </div>
-            <div className="mt-3 h-[120px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data}>
-                  <Bar
-                    dataKey="goal"
-                    style={
-                      {
-                        fill: "hsl(var(--foreground))",
-                        opacity: 0.9,
-                      } as React.CSSProperties
-                    }
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+      </Drawer.Trigger>
+      <Drawer.Portal>
+        <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+        <Drawer.Content
+          className="right-2 top-2 bottom-2 fixed z-[1050] outline-none w-[310px] flex"
+          // The gap between the edge of the screen and the drawer is 8px in this case.
+          style={{ '--initial-transform': 'calc(100% + 8px)' } as React.CSSProperties}
+        >
+          <div className="bg-zinc-50 h-full w-full grow p-5 flex flex-col rounded-[16px]">
+            <div className="max-w-md mx-auto">
+              <Drawer.Title className="font-medium mb-2 text-zinc-900">It supports all directions.</Drawer.Title>
+              <Drawer.Description className="text-zinc-600 mb-2">
+                This one specifically is not touching the edge of the screen, but that&apos;s not required for a side
+                drawer.
+              </Drawer.Description>
             </div>
           </div>
-          <DrawerFooter>
-            <Button>Submit</Button>
-            <DrawerClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </div>
-      </DrawerContent>
-    </Drawer>
+        </Drawer.Content>
+      </Drawer.Portal>
+    </Drawer.Root>
   )
 }

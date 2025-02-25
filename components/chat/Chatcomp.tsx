@@ -275,7 +275,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 					ref={inputSectionRef}
 				>
 					<div className="space-y-4">
-						<h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-foreground text-center">
+						<h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-[#DDDDDD]text-center">
 							What can I help with?
 						</h1>
 					</div>
@@ -334,8 +334,8 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									className={cn(
 										"px-3 py-1 text-sm font-medium rounded-full transition-colors",
 										activeIntegrationCategory === category.id
-											? "bg-sleek text-accent hover:bg-blue-400/20"
-											: "text-muted-foreground hover:text-accent hover:bg-blue-400/10",
+											? "bg-sleek text-white hover:bg-blue-400/20"
+											: "text-white hover:text-white hover:bg-blue-400/10",
 									)}
 									title={category.title}
 								>
