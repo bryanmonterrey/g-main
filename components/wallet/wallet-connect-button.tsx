@@ -148,7 +148,7 @@ export default function WalletConnectButton() {
   };
 
   return (
-    <div className="relative inline-flex">
+    <div className="relative inline-flex gap-x-4">
       
     <button
         onClick={!connected ? handleConnectClick : () => {}}

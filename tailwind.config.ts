@@ -47,6 +47,7 @@ export default {
 			buttongray: "#232328",
 			leaf: "#00ED89",
 			azul: "#0095FF",
+			satin: "#1B1B29",
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',
