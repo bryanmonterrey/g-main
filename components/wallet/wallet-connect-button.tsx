@@ -140,8 +140,7 @@ export default function WalletConnectButton() {
 
   return (
     <div className="relative inline-flex">
-      <WalletMultiButton>
-      </WalletMultiButton>
+      
     {!connected ? (
         <button
           onClick={handleConnectClick}
