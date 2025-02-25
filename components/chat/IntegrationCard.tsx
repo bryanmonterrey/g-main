@@ -18,21 +18,21 @@ export function IntegrationCard({ title, description, icon, logo: Logo, category
       onClick={onClick}
       className={cn(
         "flex flex-col gap-3 p-4",
-        "bg-zinc-950 border border-white/5 rounded-3xl",
+        "bg-azul/10 border border-white/0 rounded-3xl",
         "text-left",
-        "hover:bg-muted/50 hover:border-border",
-        "transition-colors",
+        "hover:bg-azul/35 hover:border-white/0",
+        "transition-all duration-300 ease-in-out",
       )}
     >
       <div className="flex items-center gap-3">
         {Logo && <Logo className="w-6 h-6" />}
         {icon}
         <div className="flex-1">
-          <h3 className="text-[15px] font-medium text-foreground">{title}</h3>
-          <div className="text-xs text-muted-foreground mt-0.5">{category}</div>
+          <h3 className="text-[15px] font-medium text-white">{title}</h3>
+          <div className="text-xs text-azul mt-0.5">{category}</div>
         </div>
       </div>
-      <div className="text-sm text-muted-foreground leading-relaxed">{description}</div>
+      <div className="text-sm text-azul leading-relaxed">{description}</div>
     </button>
   );
 }

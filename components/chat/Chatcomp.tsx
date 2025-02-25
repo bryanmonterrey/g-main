@@ -280,7 +280,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 						</h1>
 					</div>
 					<div className="space-y-4">
-						<div className="rounded-2xl p-[5px] bg-zinc-950">
+						<div className="rounded-3xl p-[5px] bg-zinc-950">
 							<div className="text-[10px] sm:text-xs px-2 py-2 text-white/85">
 							</div>
 							<ChatInput
@@ -303,9 +303,9 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									className={cn(
 										"px-4 py-2",
 										"text-sm font-medium",
-										"bg-zinc-950 border border-white/5 rounded-full",
-										"text-white/85",
-										"hover:text-accent hover:bg-zinc-900 hover:border-white/5",
+										"bg-azul/15 border border-white/0 rounded-full",
+										"text-azul",
+										"hover:text-azul hover:bg-azul/35 hover:border-white/0",
 										"transition-all duration-300 ease-in-out",
 									)}
 								>
@@ -319,10 +319,10 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 				<div className="relative pt-4">
 					<div className="flex flex-col gap-4 px-1 mb-6">
 						<div className="flex items-center gap-2">
-							<h2 className="text-xl font-semibold text-foreground">
+							<h2 className="text-xl font-semibold text-white">
 								Integrations
 							</h2>
-							<span className="text-sm text-muted-foreground">
+							<span className="text-sm text-azul">
 								({filteredIntegrations.length})
 							</span>
 						</div>
@@ -334,7 +334,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									className={cn(
 										"px-3 py-1 text-sm font-medium rounded-full transition-colors",
 										activeIntegrationCategory === category.id
-											? "bg-sleek text-white hover:bg-blue-400/20"
+											? "bg-azul/15 text-azul hover:bg-azul/35"
 											: "text-white hover:text-white hover:bg-blue-400/10",
 									)}
 									title={category.title}
