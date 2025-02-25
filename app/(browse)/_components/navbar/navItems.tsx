@@ -28,18 +28,18 @@ export const NavItems: React.FC<NavItemsProps> = ({
 
   const navigationItems = [
     {
-      key: 'browse',
-      label: 'Browse',
-      path: '/browse',
-      icon: null, // Add your icon component here if needed
-      public: true // Public route that doesn't require auth
-    },
-    {
       key: 'chat',
       label: 'Chat',
       path: '/chat',
       icon: null, // Add your icon component here if needed
       public: false // Protected route that requires auth
+    },
+    {
+      key: 'browse',
+      label: 'Browse',
+      path: '/browse',
+      icon: null, // Add your icon component here if needed
+      public: true // Public route that doesn't require auth
     },
     {
         key: 'agent',
@@ -64,8 +64,8 @@ export const NavItems: React.FC<NavItemsProps> = ({
   return (
     <>
       {navigationItems.map((item) => (
-        // Only show non-public items if we have a wallet address
-        (item.public || session?.user?.walletAddress) && (
+        // Show the item if it's public OR if the user is authenticated
+        (item.public || sessionData) && (
           <Button
             key={item.key}
             className={cn(
@@ -81,8 +81,6 @@ export const NavItems: React.FC<NavItemsProps> = ({
           </Button>
         )
       ))}
-
-      
     </>
   );
 };
