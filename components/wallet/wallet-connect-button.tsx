@@ -8,6 +8,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { DrawerDemo } from "./walletDrawer";
+import { DoorOpen } from 'lucide-react';
 
 import { SigninMessage } from "@/utils/SigninMessage";
 import { shortenWalletAddress } from "@/lib/functions";
@@ -131,7 +132,7 @@ export default function WalletConnectButton() {
   const getButtonClass = () => {
     if (connecting) return "bg-yellow-500 hover:bg-yellow-600 text-white rounded-full"; // Connecting state
     if (disconnecting) return "bg-orange-500 hover:bg-orange-600 text-white rounded-full"; // Disconnecting state
-    if (connected) return "bg-[#11111A] hover:bg-[#11111A] text-white rounded-full"; // Connected state
+    if (connected) return "bg-azul/15 hover:bg-azul/35 text-azul rounded-full"; // Connected state
     return "bg-purple-600 hover:bg-purple-700 text-white rounded-full"; // Disconnected state
   };
 
@@ -152,7 +153,7 @@ export default function WalletConnectButton() {
     <button
         onClick={!connected ? handleConnectClick : () => {}}
         disabled={connecting || disconnecting}
-        className={`px-5 py-2 font-semibold transition-colors text-xs ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
+        className={`px-5 border border-zinc-950 py-2 font-semibold transition-all duration-300 ease-in-out text-xs ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
       >
         <span className="flex items-center">
           {(connecting || disconnecting) && (
@@ -165,12 +166,15 @@ export default function WalletConnectButton() {
         </span>
       </button>
     {session && (
+      <div className="flex items-center">
+        <DoorOpen className="w-6 h-6 text-white" />
         <DrawerDemo 
         username={session.user.name || ''}
         avatarUrl={session.user.image || '/default.png'} 
         className="flex items-center relative"
         onSignOut={handleWalletDisconnect}
       />
+      </div>
       )}
     </div>
   );
