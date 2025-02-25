@@ -129,10 +129,10 @@ export default function WalletConnectButton() {
 
   // Function to determine button class based on connection state
   const getButtonClass = () => {
-    if (connecting) return "bg-yellow-500 hover:bg-yellow-600 text-white"; // Connecting state
-    if (disconnecting) return "bg-orange-500 hover:bg-orange-600 text-white"; // Disconnecting state
-    if (connected) return "bg-green-600 hover:bg-green-700 text-white"; // Connected state
-    return "bg-purple-600 hover:bg-purple-700 text-white"; // Disconnected state
+    if (connecting) return "bg-yellow-500 hover:bg-yellow-600 text-white rounded-full"; // Connecting state
+    if (disconnecting) return "bg-orange-500 hover:bg-orange-600 text-white rounded-full"; // Disconnecting state
+    if (connected) return "bg-[#11111A] hover:bg-[#11111A] text-white rounded-full"; // Connected state
+    return "bg-purple-600 hover:bg-purple-700 text-white rounded-full"; // Disconnected state
   };
 
   // Function to get button text based on connection state
@@ -152,7 +152,7 @@ export default function WalletConnectButton() {
     <button
         onClick={!connected ? handleConnectClick : () => {}}
         disabled={connecting || disconnecting}
-        className={`px-4 py-2 rounded-md font-medium transition-colors ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
+        className={`px-5 py-2 font-semibold transition-colors text-xs ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
       >
         <span className="flex items-center">
           {(connecting || disconnecting) && (
