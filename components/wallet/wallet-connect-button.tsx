@@ -114,6 +114,8 @@ export default function WalletConnectButton() {
   return (
     <div className="relative ">
     <WalletMultiButton>
+    
+    </WalletMultiButton>
     {session?.user?.image && (
         <DrawerDemo 
           username={session.user.name || ''} 
@@ -121,8 +123,6 @@ export default function WalletConnectButton() {
           className="flex items-center relative"
         />
       )}
-    </WalletMultiButton>
-    
 
     </div>
   );
