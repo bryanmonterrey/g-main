@@ -275,7 +275,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 					ref={inputSectionRef}
 				>
 					<div className="space-y-4">
-						<h1 className="text-2xl sm:text-3xl md:text-4xl font-medium text-[#DDDDDD]text-center">
+						<h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#DDDDDD]text-center">
 							What can I help with?
 						</h1>
 					</div>
@@ -302,7 +302,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									onClick={() => setInput(suggestion.text)}
 									className={cn(
 										"px-4 py-2",
-										"text-sm font-medium",
+										"text-sm font-semibold",
 										"bg-azul/15 border border-white/0 rounded-full",
 										"text-azul",
 										"hover:text-azul hover:bg-azul/35 hover:border-white/0",
@@ -332,7 +332,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									key={index}
 									onClick={() => setActiveIntegrationCategory(category.id)}
 									className={cn(
-										"px-3 py-1 text-sm font-medium rounded-full transition-colors",
+										"px-3 py-1 text-sm font-semibold rounded-full transition-colors",
 										activeIntegrationCategory === category.id
 											? "bg-azul/15 text-azul hover:bg-azul/35"
 											: "text-white hover:text-white hover:bg-blue-400/10",

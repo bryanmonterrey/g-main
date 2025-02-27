@@ -28,11 +28,11 @@ export function IntegrationCard({ title, description, icon, logo: Logo, category
         {Logo && <Logo className="w-6 h-6" />}
         {icon}
         <div className="flex-1">
-          <h3 className="text-[15px] font-medium text-white">{title}</h3>
-          <div className="text-xs text-azul mt-0.5">{category}</div>
+          <h3 className="text-[15px] font-semibold text-white/90">{title}</h3>
+          <div className="text-xs font-semibold text-azul mt-0.5">{category}</div>
         </div>
       </div>
-      <div className="text-sm text-azul leading-relaxed">{description}</div>
+      <div className="text-sm font-semibold text-azul leading-relaxed">{description}</div>
     </button>
   );
 }

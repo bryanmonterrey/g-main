@@ -12,7 +12,7 @@ const NavBar: React.FC = () => {
   
 
     return (
-      <nav className='fixed top-0 w-full h-[52px] z-[1000] bg-gradient-to-b from-satin via-satin/75 to-satin/0 lg:pr-1 lg:pl-1 flex justify-between items-center'>
+      <nav className='fixed top-0 w-full h-[52px] z-[1000] bg-gradient-to-b from-[#111111] via-[#111111]/75 to-[#111111]/0 lg:pr-1 lg:pl-1 flex justify-between items-center'>
        
        <div className='gap-x-3 ml-2 inline-flex items-center justify-center'>
           <Logo />

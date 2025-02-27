@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from "@/lib/utils";
 import { useSession } from 'next-auth/react';
+import { Search } from 'lucide-react';
 
 
 
@@ -74,13 +75,16 @@ export const NavItems: React.FC<NavItemsProps> = ({
             )}
             onClick={() => handleNavigation(item.path)}
           >
-            <div className="h-full flex items-center justify-center gap-2 hover:transition-colors hover:ease-in-out hover:duration-300 font-medium text-sm active:text-white hover:text-white active:duration-100">
+            <div className="h-full flex items-center justify-center gap-1 hover:transition-colors hover:ease-in-out hover:duration-300 font-semibold text-sm active:text-white hover:text-white active:duration-300">
               {item.icon}
               <p>{item.label}</p>
             </div>
           </Button>
         )
       ))}
+      <Button className='bg-transparent shadow-none hover:bg-transparent transition-all ease-in-out duration-300 '>
+        <Search className='w-4 h-4' />
+      </Button>
     </>
   );
 };
