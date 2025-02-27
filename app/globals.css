@@ -32,6 +32,12 @@
   font-weight: 900;
 }
 
+@font-face {
+  font-family: "English";
+  src: url("/fonts/OldEnglishFive.otf");
+  font-weight: 400;
+}
+
 html,
 body,
 :root {
