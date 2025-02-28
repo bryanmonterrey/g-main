@@ -106,7 +106,7 @@ export function ChatInput({
           {files.map((file, index) => (
             <div
               key={index}
-              className="flex items-center gap-2 rounded-lg bg-secondary/5 px-3 py-2 text-sm"
+              className="flex items-center gap-2 rounded-lg bg-zinc-900/20 px-3 py-2 text-sm"
             >
               <Paperclip className="size-4 text-white/90" strokeWidth={1.5}/>
               <span className="max-w-[120px] truncate">{file.name}</span>
@@ -147,7 +147,7 @@ export function ChatInput({
               className="hidden"
               id="file-upload"
             />
-            <Paperclip className="h-5 w-5 text-white/90" />
+            <Paperclip className="h-5 w-5 text-white/80" strokeWidth={2} />
           </label>
         </PromptInputAction>
         <div className="flex items-center justify-center">

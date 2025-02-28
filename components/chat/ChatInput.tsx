@@ -97,7 +97,7 @@ export function ChatInput({
 
                 {/* You can use the ModeSelector component if you want to use the default mode selector UI */}
                 {/* <ModeSelector selectedMode={selectedMode} onModeChange={setSelectedMode} /> */}
-                <div className="mx-4 h-4 w-[1px] bg-border shrink-0" />
+                <div className="mx-4 h-4 w-[1px] bg-white shrink-0" />
                 <DropdownComp selectedItems={selectedWallet} onItemsChange={setSelectedWallet} items={wallets} />
               </div>
             </div>
