@@ -147,7 +147,7 @@ export function ChatInput({
               className="hidden"
               id="file-upload"
             />
-            <Paperclip className="h-5 w-5 text-white/80" strokeWidth={2} />
+            <Paperclip className="h-5 w-5 text-zinc-50/30" strokeWidth={2} />
           </label>
         </PromptInputAction>
         <div className="flex items-center justify-center">
