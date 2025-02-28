@@ -34,10 +34,8 @@ export const getSelf = async (session: any) => { //fixed getself by username
 
 //fix getself by username
 
-export const getSelfByUsername = async (username: string) => {
-  const session = await useSession();
-
-  if (!session?.user?.walletAddress) {
+export const getSelfByUsername = async (username: string, session: any) => {
+  if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
 
@@ -63,6 +61,7 @@ export const getSelfByUsername = async (username: string) => {
   }
 
   // Check if the authenticated user is the same as the requested user
+  // Using walletAddress from the session since that's what your NextAuth setup provides
   if (session.user.walletAddress !== user.wallet_address) {
     throw new Error("Unauthorized");
   }

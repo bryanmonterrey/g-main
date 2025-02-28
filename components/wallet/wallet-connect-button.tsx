@@ -9,6 +9,8 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { DrawerDemo } from "./walletDrawer";
 import { Settings } from 'lucide-react';
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 import { SigninMessage } from "@/utils/SigninMessage";
 import { shortenWalletAddress } from "@/lib/functions";
@@ -167,7 +169,11 @@ export default function WalletConnectButton() {
       </button>
     {session && (
       <div className="flex items-center">
+        <Link href={`/dashboard/${session.user.name}`}>
+        <Button variant="ghost" className="h-auto p-2">
         <Settings className="w-5 h-5 text-white" />
+        </Button>
+        </Link>
         <DrawerDemo 
         username={session.user.name || ''}
         avatarUrl={session.user.image || '/default.png'} 
