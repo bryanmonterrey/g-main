@@ -169,13 +169,13 @@ export default function WalletConnectButton() {
       </button>
     {session && (
       <div className="flex items-center">
-        <Link href={`/dashboard/${session.user.name}`}>
+        <Link href={`/dashboard/${session.user.walletAddress}`}>
         <Button variant="ghost" className="h-auto p-2">
         <Settings className="w-5 h-5 text-white" />
         </Button>
         </Link>
         <DrawerDemo 
-        username={session.user.name || ''}
+        username={session.user.walletAddress || ''}
         avatarUrl={session.user.image || '/default.png'} 
         className="flex items-center relative"
         onSignOut={handleWalletDisconnect}

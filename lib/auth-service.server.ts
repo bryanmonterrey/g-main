@@ -60,8 +60,7 @@ export const getSelfByUsername = async (username: string, session: any) => {
     throw new Error("User not found");
   }
 
-  // Check if the authenticated user is the same as the requested user
-  // Using walletAddress from the session since that's what your NextAuth setup provides
+  // For web3 authentication, we need to check the wallet address
   if (session.user.walletAddress !== user.wallet_address) {
     throw new Error("Unauthorized");
   }
@@ -83,3 +82,73 @@ interface User {
     stripe_customer_id: string;
   } | null;
 }
+
+export const getSelfById = async (userId: string, session: any) => {
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const supabase = getSupabase(session);
+  
+  const { data: user, error } = await supabase
+    .from('users' as any)
+    .select(`
+      id,
+      username,
+      email,
+      avatar_url,
+      wallet_address,
+      bio,
+      created_at,
+      updated_at
+    `)
+    .eq('id', userId)
+    .single();
+
+  if (error || !user) {
+    throw new Error("User not found");
+  }
+
+  // Security check - only allow users to access their own data
+  // For web3 authentication, we need to check the wallet address
+  if (session.user.walletAddress !== user.wallet_address) {
+    throw new Error("Unauthorized");
+  }
+
+  return user;
+};
+
+// Rename to getSelfByWalletAddress
+export const getSelfByWalletAddress = async (walletAddress: string, session: any) => {
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const supabase = getSupabase(session);
+  
+  const { data: user, error } = await supabase
+    .from('users' as any)
+    .select(`
+      id,
+      username,
+      email,
+      avatar_url,
+      wallet_address,
+      bio,
+      created_at,
+      updated_at
+    `)
+    .eq('wallet_address', walletAddress)
+    .single();
+
+  if (error || !user) {
+    throw new Error("User not found");
+  }
+
+  // Since we're checking by wallet address, this check is simpler
+  if (session.user.walletAddress !== walletAddress) {
+    throw new Error("Unauthorized");
+  }
+
+  return user;
+};

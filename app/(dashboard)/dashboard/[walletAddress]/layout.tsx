@@ -2,7 +2,7 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { getSelfByUsername } from "@/lib/auth-service";
+import { getSelfByWalletAddress } from "@/lib/auth-service";
 import { redirect, useRouter } from "next/navigation";
 import NavBar from "./_components/navbar";
 import Sidebar from "./_components/sidebar";
@@ -10,7 +10,7 @@ import { Container } from "./_components/container";
 import { useEffect, useState } from "react";
 
 interface CreatorLayoutProps {
-    params: { username: string };
+    params: { walletAddress: string };
     children: React.ReactNode;
 }
 
@@ -27,7 +27,7 @@ const CreatorLayout = ({
         const fetchData = async () => {
             if (session) {
                 try {
-                    const userData = await getSelfByUsername(params.username, session);
+                    const userData = await getSelfByWalletAddress(params.walletAddress, session);
                     setUser(userData);
                 } catch (error) {
                     console.error("Error fetching user:", error);
@@ -43,7 +43,7 @@ const CreatorLayout = ({
         if (status !== "loading") {
             fetchData();
         }
-    }, [session, status, params.username, router]);
+    }, [session, status, params.walletAddress, router]);
 
     if (status === "loading" || loading) {
         return <div>Loading...</div>; // Or your custom loading component
