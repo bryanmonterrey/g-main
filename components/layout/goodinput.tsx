@@ -138,7 +138,7 @@ export function ChatInput({
         <PromptInputAction tooltip="Attach files">
           <label
             htmlFor="file-upload"
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-2xl bg-secondary/5 hover:bg-secondary/5 border-white/5 border"
+            className="flex h-8 w-8 cursor-pointer transition-all duration-300 ease-in-out items-center justify-center rounded-2xl bg-zinc-900/20 hover:bg-zinc-900/40 border-zinc-700/5 border"
           >
             <input
               type="file"
