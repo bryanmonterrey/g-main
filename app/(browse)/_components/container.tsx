@@ -27,9 +27,6 @@ export const Container = ({
   return (
     <motion.div
       className="flex-1"
-      initial={{ marginLeft: collapsed ? 44 : 240 }}
-      animate={{ marginLeft: collapsed ? 44 : 240 }}
-      transition={{ duration: 0.2, ease: "easeInOut" }}
     >
       {children}
     </motion.div>
