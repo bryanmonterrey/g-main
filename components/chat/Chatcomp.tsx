@@ -9,9 +9,9 @@ import {
 	ArrowsLeftRight,
 } from "@phosphor-icons/react";
 import { AGENT_MODES } from "./ModeSelector";
-import { MOCK_MODELS } from "./ChatInput";
+import { MOCK_MODELS } from "../layout/goodinput";
 import { IntegrationCard } from "./IntegrationCard";
-import { ChatInput } from "./ChatInput";
+import { ChatInput } from "../layout/goodinput";
 import {
 	MetaplexLogo,
 	JupiterLogo,

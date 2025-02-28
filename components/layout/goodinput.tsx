@@ -8,45 +8,44 @@ import {
   PromptInputAction,
   PromptInputActions,
 } from "@/components/ui/prompt-input";
-import { ArrowRight } from "@phosphor-icons/react";
 import { ArrowUp, Square, Paperclip, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AGENT_MODES } from "@/components/chat/ModeSelector";
 import { DropdownComp } from "@/components/chat/WalletSelector";
 
 export const MOCK_MODELS = [
-    {
-      name: "Claude",
-      subTxt: "Claude 3.5 Sonnet",
-    },
-    {
-      name: "OpenAI",
-      subTxt: "GPT-4o-mini",
-    },
-    {
-      name: "DeepSeek",
-      subTxt: "DeepSeek-V3 Base",
-    }
-  ];
-  
-  type Item = {
-    name: string;
-    subTxt: string;
-  };
+  {
+    name: "Claude",
+    subTxt: "Claude 3.5 Sonnet",
+  },
+  {
+    name: "OpenAI",
+    subTxt: "GPT-4o-mini",
+  },
+  {
+    name: "DeepSeek",
+    subTxt: "DeepSeek-V3 Base",
+  }
+];
+
+type Item = {
+  name: string;
+  subTxt: string;
+};
 
 interface ChatInputProps {
-    input: string;
-    setInput: (value: string) => void;
-    onSubmit: (e: React.FormEvent, selectedModel: Item) => void;
-    selectedMode: (typeof AGENT_MODES)[0];
-    setSelectedMode: (mode: (typeof AGENT_MODES)[0]) => void;
-    selectedModel: Item;
-    setSelectedModel: (model: Item) => void;
-    selectedWallet: Item;
-    setSelectedWallet: (wallet: Item) => void;
-  }
+  input: string;
+  setInput: (value: string) => void;
+  onSubmit: (e: React.FormEvent, selectedModel: Item) => void;
+  selectedMode: (typeof AGENT_MODES)[0];
+  setSelectedMode: (mode: (typeof AGENT_MODES)[0]) => void;
+  selectedModel: Item;
+  setSelectedModel: (model: Item) => void;
+  selectedWallet: Item;
+  setSelectedWallet: (wallet: Item) => void;
+}
 
-export function PromptInputWithActions({
+export function ChatInput({
   input,
   setInput,
   onSubmit,
@@ -65,7 +64,7 @@ export function PromptInputWithActions({
     subTxt: "",
   }]);
 
-  useEffect(() => { //fix later
+  useEffect(() => {
     fetch("/api/wallet")
       .then((res) => res.json())
       .then((data) => {
@@ -73,14 +72,13 @@ export function PromptInputWithActions({
       });
   }, []);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
+    
     if (input.trim() || files.length > 0) {
-      setIsLoading(true);
-      setTimeout(() => {
-        setIsLoading(false);
-        setInput("");
-        setFiles([]);
-      }, 2000);
+      onSubmit(e || new Event('submit') as any, selectedModel);
     }
   };
 
@@ -101,20 +99,20 @@ export function PromptInputWithActions({
       onValueChange={setInput}
       isLoading={isLoading}
       onSubmit={handleSubmit}
-      className="w-full max-w-(--breakpoint-md)"
+      className="w-full"
     >
       {files.length > 0 && (
         <div className="flex flex-wrap gap-2 pb-2">
           {files.map((file, index) => (
             <div
               key={index}
-              className="flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-sm"
+              className="flex items-center gap-2 rounded-lg bg-secondary/5 px-3 py-2 text-sm"
             >
-              <Paperclip className="size-4" />
+              <Paperclip className="size-4 text-white/90" />
               <span className="max-w-[120px] truncate">{file.name}</span>
               <button
                 onClick={() => handleRemoveFile(index)}
-                className="rounded-full p-1 hover:bg-secondary/50"
+                className="rounded-full p-1 bg-secondary/5 hover:bg-secondary/5"
               >
                 <X className="size-4" />
               </button>
@@ -123,13 +121,24 @@ export function PromptInputWithActions({
         </div>
       )}
 
-      <PromptInputTextarea placeholder="Ask me anything..." />
+      <PromptInputTextarea 
+        placeholder="Ask anything..." 
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            if (input.trim()) {
+              handleSubmit();
+            }
+          }
+        }}
+      />
 
-      <PromptInputActions className="flex items-center justify-between gap-2 pt-2">
+      <PromptInputActions className="flex items-center justify-between my-auto">
+        <div className="flex items-center justify-center">
         <PromptInputAction tooltip="Attach files">
           <label
             htmlFor="file-upload"
-            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-2xl hover:bg-secondary-foreground/10"
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-2xl bg-secondary/5 hover:bg-secondary/5 border-white/5 border"
           >
             <input
               type="file"
@@ -138,24 +147,28 @@ export function PromptInputWithActions({
               className="hidden"
               id="file-upload"
             />
-            <Paperclip className="size-5 text-primary" />
+            <Paperclip className="h-5 w-5 text-white/90" />
           </label>
         </PromptInputAction>
+        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center overflow-x-auto scrollbar-none">
+          <div className="flex items-center min-w-fit gap-x-1">
+            <DropdownComp selectedItems={selectedModel} onItemsChange={setSelectedModel} items={MOCK_MODELS} />
+            <DropdownComp selectedItems={selectedWallet} onItemsChange={setSelectedWallet} items={wallets} />
+          </div>
+        </div>
+      </div>
+      </div>
 
-        <PromptInputAction
-          tooltip={isLoading ? "Stop generation" : "Send message"}
-        >
+        <PromptInputAction tooltip="Send message">
           <Button
             variant="default"
             size="icon"
-            className="h-8 w-8 rounded-full"
-            onClick={handleSubmit}
+            className="h-8 w-8 rounded-full !bg-primary/5 border border-white/5"
+            onClick={() => handleSubmit()}
+            disabled={!input.trim() && files.length === 0}
           >
-            {isLoading ? (
-              <Square className="size-5 fill-current" />
-            ) : (
-              <ArrowUp className="size-5" />
-            )}
+            <ArrowUp className="size-5" />
           </Button>
         </PromptInputAction>
       </PromptInputActions>
