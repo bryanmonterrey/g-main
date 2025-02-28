@@ -6,6 +6,7 @@ import { getSelf } from "@/lib/auth-service";
 
 import { Button } from "@/components/ui/button"
 import { Drawer } from 'vaul';
+import { Power } from "lucide-react";
 
 interface DrawerDemoProps {
   username: string;
@@ -89,13 +90,13 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut }: Drawer
         >
           <div className="bg-zinc-50 h-full w-full grow p-5 flex flex-col rounded-[16px]">
             <div className="max-w-md mx-auto">
-            <Drawer.Title className="font-medium mb-4 text-zinc-900 flex justify-between items-center">
+            <Drawer.Title className="font-semibold mb-4 text-zinc-900 flex justify-between items-center">
                 <span>User Profile</span>
                 <button
                   onClick={onSignOut}
-                  className="px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white font-medium transition-colors"
+                  className="px-2.5 py-2.5 rounded-full bg-red-600/15 hover:bg-red-600/35 text-red-600 font-semibold transition-all duration-300 ease-in-out"
                 >
-                  Sign Out
+                  <Power className="w-4 h-4" strokeWidth={3}/>
                 </button>
               </Drawer.Title>
               <div className="flex items-center gap-4 mb-4">
