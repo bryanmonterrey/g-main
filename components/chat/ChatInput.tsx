@@ -87,7 +87,7 @@ export function ChatInput({
                 }
               }}
               placeholder="Ask anything..."
-              className="w-full h-[72px] px-6 py-4 outline-none text-base bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-foreground placeholder:text-muted-foreground resize-none hidden-scrollbar"
+              className="w-full h-[72px] px-6 py-4 outline-none text-white bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-white resize-none hidden-scrollbar"
             />
           </div>
           <div className="flex items-center h-12 px-6 border-t border-zinc-950">

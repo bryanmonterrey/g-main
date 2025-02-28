@@ -76,7 +76,7 @@ function PromptInput({
       >
         <div
           className={cn(
-            "border-white/5 bg-secondary/5 shadow-xs border rounded-3xl p-2",
+            "border-zinc-700/5 bg-zinc-900/20 shadow-xs border rounded-3xl p-2",
             className
           )}
         >

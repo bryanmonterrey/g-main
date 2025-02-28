@@ -108,7 +108,7 @@ export function ChatInput({
               key={index}
               className="flex items-center gap-2 rounded-lg bg-secondary/5 px-3 py-2 text-sm"
             >
-              <Paperclip className="size-4 text-white/90" />
+              <Paperclip className="size-4 text-white/90" strokeWidth={1.5}/>
               <span className="max-w-[120px] truncate">{file.name}</span>
               <button
                 onClick={() => handleRemoveFile(index)}
@@ -164,7 +164,7 @@ export function ChatInput({
           <Button
             variant="default"
             size="icon"
-            className="h-8 w-8 rounded-full !bg-primary/5 border border-white/5"
+            className="h-8 w-8 rounded-full bg-primary/5 border border-white/5"
             onClick={() => handleSubmit()}
             disabled={!input.trim() && files.length === 0}
           >
