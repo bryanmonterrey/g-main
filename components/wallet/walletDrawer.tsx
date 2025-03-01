@@ -105,9 +105,7 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut }: Drawer
                   avatarUrl={avatarUrl} 
                   size="lg"
                 />
-                <div>
-                  <h3 className="font-semibold text-lg">{username}</h3>
-                </div>
+                
               </div>
               <Drawer.Description className="text-zinc-600 mb-2">
                 Manage your wallet and account settings here.

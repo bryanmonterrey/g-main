@@ -19,23 +19,31 @@ const CreatorLayout = ({
     children,
 }: CreatorLayoutProps) => {
     const { data: session, status } = useSession();
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const router = useRouter();
+
+    console.log("Layout rendering with params:", params);
+    console.log("Session status:", status, "Session data:", session);
 
     useEffect(() => {
         const fetchData = async () => {
             if (session) {
                 try {
+                    console.log("Fetching user data with wallet address:", params.walletAddress);
                     const userData = await getSelfByWalletAddress(params.walletAddress, session);
+                    console.log("User data fetched successfully:", userData);
                     setUser(userData);
+                    setLoading(false);
                 } catch (error) {
                     console.error("Error fetching user:", error);
-                    router.push("/chat");
-                } finally {
+                    setError(error instanceof Error ? error.message : 'An error occurred');
                     setLoading(false);
+                    router.push("/chat");
                 }
             } else if (status === "unauthenticated") {
+                console.log("User is unauthenticated, redirecting");
                 router.push("/chat");
             }
         };
@@ -46,11 +54,15 @@ const CreatorLayout = ({
     }, [session, status, params.walletAddress, router]);
 
     if (status === "loading" || loading) {
-        return <div>Loading...</div>; // Or your custom loading component
+        return <div>Loading...</div>;
+    }
+
+    if (error) {
+        return <div>Error: {error}</div>;
     }
 
     if (!user) {
-        return null; // Render nothing while redirecting
+        return null;
     }
 
     return (
