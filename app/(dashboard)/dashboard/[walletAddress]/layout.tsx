@@ -54,7 +54,7 @@ const CreatorLayout = ({
     }, [session, status, params.walletAddress, router]);
 
     if (status === "loading" || loading) {
-        return <div>Loading...</div>;
+        return <div></div>;
     }
 
     if (error) {

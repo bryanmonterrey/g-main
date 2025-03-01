@@ -9,10 +9,10 @@ import { cn } from "@/lib/utils";
 export const Navigation = () => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
-  const username = session?.user?.username || "";
+  const username = session?.user?.name || "";
 
   if (!session) {
-    return <div>Loading...</div>; // Or a more sophisticated loading state
+    return <div></div>; // Or a more sophisticated loading state
   }
 
   if (!session || !username) {
