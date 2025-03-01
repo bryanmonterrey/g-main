@@ -44,8 +44,8 @@ export const Navigation = () => {
             className={cn(
               'h-full flex items-center justify-center',
               'hover:transition-all hover:ease-in-out hover:duration-300',
-              'font-medium text-[15px]',
-              'active:text-white hover:text-white active:scale-95 active:duration-100 active:transition-none',
+              'font-semibold text-sm',
+              'active:text-white hover:text-white active:scale-95 active:duration-300 active:transition-all    active:ease-in-out',
               pathname === item.href && 'text-white'
             )}
           >
