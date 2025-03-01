@@ -118,55 +118,25 @@ export const getSelfById = async (userId: string, session: any) => {
   return user;
 };
 
-// Rename to getSelfByWalletAddress
 export const getSelfByWalletAddress = async (walletAddress: string, session: any) => {
-  console.log("getSelfByWalletAddress called with:", { walletAddress, sessionUserId: session?.user?.id, sessionWalletAddress: session?.user?.walletAddress });
-  
   if (!session?.user?.id) {
-    console.error("Unauthorized: session user id is missing");
     throw new Error("Unauthorized");
   }
 
-  const supabase = getSupabase(session);
-  
-  try {
-    const { data: user, error } = await supabase
-      .from('users' as any)
-      .select(`
-        id,
-        username,
-        email,
-        avatar_url,
-        wallet_address,
-        bio,
-        created_at,
-        updated_at
-      `)
-      .eq('wallet_address', walletAddress)
-      .single();
-
-    console.log("Supabase query result:", { user, error });
-
-    if (error) {
-      console.error("Supabase error:", error);
-      throw new Error("User not found");
-    }
-
-    if (!user) {
-      console.error("User not found for wallet address:", walletAddress);
-      throw new Error("User not found");
-    }
-
-    // Since we're checking by wallet address, this check is simpler
-    if (session.user.walletAddress !== walletAddress) {
-      console.error("Authorization failed - Session wallet address doesn't match requested wallet address", 
-        { sessionWalletAddress: session.user.walletAddress, requestedWalletAddress: walletAddress });
-      throw new Error("Unauthorized");
-    }
-
-    return user;
-  } catch (error) {
-    console.error("Error in getSelfByWalletAddress:", error);
-    throw error;
+  // Check authorization by comparing wallet addresses
+  if (session.user.walletAddress !== walletAddress) {
+    throw new Error("Unauthorized");
   }
+
+  // Return user data from the session
+  return {
+    id: session.user.id,
+    email: session.user.email || null,
+    username: session.user.name || null,
+    avatar_url: session.user.image || null,
+    wallet_address: session.user.walletAddress,
+    bio: null,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
 };
