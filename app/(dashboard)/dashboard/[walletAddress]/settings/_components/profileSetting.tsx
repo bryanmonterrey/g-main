@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 
 export function ProfileSettings() {
   const { data: session, update: updateSession } = useSession();
+  // Use getSupabase exactly as before
   const supabase = getSupabase(session);
   
   const [username, setUsername] = useState('');
@@ -27,6 +28,7 @@ export function ProfileSettings() {
     const fetchUserData = async () => {
       if (!session?.user?.id) return;
       
+      // Use the existing supabase client
       const { data, error } = await supabase
         .from('users')
         .select('username, avatar_url')
@@ -49,7 +51,7 @@ export function ProfileSettings() {
   }, [session, supabase]);
 
   // Handle username change
-  const handleUsernameChange = async (e) => {
+  const handleUsernameChange = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (username === originalUsername) {
@@ -59,21 +61,20 @@ export function ProfileSettings() {
     try {
       setIsUpdatingUsername(true);
       
-      // Check which table to use - might be in the next_auth schema
-      // Try the 'users' table in next_auth schema first
-      const { error: nextAuthError } = await supabase
-        .from('next_auth.users')
+      // Try the public schema directly for simplicity
+      const { error } = await supabase
+        .from('users')
         .update({ username })
-        .eq('id', session.user.id);
+        .eq('id', session?.user?.id || '');
       
-      if (nextAuthError) {
-        // If that fails, try the public schema
-        const { error } = await supabase
-          .from('users')
-          .update({ username })
-          .eq('id', session.user.id);
-          
-        if (error) throw error;
+      if (error) {
+        console.error('Error updating username:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update username: " + error.message,
+          variant: "destructive",
+        });
+        return;
       }
       
       setOriginalUsername(username);
@@ -89,7 +90,7 @@ export function ProfileSettings() {
       console.error('Error updating username:', error);
       toast({
         title: "Error",
-        description: "Failed to update username: " + error.message,
+        description: "Failed to update username: " + (error as Error).message,
         variant: "destructive",
       });
     } finally {
@@ -113,11 +114,11 @@ export function ProfileSettings() {
       return;
     }
     
-    // Validate file size (50MB max)
-    if (file.size > 50 * 1024 * 1024) {
+    // Reduce the max file size to 2MB
+    if (file.size > 2 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 50MB.",
+        description: "Maximum file size is 2MB.",
         variant: "destructive",
       });
       return;
@@ -128,7 +129,7 @@ export function ProfileSettings() {
     // Create preview URL
     const reader = new FileReader();
     reader.onload = () => {
-      setPreviewUrl(reader.result);
+      setPreviewUrl(reader.result as string);
     };
     reader.readAsDataURL(file);
   };
@@ -139,43 +140,51 @@ export function ProfileSettings() {
     
     setIsUploading(true);
     try {
-      // 1. Upload to the 'avatars' bucket
+      // 1. Use a very simple file path with no subfolders
       const fileExt = avatarFile.name.split('.').pop();
-      const fileName = `${session.user.id}-${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
+      const fileName = `avatar_${Date.now()}.${fileExt}`;
       
+      // 2. Upload with minimal options
       const { error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, avatarFile);
+        .upload(fileName, avatarFile, {
+          upsert: true // Only option we need
+        });
       
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast({
+          title: "Error",
+          description: "Failed to upload avatar: " + uploadError.message,
+          variant: "destructive",
+        });
+        return;
+      }
       
-      // 2. Get public URL
+      // 3. Get public URL
       const { data: urlData } = supabase.storage
         .from('avatars')
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
       
       const newAvatarUrl = urlData.publicUrl;
       
-      // 3. Update user profile with new avatar URL in the next_auth schema
-      // Try the 'users' table in next_auth schema first
-      const { error: nextAuthError } = await supabase
-        .from('next_auth.users')
+      // 4. Update only in the public users table
+      const { error: updateError } = await supabase
+        .from('users')
         .update({ avatar_url: newAvatarUrl })
         .eq('id', session.user.id);
       
-      if (nextAuthError) {
-        // If that fails, try the 'users' table in the public schema
-        console.log('Falling back to public schema users table');
-        const { error: updateError } = await supabase
-          .from('users')
-          .update({ avatar_url: newAvatarUrl })
-          .eq('id', session.user.id);
-        
-        if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        toast({
+          title: "Error",
+          description: "Failed to update profile: " + updateError.message,
+          variant: "destructive",
+        });
+        return;
       }
       
-      // 4. Update state and session
+      // 5. Update state and session
       setAvatarUrl(newAvatarUrl);
       setAvatarFile(null);
       setPreviewUrl(''); // Clear the preview
@@ -192,7 +201,7 @@ export function ProfileSettings() {
       console.error('Error uploading avatar:', error);
       toast({
         title: "Error",
-        description: "Failed to upload avatar: " + error.message,
+        description: "Failed to upload avatar: " + (error as Error).message,
         variant: "destructive",
       });
     } finally {
@@ -232,7 +241,7 @@ export function ProfileSettings() {
                   Choose a file or drag & drop it here.
                 </div>
                 <div className="text-paragraph-xs text-text-sub-600">
-                  JPEG, PNG, or GIF formats, up to 50 MB.
+                  JPEG, PNG, or GIF formats, up to 2 MB.
                 </div>
               </div>
               <FileUpload.Button>Browse File</FileUpload.Button>
