@@ -71,7 +71,7 @@ export const NavItems: React.FC<NavItemsProps> = ({
             key={item.key}
             className={cn(
               'bg-transparent shadow-none hover:bg-transparent transition-all ease-in-out duration-300',
-              pathname === item.path ? 'text-azul' : 'text-white/80 hover:text-white'
+              pathname === item.path ? 'text-white/85' : 'text-white/85 hover:text-white'
             )}
             onClick={() => handleNavigation(item.path)}
           >
