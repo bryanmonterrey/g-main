@@ -4,6 +4,7 @@ import { getSelfByUsername } from "@/lib/auth-service";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ProfileSettings } from "./_components/profileSetting";
 
 interface CreatorPageProps {
     params: {
@@ -23,7 +24,7 @@ const CreatorPage = ({
 
     return (
         <div className="bg-black h-[calc(100vh-44px)]">           
-            {/* Your content here */}
+            <ProfileSettings />
         </div>
     );
 };

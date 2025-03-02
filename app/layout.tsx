@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 
 import { Analytics } from "@vercel/analytics/react"
 import Providers from '../components/providers';
+import { Toaster } from "@/components/ui/sonner"
 
 import "@solana/wallet-adapter-react-ui/styles.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({
               {children}    
               
           <Analytics />
+          <Toaster />
         </body>
       </html>
     
