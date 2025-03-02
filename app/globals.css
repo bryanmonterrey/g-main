@@ -200,3 +200,8 @@ body.hidden-scrollbar {
     @apply bg-background text-foreground;
   }
 }
+
+.backdrop-blur-custom {
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+}

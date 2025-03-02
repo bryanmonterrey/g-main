@@ -82,16 +82,23 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut }: Drawer
         </Button>
       </Drawer.Trigger>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40" />
+        <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-custom" />
         <Drawer.Content
-          className="right-2 top-2 bottom-2 fixed z-[1050] outline-none w-[310px] flex"
+          className="right-2 top-2 bottom-2 fixed z-[1050] outline-none max-w-[369px] flex"
           // The gap between the edge of the screen and the drawer is 8px in this case.
           style={{ '--initial-transform': 'calc(100% + 8px)' } as React.CSSProperties}
         >
-          <div className="bg-zinc-50 h-full w-full grow p-5 flex flex-col rounded-[16px]">
+          <div className="bg-zinc-950/95 border border-zinc-50/5 backdrop-blur-custom  h-full w-full grow p-5 flex flex-col rounded-[16px]">
             <div className="max-w-md mx-auto">
-            <Drawer.Title className="font-semibold mb-4 text-zinc-900 flex justify-between items-center">
-                <span>User Profile</span>
+            <Drawer.Title className="font-semibold mb-4 text-white flex justify-between items-center">
+              <div className="inline-flex items-center gap-2">
+              <UserAvatar 
+                    username={username} 
+                    avatarUrl={avatarUrl} 
+                    size="default"
+                  />
+                  <span className="text-white font-semibold text-sm">hi</span>
+                  </div>
                 <button
                   onClick={onSignOut}
                   className="px-2.5 py-2.5 rounded-full bg-red-600/15 hover:bg-red-600/35 text-red-600 font-semibold transition-all duration-300 ease-in-out"
@@ -100,11 +107,7 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut }: Drawer
                 </button>
               </Drawer.Title>
               <div className="flex items-center gap-4 mb-4">
-                <UserAvatar 
-                  username={username} 
-                  avatarUrl={avatarUrl} 
-                  size="lg"
-                />
+                
                 
               </div>
               <Drawer.Description className="text-zinc-600 mb-2">
