@@ -82,7 +82,7 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut }: Drawer
         </Button>
       </Drawer.Trigger>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-custom" />
+        <Drawer.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-custom z-20" />
         <Drawer.Content
           className="right-2 top-2 bottom-2 fixed z-[1050] outline-none max-w-[369px] flex"
           // The gap between the edge of the screen and the drawer is 8px in this case.
