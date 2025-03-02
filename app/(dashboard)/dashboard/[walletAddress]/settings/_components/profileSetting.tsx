@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Upload, User, Check, Loader2 } from 'lucide-react';
-import { getSupabase } from '@/utils/supabase/getDataWhenAuth';
+import { getSupabase } from '@/utils/supabase/supabase'; // Use admin client for next_auth schema
 import * as FileUpload from '@/components/ui/file-upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,8 +11,8 @@ import { toast } from 'sonner';
 
 export function ProfileSettings() {
   const { data: session, update: updateSession } = useSession();
-  // Use getSupabase exactly as before
-  const supabase = getSupabase(session);
+  // Use the admin client which has access to next_auth schema
+  const supabase = getSupabase();
   
   const [username, setUsername] = useState('');
   const [originalUsername, setOriginalUsername] = useState('');
@@ -25,33 +25,41 @@ export function ProfileSettings() {
 
   // Load user data on component mount
   useEffect(() => {
+    if (!session?.user?.id) return;
+    
     const fetchUserData = async () => {
-      if (!session?.user?.id) return;
-      
-      // Use the existing supabase client
-      const { data, error } = await supabase
-        .from('users')
-        .select('username, avatar_url')
-        .eq('id', session.user.id)
-        .single();
-      
-      if (error) {
-        console.error('Error fetching user data:', error);
-        return;
-      }
-      
-      if (data) {
-        setUsername(data.username || '');
-        setOriginalUsername(data.username || '');
-        setAvatarUrl(data.avatar_url || '');
+      try {
+        // Use next_auth schema
+        const { data, error } = await supabase
+          .from('next_auth.users')
+          .select('username, avatar_url')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching user data:', error);
+          // Use session data as fallback
+          setUsername(session.user.name || '');
+          setOriginalUsername(session.user.name || '');
+          setAvatarUrl(session.user.image || '');
+          return;
+        }
+        
+        if (data) {
+          setUsername(data.username || '');
+          setOriginalUsername(data.username || '');
+          setAvatarUrl(data.avatar_url || '');
+        }
+      } catch (error) {
+        console.error('Error in fetchUserData:', error);
       }
     };
     
     fetchUserData();
-  }, [session, supabase]);
+  }, [session?.user?.id]); // Only depend on the ID
 
   // Handle username change
-  const handleUsernameChange = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleUsernameChange = async (e) => {
     e.preventDefault();
     
     if (username === originalUsername) {
@@ -61,38 +69,27 @@ export function ProfileSettings() {
     try {
       setIsUpdatingUsername(true);
       
-      // Try the public schema directly for simplicity
+      // Use next_auth schema
       const { error } = await supabase
-        .from('users')
+        .from('next_auth.users')
         .update({ username })
-        .eq('id', session?.user?.id || '');
+        .eq('id', session.user.id);
       
       if (error) {
         console.error('Error updating username:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update username: " + error.message,
-          variant: "destructive",
-        });
+        toast("Failed to update username");
         return;
       }
       
       setOriginalUsername(username);
-      toast({
-        title: "Username updated",
-        description: "Your username has been updated successfully.",
-      });
+      toast("Username updated successfully");
       
       // Update the session to reflect changes if needed
       await updateSession();
       
     } catch (error) {
       console.error('Error updating username:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update username: " + (error as Error).message,
-        variant: "destructive",
-      });
+      toast("Failed to update username");
     } finally {
       setIsUpdatingUsername(false);
     }
@@ -106,21 +103,13 @@ export function ProfileSettings() {
     // Validate file type
     const acceptedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!acceptedTypes.includes(file.type)) {
-      toast({
-        title: "Invalid file type",
-        description: "Please upload a JPEG, PNG, or GIF image.",
-        variant: "destructive",
-      });
+      toast("Please upload a JPEG, PNG, or GIF image");
       return;
     }
     
-    // Reduce the max file size to 2MB
+    // Validate file size (2MB max)
     if (file.size > 2 * 1024 * 1024) {
-      toast({
-        title: "File too large",
-        description: "Maximum file size is 2MB.",
-        variant: "destructive",
-      });
+      toast("Maximum file size is 2MB");
       return;
     }
     
@@ -129,7 +118,7 @@ export function ProfileSettings() {
     // Create preview URL
     const reader = new FileReader();
     reader.onload = () => {
-      setPreviewUrl(reader.result as string);
+      setPreviewUrl(reader.result);
     };
     reader.readAsDataURL(file);
   };
@@ -140,70 +129,62 @@ export function ProfileSettings() {
     
     setIsUploading(true);
     try {
-      // 1. Use a very simple file path with no subfolders
-      const fileExt = avatarFile.name.split('.').pop();
-      const fileName = `avatar_${Date.now()}.${fileExt}`;
+      // Using timestamp to create unique filename
+      const timestamp = Date.now();
+      const fileExt = avatarFile.name.split('.').pop().toLowerCase();
+      const fileName = `img${timestamp}.${fileExt}`;
       
-      // 2. Upload with minimal options
-      const { error: uploadError } = await supabase.storage
+      // Upload with minimal options
+      const { data, error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, avatarFile, {
-          upsert: true // Only option we need
+          upsert: true
         });
       
       if (uploadError) {
         console.error('Upload error:', uploadError);
-        toast({
-          title: "Error",
-          description: "Failed to upload avatar: " + uploadError.message,
-          variant: "destructive",
-        });
+        toast("Failed to upload avatar");
+        setIsUploading(false);
         return;
       }
       
-      // 3. Get public URL
+      // Get public URL
       const { data: urlData } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
       
       const newAvatarUrl = urlData.publicUrl;
       
-      // 4. Update only in the public users table
+      // Update in next_auth schema
       const { error: updateError } = await supabase
-        .from('users')
+        .from('next_auth.users')
         .update({ avatar_url: newAvatarUrl })
         .eq('id', session.user.id);
       
       if (updateError) {
-        console.error('Update error:', updateError);
-        toast({
-          title: "Error",
-          description: "Failed to update profile: " + updateError.message,
-          variant: "destructive",
-        });
+        console.error('Error updating profile:', updateError);
+        toast("Image uploaded but profile update failed");
+        // Still update the UI with the new image even if DB update fails
+        setAvatarUrl(newAvatarUrl);
+        setAvatarFile(null);
+        setPreviewUrl('');
+        setIsUploading(false);
         return;
       }
       
-      // 5. Update state and session
+      // Update local state
       setAvatarUrl(newAvatarUrl);
       setAvatarFile(null);
-      setPreviewUrl(''); // Clear the preview
+      setPreviewUrl('');
       
-      toast({
-        title: "Avatar updated",
-        description: "Your profile picture has been updated successfully.",
-      });
+      toast("Avatar updated successfully");
       
-      // Update the session to reflect changes if needed
+      // Update the session to reflect changes
       await updateSession();
       
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      toast({
-        title: "Error",
-        description: "Failed to upload avatar: " + (error as Error).message,
-        variant: "destructive",
-      });
+      toast("Failed to upload avatar");
     } finally {
       setIsUploading(false);
     }

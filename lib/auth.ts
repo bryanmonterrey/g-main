@@ -208,6 +208,9 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.sub;
         session.user.image = userData?.avatar_url || ``;
         session.user.walletAddress = token.walletAddress;
+
+        session.supabaseAccessToken = token.supabaseAccessToken;
+        
       }
       
       // Check if a session exists
