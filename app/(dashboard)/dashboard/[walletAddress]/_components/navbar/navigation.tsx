@@ -9,24 +9,24 @@ import { cn } from "@/lib/utils";
 export const Navigation = () => {
   const pathname = usePathname();
   const { data: session, status } = useSession();
-  const username = session?.user?.name || "";
+  const walletAddress = session?.user?.walletAddress || "";
 
   if (!session) {
     return <div></div>; // Or a more sophisticated loading state
   }
 
-  if (!session || !username) {
+  if (!session || !walletAddress) {
     return null; // Or handle the case when there's no user
   }
 
   const navItems = [
-    { label: "Stream", href: `/dashboard/${username}` },
-    { label: "Profile", href: `/dashboard/${username}/profile` },
-    { label: "Messages", href: `/dashboard/${username}/messages` },
-    { label: "Vods", href: `/dashboard/${username}/vods` },
-    { label: "Community", href: `/dashboard/${username}/community` },
-    { label: "Subscriptions", href: `/dashboard/${username}/subscriptions` },
-    { label: "Settings", href: `/dashboard/${username}/settings` },
+    { label: "Stream", href: `/dashboard/${walletAddress}` },
+    { label: "Profile", href: `/dashboard/${walletAddress}/profile` },
+    { label: "Messages", href: `/dashboard/${walletAddress}/messages` },
+    { label: "Vods", href: `/dashboard/${walletAddress}/vods` },
+    { label: "Community", href: `/dashboard/${walletAddress}/community` },
+    { label: "Subscriptions", href: `/dashboard/${walletAddress}/subscriptions` },
+    { label: "Settings", href: `/dashboard/${walletAddress}/settings` },
   ];
 
   return (

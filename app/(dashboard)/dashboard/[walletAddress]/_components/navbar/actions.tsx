@@ -9,7 +9,7 @@ const actions = () => {
         <Button
         size="sm"
         variant="ghost"
-        className='text-litepurp/90 text-[15px] bg-buttongray px-3 font-medium mr-3 hover:text-white'
+        className='text-litepurp/90 rounded-full text-[15px] bg-buttongray px-3 font-semibold mr-3 hover:text-white'
         asChild >
             <Link href="/chat">
             <Home className='h-4 w-4 mr-2' strokeWidth={2.75}/>
