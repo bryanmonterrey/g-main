@@ -46,7 +46,7 @@ export default {
 			sleek: '#11111A',
 			buttongray: "#232328",
 			leaf: "#00ED89",
-			azul: "#ffffff",
+			azul: "#5643FF",
 			satin: "#1B1B29",
   			chart: {
   				'1': 'hsl(var(--chart-1))',
