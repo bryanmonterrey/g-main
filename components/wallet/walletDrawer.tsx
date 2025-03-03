@@ -13,6 +13,7 @@ interface DrawerDemoProps {
   avatarUrl: string;
   className?: string;
   onSignOut: () => Promise<void>;
+  onRefresh?: () => void;
 }
 
 const data = [
@@ -59,7 +60,7 @@ const data = [
 
 const snapPoints = ['148px', '355px', 1];
 
-export function DrawerDemo({ username, avatarUrl, className, onSignOut }: DrawerDemoProps) {
+export function DrawerDemo({ username, avatarUrl, className, onSignOut, onRefresh }: DrawerDemoProps) {
   const [goal, setGoal] = React.useState(350)
   
   const [loading, setLoading] = React.useState(true)
@@ -69,6 +70,13 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut }: Drawer
   function onClick(adjustment: number) {
     setGoal(Math.max(200, Math.min(400, goal + adjustment)))
   }
+
+  // Function to handle refresh click
+  const handleRefresh = () => {
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
 
   return (
     <Drawer.Root direction="right">

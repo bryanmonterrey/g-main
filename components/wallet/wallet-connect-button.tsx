@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { getCsrfToken, signIn, signOut, useSession } from "next-auth/react";
 import bs58 from "bs58";
@@ -117,6 +117,52 @@ export default function WalletConnectButton() {
     }
   };
 
+  // Add state for avatar URL to ensure it updates
+  const [currentAvatarUrl, setCurrentAvatarUrl] = useState('');
+  
+  // Fetch the latest avatar URL when session changes or component mounts
+  const fetchLatestAvatar = useCallback(async () => {
+    if (!session?.user?.id) return;
+    
+    try {
+      const supabase = getSupabase(session);
+      const { data, error } = await supabase
+        .from('users')
+        .select('avatar_url')
+        .eq('id', session.user.id)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching avatar URL:', error);
+        return;
+      }
+      
+      if (data && data.avatar_url) {
+        setCurrentAvatarUrl(data.avatar_url);
+      } else {
+        setCurrentAvatarUrl(session.user.image || '/default.png');
+      }
+    } catch (error) {
+      console.error('Error fetching avatar:', error);
+    }
+  }, [session]);
+  
+  // Fetch avatar when session changes
+  useEffect(() => {
+    fetchLatestAvatar();
+    
+    // Set up an interval to periodically check for avatar updates
+    const intervalId = setInterval(fetchLatestAvatar, 5000);
+    
+    return () => clearInterval(intervalId);
+  }, [session, fetchLatestAvatar]);
+
+  // Handle manual refresh
+  const refreshAvatar = () => {
+    fetchLatestAvatar();
+  };
+
+
   useEffect(() => {
     // Only attempt auto sign-in if not actively signing out
     if (connected && status === "unauthenticated" && !isSigningIn && !isSigningOut) {
@@ -176,9 +222,10 @@ export default function WalletConnectButton() {
         </Link>
         <DrawerDemo 
         username={session.user.walletAddress || ''}
-        avatarUrl={session.user.image || '/default.png'} 
+        avatarUrl={currentAvatarUrl || session.user.image || '/default.png'}  
         className="flex items-center relative"
         onSignOut={handleWalletDisconnect}
+        onRefresh={refreshAvatar}
       />
       </div>
       )}
