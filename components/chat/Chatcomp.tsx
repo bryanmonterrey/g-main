@@ -283,7 +283,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 					<div className="space-y-4">
 						<div className="relative">
 						<GlowEffect
-        colors={['#83A8F9', '#CFC1FA', '#A6FBF5', '#CDAEFD']}
+        colors={['#0894FF', '#C959DD', '#FF2E54', '#FF9004']}
         mode='static'
         blur='soft'
         className="absolute inset-0 rounded-3xl z-5"
