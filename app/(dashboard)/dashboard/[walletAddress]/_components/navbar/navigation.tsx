@@ -36,7 +36,7 @@ export const Navigation = () => {
           key={item.href}
           className={cn(
             'bg-transparent hover:bg-transparent',
-            pathname === item.href ? 'text-white/85' : 'text-white/80 hover:text-white'
+            pathname === item.href ? 'text-white/85' : 'text-white/85 hover:text-white'
           )}
         >
           <Link 
@@ -45,8 +45,8 @@ export const Navigation = () => {
               'h-full flex items-center justify-center',
               'hover:transition-all hover:ease-in-out hover:duration-300',
               'font-semibold text-sm',
-              'active:text-white hover:text-white active:scale-95 active:duration-300 active:transition-all    active:ease-in-out',
-              pathname === item.href && 'text-white'
+              'active:text-juul active:scale-95 active:duration-300 active:transition-all    active:ease-in-out',
+              pathname === item.href && 'text-juul'
             )}
           >
             <p>{item.label}</p>
