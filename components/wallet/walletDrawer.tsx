@@ -109,7 +109,7 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut, onRefres
                   </div>
                 <button
                   onClick={onSignOut}
-                  className="px-2 py-2 rounded-full bg-white/15 hover:bg-white/35 text-white font-semibold transition-all duration-300 ease-in-out"
+                  className="px-2 py-2 rounded-full bg-zinc-900/95 hover:bg-red-500/35 hover:text-red-500 text-zinc-500/90 font-semibold transition-all duration-300 ease-in-out border border-zinc-500/5"
                 >
                   <Power className="w-4 h-4" strokeWidth={3}/>
                 </button>

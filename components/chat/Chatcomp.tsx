@@ -303,9 +303,9 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									className={cn(
 										"px-4 py-2",
 										"text-sm font-semibold",
-										"bg-azul/10 border border-white/0 rounded-full",
-										"text-azul",
-										"hover:text-azul hover:bg-azul/30 hover:border-white/0",
+										"bg-zinc-900/70 border border-zinc-500/5 rounded-full",
+										"text-azul/85",
+										"hover:text-azul hover:bg-azul/20 hover:border-white/0",
 										"transition-all duration-300 ease-in-out",
 									)}
 								>
@@ -334,7 +334,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									className={cn(
 										"px-3 py-1 text-sm font-semibold rounded-full transition-colors",
 										activeIntegrationCategory === category.id
-											? "bg-azul/15 text-azul hover:bg-azul/35"
+											? "bg-zinc-900/95 text-azul hover:bg-azul/35"
 											: "text-white hover:text-white hover:bg-blue-400/10",
 									)}
 									title={category.title}

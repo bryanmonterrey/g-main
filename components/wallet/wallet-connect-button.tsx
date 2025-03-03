@@ -178,10 +178,10 @@ export default function WalletConnectButton() {
 
   // Function to determine button class based on connection state
   const getButtonClass = () => {
-    if (connecting) return "bg-azul/10 hover:bg-azul/30 text-azul rounded-full"; // Connecting state
-    if (disconnecting) return "bg-azul/10 hover:bg-azul/30 text-azul/85 rounded-full"; // Disconnecting state
-    if (connected) return "bg-azul/10 hover:bg-azul/30 text-azul rounded-full"; // Connected state
-    return "bg-azul/10 hover:bg-azul/30 text-azul rounded-full"; // Disconnected state
+    if (connecting) return "bg-zinc-900/95 hover:bg-azul/20 text-azul rounded-full border border-zinc-500/5"; // Connecting state
+    if (disconnecting) return "bg-zinc-900/95 hover:bg-azul/20 text-azul/85 rounded-full border border-zinc-500/5"; // Disconnecting state
+    if (connected) return "bg-zinc-900/95 hover:bg-azul/20 text-azul rounded-full border border-zinc-500/5"; // Connected state
+    return "bg-zinc-900/95 hover:bg-azul/20 text-azul rounded-full border border-zinc-500/5"; // Disconnected state
   };
 
   // Function to get button text based on connection state
@@ -216,7 +216,7 @@ export default function WalletConnectButton() {
     {session && (
       <div className="flex items-center">
         <Link href={`/dashboard/${session.user.walletAddress}`}>
-        <Button variant="ghost" className="h-auto rounded-full bg-azul/10 hover:bg-azul/30 p-2">
+        <Button variant="ghost" className="h-auto rounded-full bg-zinc-900/95 hover:bg-azul/30 border border-zinc-500/5 p-2">
         <Settings className="w-5 h-5 text-white/85" />
         </Button>
         </Link>

@@ -68,7 +68,7 @@ const CreatorLayout = ({
     return (
         <>   
             <NavBar />
-            <div className="flex rounded-xl h-[calc(100%-46px)]">   
+            <div className="flex rounded-xl h-[calc(100%-52px)]">   
                 <Container>
                     {children}
                 </Container>

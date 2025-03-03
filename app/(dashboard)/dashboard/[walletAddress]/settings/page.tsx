@@ -23,7 +23,7 @@ const CreatorPage = ({
     
 
     return (
-        <div className="bg-black h-[calc(100vh-44px)]">           
+        <div className="bg-black h-[calc(100vh-52px)]">           
             <ProfileSettings />
         </div>
     );

@@ -18,9 +18,9 @@ export function IntegrationCard({ title, description, icon, logo: Logo, category
       onClick={onClick}
       className={cn(
         "flex flex-col gap-3 p-4",
-        "bg-azul/10 border border-white/0 rounded-3xl",
+        "bg-zinc-950 border border-zinc-500/5 rounded-3xl",
         "text-left",
-        "hover:bg-azul/35 hover:border-white/0",
+        "hover:bg-azul/30 hover:border-white/0",
         "transition-all duration-300 ease-in-out",
       )}
     >
