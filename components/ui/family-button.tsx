@@ -27,7 +27,7 @@ const FamilyButton: React.FC<FamilyButtonProps> = ({ children }) => {
       )}
     >
       <div className="rounded-[23px] border   border-black/10 ">
-        <div className="rounded-[22px] border  dark:border-stone-800 border-white/50 ">
+        <div className="rounded-[22px] border  dark:border-stone-800 border-white/5 ">
           <div className="rounded-[21px] border    border-neutral-950/20   flex items-center justify-center ">
             <FamilyButtonContainer
               isExpanded={isExpanded}
@@ -140,7 +140,7 @@ const FamilyButtonContainer: FC<FamilyButtonContainerProps> = ({
         ) : (
           <motion.div
             className={cn(
-              "p-[10px] group bg-neutral-200 dark:bg-cyan-500/90 text-cyan-50 border border-cyan-100/10  shadow-2xl transition-colors duration-200"
+              "p-[10px] group bg-neutral-200/5 dark:bg-cyan-500/90 text-cyan-50 border border-cyan-100/10  shadow-2xl transition-colors duration-200"
             )}
             style={{ borderRadius: 24 }}
             onClick={toggleExpand}
