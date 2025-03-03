@@ -16,6 +16,7 @@ import { SigninMessage } from "@/utils/SigninMessage";
 import { shortenWalletAddress } from "@/lib/functions";
 import { getSelf } from "@/lib/auth-service";
 import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
+import { GlowEffect } from "../ui/glow-effect";
 
 
 export default function WalletConnectButton() {
@@ -178,10 +179,10 @@ export default function WalletConnectButton() {
 
   // Function to determine button class based on connection state
   const getButtonClass = () => {
-    if (connecting) return "bg-zinc-900/95 hover:bg-azul/20 text-azul rounded-full border border-zinc-500/5"; // Connecting state
-    if (disconnecting) return "bg-zinc-900/95 hover:bg-azul/20 text-azul/85 rounded-full border border-zinc-500/5"; // Disconnecting state
-    if (connected) return "bg-zinc-900/95 hover:bg-azul/20 text-azul rounded-full border border-zinc-500/5"; // Connected state
-    return "bg-zinc-900/95 hover:bg-azul/20 text-azul rounded-full border border-zinc-500/5"; // Disconnected state
+    if (connecting) return "bg-zinc-900/95 hover:bg-zinc-800/95 text-azul rounded-full border border-zinc-500/5"; // Connecting state
+    if (disconnecting) return "bg-zinc-900/95 hover:bg-zinc-800/95 text-azul/85 rounded-full border border-zinc-500/5"; // Disconnecting state
+    if (connected) return "bg-zinc-900 hover:bg-zinc-800/95 text-azul rounded-full border border-zinc-500/5"; // Connected state
+    return "bg-zinc-900/95 hover:bg-zinc-800/95 text-azul rounded-full border border-zinc-500/5"; // Disconnected state
   };
 
   // Function to get button text based on connection state
@@ -197,12 +198,21 @@ export default function WalletConnectButton() {
 
   return (
     <div className="relative inline-flex gap-x-4">
+      <div className="relative">
+      
+      <GlowEffect
+        colors={['#0894FF', '#C959DD', '#FF2E54', '#FF9004']}
+        mode='static'
+        blur='soft'
+        className="absolute inset-0 rounded-full z-5"
+      />
       
     <button
         onClick={!connected ? handleConnectClick : () => {}}
         disabled={connecting || disconnecting}
-        className={`px-5 border border-zinc-950 py-2 font-semibold transition-all duration-300 ease-in-out text-xs ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
+        className={`px-5 border border-zinc-950 py-2 font-semibold transition-all duration-300 ease-in-out text-xs z-20 relative ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
       >
+        
         <span className="flex items-center">
           {(connecting || disconnecting) && (
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -212,7 +222,10 @@ export default function WalletConnectButton() {
           )}
           {getButtonText()}
         </span>
+        
       </button>
+      
+      </div>
     {session && (
       <div className="flex items-center">
         <Link href={`/dashboard/${session.user.walletAddress}`}>
