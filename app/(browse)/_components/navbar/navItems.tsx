@@ -30,28 +30,28 @@ export const NavItems: React.FC<NavItemsProps> = ({
   const navigationItems = [
     {
       key: 'chat',
-      label: 'Chat',
+      label: 'chat',
       path: '/chat',
       icon: null, // Add your icon component here if needed
       public: false // Protected route that requires auth
     },
     {
       key: 'browse',
-      label: 'Browse',
+      label: 'browse',
       path: '/browse',
       icon: null, // Add your icon component here if needed
       public: true // Public route that doesn't require auth
     },
     {
         key: 'agent',
-        label: 'Agent',
+        label: 'agent',
         path: '/agent',
         icon: null, // Add your icon component here if needed
         public: false // Protected route that requires auth
       },
       {
         key: 'tasks',
-        label: 'Tasks',
+        label: 'tasks',
         path: '/tasks',
         icon: null, // Add your icon component here if needed
         public: false // Protected route that requires auth
