@@ -219,8 +219,6 @@ export function ProfileSettings() {
       
       // Update the session to reflect changes
       await updateSession();
-
-      window.location.reload();
       
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -239,7 +237,7 @@ export function ProfileSettings() {
         <h2 className="text-xl font-semibold">Profile Picture</h2>
         
         <div className="flex items-start gap-6">
-          <Avatar className="w-24 h-24 border">
+          <Avatar className="w-24 h-24">
             <AvatarImage src={previewUrl || avatarUrl} />
             <AvatarFallback>
               <User className="w-12 h-12 text-gray-400" />
@@ -247,7 +245,7 @@ export function ProfileSettings() {
           </Avatar>
           
           <div className="flex-1">
-            <FileUpload.Root className="p-4 border rounded-md">
+            <FileUpload.Root className="p-4 border rounded-3xl">
               <input 
                 type="file" 
                 tabIndex={-1} 
