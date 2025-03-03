@@ -195,17 +195,17 @@ export const authOptions: NextAuthOptions = {
     async session({ session, token }) {
       const supabase = await getSupabase();
 
-      // Get the user's data from Supabase to include avatar_url
+          // Get the user's data from Supabase to include avatar_url and username
       const { data: userData, error } = await supabase
-        .from('users')
-        .select('avatar_url')
-        .eq('id', token.id)
-        .single();
+      .from('users')
+      .select('username, avatar_url')
+      .eq('id', token.id)
+      .single();
 
       if (session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
-        session.user.name = token.sub;
+        session.user.name = userData?.username || token.sub;
         session.user.image = userData?.avatar_url || ``;
         session.user.walletAddress = token.walletAddress;
 
