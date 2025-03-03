@@ -260,7 +260,7 @@ export function ProfileSettings() {
         <h2 className="text-xl font-semibold">Profile Picture</h2>
         
         <div className="flex items-start gap-6">
-          <Avatar className="w-24 h-24 border">
+          <Avatar className="w-24 h-24">
             <AvatarImage src={previewUrl || avatarUrl} />
             <AvatarFallback>
               <User className="w-12 h-12 text-gray-400" />
