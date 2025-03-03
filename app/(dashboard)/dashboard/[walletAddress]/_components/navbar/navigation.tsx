@@ -20,13 +20,13 @@ export const Navigation = () => {
   }
 
   const navItems = [
-    { label: "Stream", href: `/dashboard/${walletAddress}` },
-    { label: "Profile", href: `/dashboard/${walletAddress}/profile` },
-    { label: "Messages", href: `/dashboard/${walletAddress}/messages` },
-    { label: "Vods", href: `/dashboard/${walletAddress}/vods` },
-    { label: "Community", href: `/dashboard/${walletAddress}/community` },
-    { label: "Subscriptions", href: `/dashboard/${walletAddress}/subscriptions` },
-    { label: "Settings", href: `/dashboard/${walletAddress}/settings` },
+    { label: "stream", href: `/dashboard/${walletAddress}` },
+    { label: "profile", href: `/dashboard/${walletAddress}/profile` },
+    { label: "messages", href: `/dashboard/${walletAddress}/messages` },
+    { label: "vods", href: `/dashboard/${walletAddress}/vods` },
+    { label: "community", href: `/dashboard/${walletAddress}/community` },
+    { label: "subscriptions", href: `/dashboard/${walletAddress}/subscriptions` },
+    { label: "settings", href: `/dashboard/${walletAddress}/settings` },
   ];
 
   return (
@@ -45,8 +45,8 @@ export const Navigation = () => {
               'h-full flex items-center justify-center',
               'hover:transition-all hover:ease-in-out hover:duration-300',
               'font-semibold text-sm',
-              'active:text-juul active:duration-300 active:transition-all    active:ease-in-out',
-              pathname === item.href && 'text-juul'
+              'active:text-white active:duration-300 active:transition-all    active:ease-in-out',
+              pathname === item.href && 'text-white'
             )}
           >
             <p>{item.label}</p>

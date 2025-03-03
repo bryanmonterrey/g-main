@@ -131,7 +131,7 @@ export function PulseDotLoader({
   return (
     <div
       className={cn(
-        "bg-juul animate-[pulse-dot_1.2s_ease-in-out_infinite] rounded-full",
+        "bg-white animate-[pulse-dot_1.2s_ease-in-out_infinite] rounded-full",
         sizeClasses[size],
         className
       )}
@@ -172,7 +172,7 @@ export function DotsLoader({
         <div
           key={i}
           className={cn(
-            "bg-juul animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full",
+            "bg-white animate-[bounce-dots_1.4s_ease-in-out_infinite] rounded-full",
             dotSizes[size]
           )}
           style={{
@@ -266,7 +266,7 @@ export function WaveLoader({
         <div
           key={i}
           className={cn(
-            "bg-juul animate-[wave_1s_ease-in-out_infinite] rounded-full",
+            "bg-white animate-[wave_1s_ease-in-out_infinite] rounded-full",
             barWidths[size]
           )}
           style={{

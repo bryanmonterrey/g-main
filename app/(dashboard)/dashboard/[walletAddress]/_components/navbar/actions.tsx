@@ -13,7 +13,7 @@ const actions = () => {
         asChild >
             <Link href="/chat">
             <Home className='h-4 w-4 mr-2' strokeWidth={2.75}/>
-                Exit Dashboard
+                exit dashboard
             </Link>
         </Button>
         
