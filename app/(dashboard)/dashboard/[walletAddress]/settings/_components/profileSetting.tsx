@@ -82,7 +82,7 @@ export function ProfileSettings() {
     try {
       setIsUpdatingUsername(true);
       
-      // Update only in the public schema 
+      // Update in users table
       const { error } = await supabase
         .from('users')
         .update({ username })
@@ -94,11 +94,16 @@ export function ProfileSettings() {
         return;
       }
       
-      // Update succeeded
+      // Update succeeded - update local state and session
       setOriginalUsername(username);
       toast("Username updated successfully");
       
-      // Update the session to reflect changes
+      // Explicitly update the session name to show updated username immediately
+      if (session.user) {
+        session.user.name = username;
+      }
+
+      // Call updateSession to persist the changes
       await updateSession();
       
     } catch (error) {
@@ -182,7 +187,7 @@ export function ProfileSettings() {
       const newAvatarUrl = urlData.publicUrl;
       console.log('Generated URL:', newAvatarUrl);
       
-      // Step 3: Update only in public schema
+      // Step 3: Update in database
       const { error: updateError } = await supabase
         .from('users')
         .update({ avatar_url: newAvatarUrl })
@@ -200,10 +205,15 @@ export function ProfileSettings() {
         return;
       }
       
-      // Update succeeded
+      // Update local state
       setAvatarUrl(newAvatarUrl);
       setAvatarFile(null);
       setPreviewUrl('');
+      
+      // Explicitly update the session image to show updated avatar immediately
+      if (session.user) {
+        session.user.image = newAvatarUrl;
+      }
       
       toast("Avatar updated successfully");
       
@@ -227,7 +237,7 @@ export function ProfileSettings() {
         <h2 className="text-xl font-semibold">Profile Picture</h2>
         
         <div className="flex items-start gap-6">
-          <Avatar className="w-24 h-24">
+          <Avatar className="w-24 h-24 border">
             <AvatarImage src={previewUrl || avatarUrl} />
             <AvatarFallback>
               <User className="w-12 h-12 text-gray-400" />
@@ -235,7 +245,7 @@ export function ProfileSettings() {
           </Avatar>
           
           <div className="flex-1">
-            <FileUpload.Root className="p-4 border rounded-3xl border-white/15">
+            <FileUpload.Root className="p-4 border rounded-md">
               <input 
                 type="file" 
                 tabIndex={-1} 
