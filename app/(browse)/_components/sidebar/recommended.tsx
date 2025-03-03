@@ -3,7 +3,7 @@
 import { useSidebar } from '@/store/sidebar';
 import React from 'react';
 import { UserItem, UserItemSkeleton } from './useritem';
-import { Rocket } from 'lucide-react';
+import { HandCoins } from 'lucide-react';
 import { Database } from "@/types/supabase";
 import { useSession } from "next-auth/react";
 
@@ -39,7 +39,7 @@ const Recommended = ({
       )}
       {collapsed && (
         <div className="flex justify-center items-center mb-2">
-          <Rocket className='h-4 w-4 text-white/90'/>
+          <HandCoins className='h-4 w-4 text-white/90'/>
         </div>
       )}
       <div className='flex items-center justify-center w-full'>
