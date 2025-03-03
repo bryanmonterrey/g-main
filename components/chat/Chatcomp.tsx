@@ -36,6 +36,7 @@ import { cn } from "@/lib/utils";
 import { useChatStore } from "@/store/useChatStore";
 
 import { useSession } from "next-auth/react";
+import { GlowEffect } from "../ui/glow-effect";
 
 const QUICK_SUGGESTIONS = [
 	{ text: "Launch a Memecoin", category: "NFTs", icon: Coin },
@@ -280,7 +281,15 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 						</h1>
 					</div>
 					<div className="space-y-4">
-						<div className="rounded-3xl p-[5px] bg-zinc-950">
+						<div className="relative">
+						<GlowEffect
+        colors={['#0894FF', '#C959DD', '#FF2E54', '#FF9004']}
+        mode='static'
+        blur='soft'
+        className="absolute inset-0 rounded-3xl z-5"
+      />
+						
+						<div className="rounded-3xl p-[5px] bg-zinc-950 z-20 relative">
 							<div className="text-[10px] sm:text-xs px-2 py-2 text-white/85">
 							</div>
 							<ChatInput
@@ -294,6 +303,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 								selectedModel={selectedModel}
 								setSelectedModel={setSelectedModel}
 							/>
+						</div>
 						</div>
 						<div className="flex flex-row flex-wrap gap-2 items-center justify-center">
 							{QUICK_SUGGESTIONS.map((suggestion, index) => (

@@ -48,7 +48,7 @@ export default {
 			leaf: "#00ED89",
 			azul: "#ffffff",
 			satin: "#1B1B29",
-			juul: "#00ED89",
+			juul: "#0071E3",
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',

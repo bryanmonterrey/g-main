@@ -229,7 +229,7 @@ export default function WalletConnectButton() {
     {session && (
       <div className="flex items-center">
         <Link href={`/dashboard/${session.user.walletAddress}`}>
-        <Button variant="ghost" className="h-auto rounded-full bg-zinc-900/95 hover:bg-azul/30 border border-zinc-500/5 p-2">
+        <Button variant="ghost" className="h-auto rounded-full bg-zinc-900/95 hover:bg-zinc-800/95 border border-zinc-500/5 p-2">
         <Settings className="w-5 h-5 text-white/85" />
         </Button>
         </Link>
