@@ -45,7 +45,7 @@ export const Navigation = () => {
               'h-full flex items-center justify-center',
               'hover:transition-all hover:ease-in-out hover:duration-300',
               'font-semibold text-sm',
-              'active:text-juul active:scale-95 active:duration-300 active:transition-all    active:ease-in-out',
+              'active:text-juul active:duration-300 active:transition-all    active:ease-in-out',
               pathname === item.href && 'text-juul'
             )}
           >

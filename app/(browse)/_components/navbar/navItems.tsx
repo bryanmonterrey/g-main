@@ -75,7 +75,7 @@ export const NavItems: React.FC<NavItemsProps> = ({
             )}
             onClick={() => handleNavigation(item.path)}
           >
-            <div className="h-full flex items-center justify-center gap-1 transition-all ease-in-out duration-300 font-semibold text-sm active:text-white">
+            <div className="h-full flex items-center justify-center gap-1 transition-all ease-in-out duration-300 font-semibold text-sm active:text-juul">
               {item.icon}
               <p>{item.label}</p>
             </div>
