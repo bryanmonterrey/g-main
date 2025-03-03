@@ -30,13 +30,13 @@ export const Navigation = () => {
   ];
 
   return (
-    <div className='gap-x-7 inline-flex items-center justify-center'>
+    <div className='gap-x-3 inline-flex items-center justify-center'>
       {navItems.map((item) => (
         <Button 
           key={item.href}
           className={cn(
             'bg-transparent hover:bg-transparent',
-            pathname === item.href ? 'text-white' : 'text-white/80 hover:text-white'
+            pathname === item.href ? 'text-white/85' : 'text-white/80 hover:text-white'
           )}
         >
           <Link 
