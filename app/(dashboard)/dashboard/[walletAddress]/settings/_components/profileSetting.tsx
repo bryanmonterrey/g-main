@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Upload, User, Check, Loader2 } from 'lucide-react';
-import { getSupabase } from '@/utils/supabase/supabase'; // Use admin client for next_auth schema
+import { getSupabase } from '@/utils/supabase/getDataWhenAuth'; // Use admin client for next_auth schema
 import * as FileUpload from '@/components/ui/file-upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 export function ProfileSettings() {
   const { data: session, update: updateSession } = useSession();
   // Use the admin client which has access to next_auth schema
-  const supabase = getSupabase();
+  const supabase = getSupabase(session);
   
   const [username, setUsername] = useState('');
   const [originalUsername, setOriginalUsername] = useState('');
@@ -31,7 +31,7 @@ export function ProfileSettings() {
       try {
         // Use next_auth schema
         const { data, error } = await supabase
-          .from('next_auth.users')
+          .from('users')
           .select('username, avatar_url')
           .eq('id', session.user.id)
           .single();
@@ -71,7 +71,7 @@ export function ProfileSettings() {
       
       // Use next_auth schema
       const { error } = await supabase
-        .from('next_auth.users')
+        .from('users')
         .update({ username })
         .eq('id', session.user.id);
       
@@ -157,7 +157,7 @@ export function ProfileSettings() {
       
       // Update in next_auth schema
       const { error: updateError } = await supabase
-        .from('next_auth.users')
+        .from('users')
         .update({ avatar_url: newAvatarUrl })
         .eq('id', session.user.id);
       

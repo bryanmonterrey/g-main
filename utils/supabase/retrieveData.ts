@@ -19,7 +19,7 @@ export const createSupabaseClient = () => {
         }
       },
       db: {
-        schema: 'next_auth'
+        schema: 'public'
       }
     }
   );
