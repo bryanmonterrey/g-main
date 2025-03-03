@@ -230,11 +230,11 @@ export function ProfileSettings() {
 
   return (
     <div className="space-y-8 max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold">Profile Settings</h1>
+      <h1 className="text-xl font-bold">Settings</h1>
       
       {/* Avatar Section */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Profile Picture</h2>
+        <h2 className="text-sm font-semibold">Profile Picture</h2>
         
         <div className="flex items-start gap-6">
           <Avatar className="w-24 h-24">
@@ -245,7 +245,7 @@ export function ProfileSettings() {
           </Avatar>
           
           <div className="flex-1">
-            <FileUpload.Root className="p-4 border rounded-3xl">
+            <FileUpload.Root className="p-4 border border-zinc-900 rounded-3xl">
               <input 
                 type="file" 
                 tabIndex={-1} 
@@ -263,7 +263,7 @@ export function ProfileSettings() {
                   JPEG, PNG, or GIF formats, up to 2 MB.
                 </div>
               </div>
-              <FileUpload.Button>Browse File</FileUpload.Button>
+              <FileUpload.Button className="rounded-full h-9 ring-transparent">Browse File</FileUpload.Button>
             </FileUpload.Root>
             
             {avatarFile && (
@@ -276,12 +276,12 @@ export function ProfileSettings() {
                   {isUploading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading...
+                      
                     </>
                   ) : (
                     <>
                       <Check className="mr-2 h-4 w-4" />
-                      Save Avatar
+                      Save
                     </>
                   )}
                 </Button>
@@ -293,47 +293,35 @@ export function ProfileSettings() {
       
       {/* Username Section */}
       <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Username</h2>
+        <h2 className="text-sm font-semibold">Username</h2>
         
         <form onSubmit={handleUsernameChange} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
             <Input
               id="username"
               name="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Enter your username"
-              className="w-full"
+              className="w-full rounded-full"
             />
           </div>
           
           <Button 
             type="submit" 
             disabled={isUpdatingUsername || username === originalUsername}
-            className="flex items-center"
+            className="flex items-center rounded-full ml-auto"
           >
             {isUpdatingUsername ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Updating...
               </>
             ) : (
-              "Save Username"
+              "Save"
             )}
           </Button>
         </form>
       </div>
-      
-      {/* Debug Section - only in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <div className="mt-8 border-t pt-4">
-          <h3 className="text-sm font-semibold mb-2">Debug Information</h3>
-          <pre className="text-xs bg-gray-100 p-3 rounded overflow-auto max-h-40">
-            {JSON.stringify(debugInfo, null, 2)}
-          </pre>
-        </div>
-      )}
     </div>
   );
 }
