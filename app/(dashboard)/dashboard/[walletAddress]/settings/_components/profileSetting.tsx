@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Upload, User, Check, Loader2 } from 'lucide-react';
-import { getSupabase } from '@/utils/supabase/getDataWhenAuth'; // Use admin client for next_auth schema
+import { getSupabase } from '@/utils/supabase/getDataWhenAuth';
 import * as FileUpload from '@/components/ui/file-upload';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 
 export function ProfileSettings() {
   const { data: session, update: updateSession } = useSession();
-  // Use the admin client which has access to next_auth schema
   const supabase = getSupabase(session);
   
   const [username, setUsername] = useState('');
@@ -29,12 +28,14 @@ export function ProfileSettings() {
     
     const fetchUserData = async () => {
       try {
-        // Use next_auth schema
+        // Try to get data from public schema first (our source of truth)
         const { data, error } = await supabase
           .from('users')
           .select('username, avatar_url')
           .eq('id', session.user.id)
           .single();
+        
+        console.log('Fetched user data:', { data, error });
         
         if (error) {
           console.error('Error fetching user data:', error);
@@ -56,7 +57,7 @@ export function ProfileSettings() {
     };
     
     fetchUserData();
-  }, [session?.user?.id]); // Only depend on the ID
+  }, [session?.user?.id]);
 
   // Handle username change
   const handleUsernameChange = async (e) => {
@@ -69,27 +70,55 @@ export function ProfileSettings() {
     try {
       setIsUpdatingUsername(true);
       
-      // Use next_auth schema
-      const { error } = await supabase
+      // Update in both schemas
+      let publicUpdated = false;
+      let nextAuthUpdated = false;
+      
+      // Update in public schema
+      const { error: publicError } = await supabase
         .from('users')
         .update({ username })
         .eq('id', session.user.id);
       
-      if (error) {
-        console.error('Error updating username:', error);
-        toast("Failed to update username");
+      if (publicError) {
+        console.error('Error updating username in public schema:', publicError);
+      } else {
+        publicUpdated = true;
+      }
+      
+      // Also update in next_auth schema using RPC function
+      const { error: rpcError } = await supabase.rpc('sync_username_to_next_auth', { 
+        user_id: session.user.id,
+        new_username: username
+      });
+      
+      if (rpcError) {
+        console.error('Error updating username in next_auth schema via RPC:', rpcError);
+      } else {
+        nextAuthUpdated = true;
+      }
+      
+      if (!publicUpdated && !nextAuthUpdated) {
+        toast("Failed to update username in any schema");
         return;
       }
       
       setOriginalUsername(username);
-      toast("Username updated successfully");
       
-      // Update the session to reflect changes if needed
+      if (publicUpdated && nextAuthUpdated) {
+        toast("Username updated successfully in both schemas");
+      } else if (publicUpdated) {
+        toast("Username updated in public schema only");
+      } else {
+        toast("Username updated in next_auth schema only");
+      }
+      
+      // Update the session to reflect changes
       await updateSession();
       
     } catch (error) {
       console.error('Error updating username:', error);
-      toast("Failed to update username");
+      toast("Failed to update username: " + error.message);
     } finally {
       setIsUpdatingUsername(false);
     }
@@ -99,6 +128,13 @@ export function ProfileSettings() {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    
+    // Log file details
+    console.log('File selected:', {
+      name: file.name,
+      type: file.type,
+      size: Math.round(file.size / 1024) + 'KB'
+    });
     
     // Validate file type
     const acceptedTypes = ['image/jpeg', 'image/png', 'image/gif'];
@@ -123,18 +159,21 @@ export function ProfileSettings() {
     reader.readAsDataURL(file);
   };
 
-  // Upload avatar to Supabase Storage and update profile
+  // Upload avatar to Supabase Storage
   const uploadAvatar = async () => {
     if (!avatarFile || !session?.user?.id) return;
     
     setIsUploading(true);
+    
     try {
-      // Using timestamp to create unique filename
+      // Create a unique filename with timestamp
       const timestamp = Date.now();
       const fileExt = avatarFile.name.split('.').pop().toLowerCase();
-      const fileName = `img${timestamp}.${fileExt}`;
+      const fileName = `${timestamp}.${fileExt}`;
       
-      // Upload with minimal options
+      console.log('Starting upload with filename:', fileName);
+      
+      // Step 1: Upload file to storage
       const { data, error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, avatarFile, {
@@ -148,43 +187,65 @@ export function ProfileSettings() {
         return;
       }
       
-      // Get public URL
+      console.log('File uploaded successfully:', data);
+      
+      // Step 2: Get public URL 
       const { data: urlData } = supabase.storage
         .from('avatars')
         .getPublicUrl(fileName);
       
       const newAvatarUrl = urlData.publicUrl;
+      console.log('Generated URL:', newAvatarUrl);
       
-      // Update in next_auth schema
-      const { error: updateError } = await supabase
+      // Step 3: Update both schemas
+      let publicUpdated = false;
+      let nextAuthUpdated = false;
+      
+      // Update in public schema
+      const { error: publicError } = await supabase
         .from('users')
         .update({ avatar_url: newAvatarUrl })
         .eq('id', session.user.id);
       
-      if (updateError) {
-        console.error('Error updating profile:', updateError);
-        toast("Image uploaded but profile update failed");
-        // Still update the UI with the new image even if DB update fails
-        setAvatarUrl(newAvatarUrl);
-        setAvatarFile(null);
-        setPreviewUrl('');
-        setIsUploading(false);
-        return;
+      if (publicError) {
+        console.error('Error updating avatar in public schema:', publicError);
+      } else {
+        publicUpdated = true;
       }
       
-      // Update local state
+      // Also update in next_auth schema using RPC function
+      const { error: rpcError } = await supabase.rpc('sync_avatar_to_next_auth', { 
+        user_id: session.user.id,
+        new_avatar_url: newAvatarUrl
+      });
+      
+      if (rpcError) {
+        console.error('Error updating avatar in next_auth schema via RPC:', rpcError);
+      } else {
+        nextAuthUpdated = true;
+      }
+      
+      // Update UI regardless of database updates
       setAvatarUrl(newAvatarUrl);
       setAvatarFile(null);
       setPreviewUrl('');
       
-      toast("Avatar updated successfully");
+      if (publicUpdated && nextAuthUpdated) {
+        toast("Avatar updated successfully in both schemas");
+      } else if (publicUpdated) {
+        toast("Avatar updated in public schema only");
+      } else if (nextAuthUpdated) {
+        toast("Avatar updated in next_auth schema only");
+      } else {
+        toast("Image uploaded but profile update failed");
+      }
       
       // Update the session to reflect changes
       await updateSession();
       
     } catch (error) {
       console.error('Error uploading avatar:', error);
-      toast("Failed to upload avatar");
+      toast("Failed to upload avatar: " + error.message);
     } finally {
       setIsUploading(false);
     }
