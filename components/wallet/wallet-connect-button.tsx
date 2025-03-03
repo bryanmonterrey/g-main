@@ -132,10 +132,10 @@ export default function WalletConnectButton() {
 
   // Function to determine button class based on connection state
   const getButtonClass = () => {
-    if (connecting) return "bg-azul/10 hover:bg-azul/30 text-azul/85 rounded-full"; // Connecting state
+    if (connecting) return "bg-azul/10 hover:bg-azul/30 text-azul rounded-full"; // Connecting state
     if (disconnecting) return "bg-azul/10 hover:bg-azul/30 text-azul/85 rounded-full"; // Disconnecting state
-    if (connected) return "bg-azul/10 hover:bg-azul/30 text-azul/85 rounded-full"; // Connected state
-    return "bg-azul/10 hover:bg-azul/30 text-azul/85 rounded-full"; // Disconnected state
+    if (connected) return "bg-azul/10 hover:bg-azul/30 text-azul rounded-full"; // Connected state
+    return "bg-azul/10 hover:bg-azul/30 text-azul rounded-full"; // Disconnected state
   };
 
   // Function to get button text based on connection state
