@@ -71,19 +71,19 @@ export const NavItems: React.FC<NavItemsProps> = ({
             key={item.key}
             className={cn(
               'bg-transparent shadow-none hover:bg-transparent transition-all ease-in-out duration-300',
-              pathname === item.path ? 'text-white active:text-juul hover:text-juul' : 'text-white/75 hover:text-white'
+              pathname === item.path ? 'text-white/95 active:text-white hover:text-white' : 'text-white/75 hover:text-white'
             )}
             onClick={() => handleNavigation(item.path)}
           >
-            <div className="h-full flex items-center justify-center gap-1 transition-all ease-in-out duration-300 font-semibold text-sm active:text-juul">
+            <div className="h-full flex items-center justify-center gap-1 transition-all ease-in-out duration-300 font-semibold text-sm active:text-white">
               {item.icon}
               <p>{item.label}</p>
             </div>
           </Button>
         )
       ))}
-      <Button className='bg-transparent shadow-none hover:bg-transparent transition-all ease-in-out duration-300 '>
-        <Search className='w-4 h-4' strokeWidth={2.25} />
+      <Button className=' rounded-full bg-transparent p-2 px-2.5 shadow-none hover:bg-white/5 transition-all ease-in-out duration-300 '>
+        <Search className='w-4 h-4 text-white/75 hover:text-white' strokeWidth={2.50} />
       </Button>
     </>
   );
