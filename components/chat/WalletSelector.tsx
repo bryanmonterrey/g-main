@@ -28,7 +28,7 @@ export function DropdownComp({ selectedItems, onItemsChange, items }: DropdownCo
           className={cn(
             "flex items-center gap-x-2 py-1.5 px-2.5 ml-2.5 rounded-full border border-zinc-700/5",
             "text-zinc-50/30 hover:text-white/85 bg-black/50 hover:bg-zinc-900/40",
-            "transition-colors",
+            "transition-all duration-300 ease-in-out",
             "group",
           )}
         >
