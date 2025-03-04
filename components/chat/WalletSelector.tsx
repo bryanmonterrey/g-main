@@ -27,19 +27,21 @@ export function DropdownComp({ selectedItems, onItemsChange, items }: DropdownCo
         <button
           className={cn(
             "flex items-center gap-x-2 py-1.5 px-2.5 ml-2.5 rounded-full border border-zinc-700/5",
-            "text-zinc-50/30 hover:text-white/85 bg-black/50 hover:bg-zinc-900/40",
+            "font-semibold text-muted-foreground text-sm hover:text-white bg-black/50 hover:bg-zinc-900/40",
             "transition-all duration-300 ease-in-out",
             "group",
           )}
         >
-          <div className="text-primary transition-transform duration-200 ease-out group-hover:scale-110">
+          
+          <div className="transition-transform duration-300 ease-in-out group-hover:scale-110">
             <SolanaIcon className="w-4 h-4" />
           </div>
-          <span className="font-medium">{selectedItems.name.split(" ")[0]}</span>
-          <CaretDown size={14} weight="bold" className="text-muted-foreground" />
+          <span className="font-semibold">{selectedItems.name.split(" ")[0]}</span>
+          <CaretDown size={14} weight="bold" className="" strokeWidth={2.5} />
+          
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64 p-1 bg-popover border border-border">
+      <DropdownMenuContent align="start" className="w-64 p-1 bg-black/50 border border-zinc-700/5">
         {items?.map((item,index) => (
           <DropdownMenuItem
             key={index}
@@ -47,10 +49,10 @@ export function DropdownComp({ selectedItems, onItemsChange, items }: DropdownCo
             className={cn(
               "flex items-center gap-2 px-2 py-2 rounded-md",
               "hover:bg-muted",
-              item.subTxt === selectedItems.subTxt ? "text-foreground" : "text-muted-foreground",
+              item.subTxt === selectedItems.subTxt ? "text-white" : "text-white",
             )}
           >
-            <div className="text-primary">
+            <div className="text-white/75">
               <SolanaIcon className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
@@ -59,7 +61,7 @@ export function DropdownComp({ selectedItems, onItemsChange, items }: DropdownCo
             </div>
             {item.subTxt === selectedItems.subTxt && (
               <div className="ml-auto">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+                <div className="w-1.5 h-1.5 rounded-full bg-white/75" />
               </div>
             )}
           </DropdownMenuItem>

@@ -108,7 +108,7 @@ export function ChatInput({
               key={index}
               className="flex items-center gap-2 rounded-lg bg-zinc-900/20 px-3 py-2 text-sm"
             >
-              <Paperclip className="size-4 text-white/90" strokeWidth={1.5}/>
+              <Paperclip className="size-4 text-zinc-50/50" strokeWidth={1.5}/>
               <span className="max-w-[120px] truncate">{file.name}</span>
               <button
                 onClick={() => handleRemoveFile(index)}
@@ -123,7 +123,7 @@ export function ChatInput({
 
       <PromptInputTextarea 
         placeholder="Ask anything..." 
-        className="placeholder:font-medium"
+        className="placeholder:font-semibold"
         onKeyDown={(e) => {
           if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -139,7 +139,7 @@ export function ChatInput({
         <PromptInputAction tooltip="Attach files">
           <label
             htmlFor="file-upload"
-            className="flex h-8 w-8 cursor-pointer transition-all duration-300 ease-in-out items-center justify-center rounded-2xl bg-black hover:bg-zinc-900/40 border-zinc-700/5 border"
+            className="flex h-8 w-8 cursor-pointer transition-all duration-300 ease-in-out items-center justify-center rounded-2xl bg-black/50 hover:bg-zinc-900/40 border-zinc-700/5 border"
           >
             <input
               type="file"

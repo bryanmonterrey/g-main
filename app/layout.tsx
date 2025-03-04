@@ -25,7 +25,7 @@ export default function RootLayout({
     <Providers>
     
       <html lang="en" className="hidden-scrollbar">
-        <body className={`${inter.className} antialiased hidden-scrollbar`}>       
+        <body className={`antialiased hidden-scrollbar`}>       
             
               {children}    
               

@@ -349,7 +349,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 							<h2 className="text-xl font-semibold text-white">
 								Integrations
 							</h2>
-							<span className="text-sm text-azul">
+							<span className="text-sm font-semibold text-azul">
 								({filteredIntegrations.length})
 							</span>
 						</div>
