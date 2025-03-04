@@ -5,6 +5,7 @@ import { UserItem, UserItemSkeleton } from "./useritem";
 import { Heart } from 'lucide-react';
 import { Database } from "@/types/supabase";
 import { useSession } from "next-auth/react";
+import { GlowEffect } from "@/components/ui/glow-effect";
 
 // Define types based on your Supabase schema
 type DbFollow = Database['next_auth']['Tables']['follow']['Row'];
@@ -43,7 +44,17 @@ export const Following = ({
       )}
       {collapsed && (
         <div className="flex justify-center items-center pt-[2px] mb-2">
-          <Heart className="h-[18px] w-[18px] text-litepurp" strokeWidth={3}/>
+          <div className='relative'>
+          <GlowEffect
+        colors={['#FFC6C6', '#ADFFE1', '#B8A4FF', '#E6B1FF']}
+        mode='static'
+        blur='soft'
+        className="absolute inset-0 rounded-full z-5"
+      />
+          <div className='h-2 w-2 gradient-border rounded-full'>
+
+          </div>
+          </div>
         </div>
       )}
       <div className='flex items-center justify-center w-full'>

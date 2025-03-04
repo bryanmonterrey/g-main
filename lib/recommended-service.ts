@@ -1,67 +1,74 @@
 import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 
 export const getRecommended = async (session: any) => {
-    if (!session) {
-        console.log('No session provided to getRecommended');
-        return [];
-    }
+    if (!session) return [];
     
     const supabase = getSupabase(session);
     let userId = session.user?.id;
 
+    console.log('Getting recommended users for:', userId);
+
     try {
-        // Get all online users through active sessions
-        const { data: onlineUsers, error: onlineError } = await supabase
+        // Get active users with their avatar URLs
+        const { data: activeUsers, error: activeError } = await supabase
             .from('users')
             .select(`
-                *,
-                sessions!inner(
+                id,
+                username,
+                avatar_url,
+                wallet_address,
+                sessions!inner (
                     expires
                 )
             `)
             .neq('id', userId)
-            .gt('sessions.expires', new Date().toISOString())
-            .limit(10);
+            .gt('sessions.expires', new Date().toISOString());
 
-        if (onlineError) {
-            console.error('Error fetching online users:', onlineError);
+        console.log('Active users query result:', {
+            success: !activeError,
+            error: activeError,
+            usersFound: activeUsers?.length,
+            users: activeUsers?.map(u => ({
+                id: u.id,
+                username: u.username,
+                avatar_url: u.avatar_url,
+                hasSession: !!u.sessions
+            }))
+        });
+
+        if (activeError) {
+            console.error('Error fetching active users:', activeError);
             return [];
         }
 
-        console.log('Found online users:', {
-            count: onlineUsers?.length,
-            users: onlineUsers?.map(u => ({
-                id: u.id,
-                username: u.username,
-                sessionExpiry: u.sessions?.expires
-            }))
-        });
+        if (!activeUsers?.length) {
+            console.log('No active users found');
+            return [];
+        }
 
         // Get following list to exclude
         const { data: followingData, error: followingError } = await supabase
             .from('follow')
             .select('following_id')
             .eq('follower_id', userId);
-            
-        if (followingError) {
-            console.error('Error fetching following IDs:', followingError);
-            return [];
-        }
 
         const followingIds = followingData?.map(item => item.following_id) || [];
 
-        // Filter out users you're following
-        let recommendedUsers = onlineUsers;
-        if (followingIds.length > 0) {
-            recommendedUsers = onlineUsers.filter(user => !followingIds.includes(user.id));
-        }
+        // Filter out users you're following and ensure each user has required fields
+        const recommendedUsers = activeUsers
+            .filter(user => !followingIds.includes(user.id))
+            .map(user => ({
+                id: user.id,
+                username: user.username || '',
+                avatar_url: user.avatar_url || '',
+                wallet_address: user.wallet_address || ''
+            }));
 
         console.log('Final recommended users:', {
-            count: recommendedUsers.length,
-            users: recommendedUsers.map(u => ({
-                id: u.id,
-                username: u.username
-            }))
+            total: activeUsers.length,
+            following: followingIds.length,
+            recommended: recommendedUsers.length,
+            users: recommendedUsers
         });
 
         return recommendedUsers;

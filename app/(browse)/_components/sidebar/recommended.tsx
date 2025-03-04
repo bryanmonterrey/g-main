@@ -55,12 +55,12 @@ const Recommended = ({
         <div className="flex justify-center items-center mb-2 -ml-1">
           <div className='relative'>
           <GlowEffect
-        colors={['#FFC6C6', '#ADFFE1', '#B8A4FF', '#E6B1FF']}
+        colors={['#00FFA2', '#00FFA2', '#00FFA2', '#00FFA2']}
         mode='static'
         blur='soft'
         className="absolute inset-0 rounded-full z-5"
       />
-          <div className='h-2 w-2 gradient-border rounded-full'>
+          <div className='h-2 w-2 bg-[#00FFA2] rounded-full'>
 
           </div>
           </div>
