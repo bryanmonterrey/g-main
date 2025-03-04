@@ -53,7 +53,7 @@ export const Following = ({
               key={follow.following.id}
               username={follow.following.username || ''}
               avatarUrl={follow.following.avatar_url || ''} 
-              isAuthenticated={isUserAuthenticated} // Use the current user's auth status
+              isAuthenticated={follow.following.isAuthenticated} // Use the current user's auth status
             />
           ))}
         </ul>

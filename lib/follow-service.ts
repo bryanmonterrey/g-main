@@ -22,7 +22,8 @@ export const getFollowedUsers = async (session: any) => {
                     id,
                     username,
                     avatar_url,
-                    wallet_address     
+                    wallet_address,
+                    last_seen     
                 )
             `)
             .eq('follower_id', self.id);
@@ -43,7 +44,7 @@ export const isFollowingUser = async (id: string, session: any) => {
     try {
         if (!session) return false;
         
-        const self = await getSelf();
+        const self = await getSelf(session);
         const supabase = getSupabase(session);
 
         // Check if user exists

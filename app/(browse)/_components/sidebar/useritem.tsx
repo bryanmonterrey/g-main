@@ -21,10 +21,10 @@ export const UserItem = ({
     avatarUrl,
     isAuthenticated
 }: UserItemProps) => {
+    console.log('UserItem rendered:', { username, avatarUrl, isAuthenticated });
+
     const pathname = usePathname();
-
     const { collapsed } = useSidebar((state) => state);
-
     const href = `/${username}`;
     const isActive = pathname === href;
 
