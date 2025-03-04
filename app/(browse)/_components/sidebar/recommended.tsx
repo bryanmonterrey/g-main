@@ -52,7 +52,7 @@ const Recommended = ({
         </div>
       )}
       {collapsed && (
-        <div className="flex justify-center items-center mb-2 -ml-1">
+        <div className="flex justify-center items-center mb-2">
           <div className='relative'>
           <GlowEffect
         colors={['#00FFA2', '#00FFA2', '#00FFA2', '#00FFA2']}
