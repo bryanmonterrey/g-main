@@ -3,9 +3,15 @@ import { getSelf } from "@/lib/auth-service";
 
 export const getFollowedUsers = async (session: any) => {
     try {
-        if (!session) return [];
+        console.log('getFollowedUsers called with session:', session); // Add this
+
+        if (!session) {
+            console.log('No session provided to getFollowedUsers'); // Add this
+            return [];
+        }
         
-        const self = await getSelf();
+        const self = await getSelf(session);
+        console.log('Got self user:', self); // Add this
         const supabase = getSupabase(session);
 
         const { data: followedUsers, error } = await supabase

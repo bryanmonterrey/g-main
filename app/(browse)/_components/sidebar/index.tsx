@@ -20,10 +20,15 @@ const Sidebar = () => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
+                console.log('Fetching data with session:', session); // Add this
                 const [recommendedData, followingData] = await Promise.all([
                     getRecommended(session),
-                    getFollowedUsers()
+                    getFollowedUsers(session)
                 ]);
+
+                console.log('Received following data:', followingData); // Add this
+                console.log('Received recommended data:', recommendedData); // Add this
+            
                 
                 setRecommended(recommendedData);
                 setFollowing(followingData);
