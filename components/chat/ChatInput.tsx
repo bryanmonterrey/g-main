@@ -72,7 +72,7 @@ export function ChatInput({
 
   return (
     <form onSubmit={handleSubmit}>
-      <div className="relative rounded-2xl bg-zinc-700/10 backdrop-blur-xl shadow-sm transition-all duration-300 ease-in-out">
+      <div className="relative rounded-3xl bg-zinc-950 backdrop-blur-xl shadow-sm transition-all duration-300 ease-in-out">
         <div className="flex flex-col">
           <div className="relative flex items-center min-h-[72px]">
             <textarea
@@ -87,7 +87,7 @@ export function ChatInput({
                 }
               }}
               placeholder="Ask anything..."
-              className="w-full h-[72px] px-6 py-4 outline-none text-white bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-white resize-none hidden-scrollbar"
+              className="w-full h-[72px] px-6 py-4 outline-none text-white bg-transparent border-0 focus-visible:ring-0 font-medium placeholder:font-semibold focus-visible:ring-offset-0 placeholder:text-white resize-none hidden-scrollbar"
             />
           </div>
           <div className="flex items-center h-12 px-6 border-t border-zinc-950">
