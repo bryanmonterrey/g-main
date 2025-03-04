@@ -339,3 +339,10 @@ body.hidden-scrollbar {
     background-clip: border-box;
     border: 1px solid transparent; /* Set the border thickness */
   }
+
+  .gradient-text {
+    background: linear-gradient(to right, #FFC6C6, #ADFFE1, #B8A4FF, #E6B1FF);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }

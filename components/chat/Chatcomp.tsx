@@ -299,7 +299,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 					ref={inputSectionRef}
 				>
 					<div className="space-y-4">
-						<h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-[#DDDDDD]text-center">
+						<h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white/80 text-center ">
 							What can I help with?
 						</h1>
 					</div>
