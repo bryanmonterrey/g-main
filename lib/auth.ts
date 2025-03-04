@@ -52,46 +52,81 @@ export const authOptions: NextAuthOptions = {
           if (!validationResult)
             throw new Error("Could not validate the signed message");
 
-          // Check if user exists in Supabase
-          const supabase = await getSupabase();
-          let { data: user, error } = await supabase
-            .from("users")
-            .select("*")
-            .eq("wallet_address", signinMessage.publicKey)
-            .single();
+          // First log what we're checking
+console.log('Checking for wallet address:', signinMessage.publicKey);
 
-       // If the user doesn't exist, create them
+// Check if user exists in Supabase
+const supabase = await getSupabase();
+let { data: user, error } = await supabase
+    .from("users")
+    .select("*")
+    .eq("wallet_address", signinMessage.publicKey)
+    .maybeSingle(); // Use maybeSingle() instead of single() to avoid errors
+
+console.log('User check result:', { exists: !!user, error });
+
+// If the user doesn't exist, create them
 if (!user) {
   try {
       const newUserId = crypto.randomUUID();
       const now = new Date().toISOString();
       
+      // Log initial attempt
+      console.log('New wallet detected:', signinMessage.publicKey);
+      
+      // Double check both schemas to make sure user really doesn't exist
+      const { data: doubleCheck, error: checkError } = await supabase
+          .from("users")
+          .select("*")
+          .or(`wallet_address.eq.${signinMessage.publicKey},id.eq.${newUserId}`)
+          .maybeSingle();
+
+      if (doubleCheck) {
+          console.log('Found existing user in double check:', doubleCheck);
+          user = doubleCheck;
+          return {
+              id: user.id,
+              walletAddress: user.wallet_address || "",
+              role: user.role || "user",
+          };
+      }
+
+      // Log creation attempt
+      console.log('Creating new user:', {
+          id: newUserId,
+          wallet: signinMessage.publicKey
+      });
+
       // Create user in next_auth schema
       const { data: newUser, error: insertError } = await supabase
           .from("users")
-          .insert([{ 
+          .insert({ 
               id: newUserId,
               wallet_address: signinMessage.publicKey, 
               role: "user",
               created_at: now,
               updated_at: now,
               last_signed_in: now
-          }])
+          })
           .select()
           .single();
 
       if (insertError) {
-          console.error("Error creating user:", insertError);
+          console.error("Error creating user:", {
+              error: insertError,
+              attempted_id: newUserId,
+              wallet: signinMessage.publicKey
+          });
           return null;
       }
 
+      console.log('Successfully created user:', newUser);
       user = newUser;
   } catch (error) {
-      console.error("Error creating user:", error);
+      console.error("Error in user creation flow:", error);
       return null;
   }
 }
-
     console.log('User authenticated:', user);
     console.log('Authorization successful for wallet:', signinMessage.publicKey);
     
