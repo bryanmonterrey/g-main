@@ -200,13 +200,8 @@ export default function WalletConnectButton() {
     <div className="relative inline-flex gap-x-4">
       <div className="relative">
       
-      <GlowEffect
-        colors={['#FFC6C6', '#ADFFE1', '#B8A4FF', '#E6B1FF']}
-        mode='static'
-        blur='soft'
-        className="absolute inset-0 rounded-full z-5"
-      />
       
+      <div className="absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
     <button
         onClick={!connected ? handleConnectClick : () => {}}
         disabled={connecting || disconnecting}
@@ -224,7 +219,7 @@ export default function WalletConnectButton() {
         </span>
         
       </button>
-      
+      </div>
       </div>
     {session && (
       <div className="flex items-center">
