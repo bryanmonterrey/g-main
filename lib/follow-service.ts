@@ -23,7 +23,7 @@ export const getFollowedUsers = async (session: any) => {
                     username,
                     avatar_url,
                     wallet_address,
-                    last_seen     
+                    last_signed_in   
                 )
             `)
             .eq('follower_id', self.id);
@@ -148,7 +148,7 @@ export const unfollowUser = async (id: string, session: any) => {
     try {
         if (!session) throw new Error("Not authenticated");
         
-        const self = await getSelf();
+        const self = await getSelf(session);
         const supabase = getSupabase(session);
 
         // Check if user exists

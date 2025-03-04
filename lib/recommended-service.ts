@@ -16,8 +16,8 @@ export const getRecommended = async (session: any) => {
             const { data, error } = await supabase
                 .from('users')
                 .select('*')
-                .gt('last_seen', onlineThreshold) // Only get online users
-                .order('last_seen', { ascending: false })
+                .gt('last_signed_in', onlineThreshold) // Only get online users
+                .order('last_signed_in', { ascending: false })
                 .limit(10);
                 
             if (error) {
@@ -66,8 +66,8 @@ export const getRecommended = async (session: any) => {
             .from('users')
             .select('*')
             .neq('id', userId)
-            .gt('last_seen', onlineThreshold) // Only get online users
-            .order('last_seen', { ascending: false }) // Order by most recently active
+            .gt('last_signed_in', onlineThreshold) // Only get online users
+            .order('last_signed_in', { ascending: false }) // Order by most recently active
             .limit(10);
             
         // Apply filters only if we have IDs to filter with
