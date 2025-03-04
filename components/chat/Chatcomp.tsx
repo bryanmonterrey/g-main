@@ -327,8 +327,8 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									className={cn(
 										"px-4 py-2",
 										"text-sm font-semibold",
-										"bg-zinc-900/70 border border-zinc-500/5 rounded-full",
-										"text-azul/85",
+										"bg-zinc-950 border border-zinc-500/10 rounded-full",
+										"text-azul/75",
 										"hover:text-azul hover:bg-zinc-800/95 hover:border-white/0",
 										"transition-all duration-300 ease-in-out",
 									)}
