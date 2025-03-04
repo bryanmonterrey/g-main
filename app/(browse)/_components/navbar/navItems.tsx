@@ -70,12 +70,12 @@ export const NavItems: React.FC<NavItemsProps> = ({
           <Button
             key={item.key}
             className={cn(
-              'bg-transparent shadow-none hover:bg-transparent transition-all ease-in-out duration-300',
+              'bg-transparent shadow-none hover:bg-transparent transition-all ease-in-out duration-200',
               pathname === item.path ? 'text-white/95 active:text-white hover:text-white' : 'text-white/75 hover:text-white'
             )}
             onClick={() => handleNavigation(item.path)}
           >
-            <div className="h-full flex items-center justify-center gap-1 transition-all ease-in-out duration-300 font-semibold text-sm active:text-white">
+            <div className="h-full flex items-center justify-center gap-1 transition-all ease-in-out duration-200 font-semibold text-sm active:text-white">
               {item.icon}
               <p>{item.label}</p>
             </div>
