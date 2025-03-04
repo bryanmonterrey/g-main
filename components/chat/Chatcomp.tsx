@@ -329,10 +329,10 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									onClick={() => setInput(suggestion.text)}
 									className={cn(
 										"px-4 py-2",
-										"text-sm font-semibold",
+										"text-sm font-semibold hover:gradient-text",
 										"bg-zinc-950 border border-zinc-500/10 rounded-full",
-										"text-azul/75",
-										"hover:text-azul hover:bg-zinc-800/95 hover:border-white/0",
+										"text-azul/70 hover:text-white",
+										"hover:bg-zinc-800/95 hover:border",
 										"transition-all duration-300 ease-in-out",
 									)}
 								>
