@@ -27,14 +27,20 @@ const Recommended = ({
   const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
 
-  console.log('Recommended component data:', data); // Debug log
+  console.log('Recommended render:', {
+    dataLength: data?.length,
+    isAuthenticated,
+    collapsed
+  });
 
-  if (!data || data.length === 0) {
-    console.log('No recommended users found'); // Debug log
+  // Show nothing only if explicitly empty
+  if (!Array.isArray(data)) {
+    console.log('Invalid data type for recommended users');
     return null;
   }
 
   const showLabel = !collapsed && data.length > 0;
+
 
   return (
     <div>

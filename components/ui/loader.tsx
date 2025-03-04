@@ -216,7 +216,7 @@ export function TypingLoader({
         <div
           key={i}
           className={cn(
-            "bg-primary animate-[typing_1s_infinite] rounded-full",
+            "gradient-border animate-[typing_1s_infinite] rounded-full",
             dotSizes[size]
           )}
           style={{
@@ -266,7 +266,7 @@ export function WaveLoader({
         <div
           key={i}
           className={cn(
-            "bg-white animate-[wave_1s_ease-in-out_infinite] rounded-full",
+            "gradient-border animate-[wave_1s_ease-in-out_infinite] rounded-full",
             barWidths[size]
           )}
           style={{

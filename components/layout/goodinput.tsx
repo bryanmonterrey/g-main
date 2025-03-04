@@ -161,15 +161,19 @@ export function ChatInput({
       </div>
 
         <PromptInputAction tooltip="Send message">
+          <div className="relative">
+            
           <Button
             variant="default"
             size="icon"
-            className="h-8 w-8 rounded-full bg-primary/5 border border-white/5"
+            className="h-8 w-8 rounded-full bg-zinc-950 border border-zinc-800 relative z-20"
             onClick={() => handleSubmit()}
             disabled={!input.trim() && files.length === 0}
           >
             <ArrowUp className="size-5" />
           </Button>
+          </div>
+          
         </PromptInputAction>
       </PromptInputActions>
     </PromptInput>

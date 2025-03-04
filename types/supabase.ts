@@ -1030,6 +1030,35 @@ export type Database = {
           },
         ]
       }
+      sessions: {
+        Row: {
+          expires: string
+          id: string
+          sessionToken: string
+          userId: string | null
+        }
+        Insert: {
+          expires: string
+          id?: string
+          sessionToken: string
+          userId?: string | null
+        }
+        Update: {
+          expires?: string
+          id?: string
+          sessionToken?: string
+          userId?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sessions_userId_fkey"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           avatar_url: string | null
@@ -1082,6 +1111,26 @@ export type Database = {
     Functions: {
       expire_sessions: {
         Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      sync_avatar_to_next_auth: {
+        Args: {
+          user_id: string
+          new_avatar_url: string
+        }
+        Returns: undefined
+      }
+      sync_user_profile: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
+      }
+      sync_username_to_next_auth: {
+        Args: {
+          user_id: string
+          new_username: string
+        }
         Returns: undefined
       }
     }

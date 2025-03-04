@@ -11,40 +11,57 @@ import { getRecommended } from '@/lib/recommended-service';
 import { getFollowedUsers } from '@/lib/follow-service';
 
 const Sidebar = () => {
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [recommended, setRecommended] = useState([]);
     const [following, setFollowing] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);  // Add error state
 
     useEffect(() => {
         const fetchData = async () => {
+            // Don't fetch if we're not authenticated yet
+            if (status === 'loading' || !session) return;
+
             try {
                 setIsLoading(true);
-                console.log('Fetching data with session:', session); // Add this
+                console.log('Fetching data with session:', {
+                    sessionExists: !!session,
+                    userId: session?.user?.id
+                });
+
                 const [recommendedData, followingData] = await Promise.all([
                     getRecommended(session),
                     getFollowedUsers(session)
                 ]);
 
-                console.log('Received following data:', followingData); // Add this
-                console.log('Received recommended data:', recommendedData); // Add this
-            
+                console.log('Fetch results:', {
+                    recommendedCount: recommendedData?.length,
+                    followingCount: followingData?.length
+                });
                 
-                setRecommended(recommendedData);
-                setFollowing(followingData);
+                setRecommended(recommendedData || []);
+                setFollowing(followingData || []);
             } catch (error) {
                 console.error("Error fetching sidebar data:", error);
+                setError(error);
             } finally {
                 setIsLoading(false);
             }
         };
         
         fetchData();
-    }, [session]);
+    }, [session, status]);
 
-    if (isLoading) {
+    // Show skeleton while session is loading
+    if (status === 'loading' || isLoading) {
         return <SidebarSkeleton />;
     }
+
+    // Show error if any
+    if (error) {
+        console.error('Sidebar error:', error);
+    }
+
 
     return (
         <Wrapper>

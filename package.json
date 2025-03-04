@@ -36,6 +36,7 @@
     "@orca-so/whirlpools-sdk": "^0.13.16",
     "@phosphor-icons/react": "^2.1.7",
     "@pythnetwork/hermes-client": "^2.0.0",
+    "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@raydium-io/raydium-sdk-v2": "^0.1.115-alpha",
     "@solana/spl-token": "^0.4.12",

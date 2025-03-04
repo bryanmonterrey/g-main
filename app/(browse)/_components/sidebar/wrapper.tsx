@@ -20,9 +20,7 @@ export const Wrapper = ({
 
     return (
         <motion.aside 
-            className="w-[44px]"
-            
-            
+            className="w-[44px] fixed left-0 flex flex-col h-full z-50"      
             transition={{ duration: 0.25, ease: "easeInOut", spring: 0.5 }}
         >
             {children}
