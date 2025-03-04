@@ -6,6 +6,7 @@ import { Container } from './_components/container';
 import { useRouter } from 'next/navigation'
 import { DynamicIslandDemo } from '@/components/layout/island';
 import Sidebar, { SidebarSkeleton} from './_components/sidebar';
+import LocomotiveScroll from 'locomotive-scroll';
 
 import { useSession } from "next-auth/react";
 
@@ -28,10 +29,28 @@ const BrowseLayout = ({
       }
     }, [session, router]);
 
+    useEffect(() => {
+      if (typeof window !== 'undefined') {
+        const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
+    
+        if (scrollContainer) {
+          const locomotiveScroll = new (LocomotiveScroll as any)({
+            el: scrollContainer,
+            smooth: true,
+          });
+    
+          return () => {
+            if (locomotiveScroll) locomotiveScroll.destroy();
+          };
+        }
+      }
+    }, []);
+  
+
   return ( 
     <>
     <NavBar />
-        <div className="transition-all hidden-scrollbar flex h-full pt-[46px]" >
+        <div className="transition-all hidden-scrollbar flex h-full pt-[46px]" data-scroll-container>
         <Suspense fallback={<SidebarSkeleton />}>
                 <Sidebar />
             </Suspense>

@@ -34,6 +34,7 @@ import {
 } from "./icons";
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/store/useChatStore";
+import LocomotiveScroll from 'locomotive-scroll';
 
 import { useSession } from "next-auth/react";
 import { GlowEffect } from "../ui/glow-effect";
@@ -226,6 +227,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 
 	const { addSession, addMessageToSession, getSessionById, setInitialMessage } =
 		useChatStore();
+		
 
 	const filteredIntegrations =
 		activeIntegrationCategory === "all"
@@ -267,9 +269,27 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 			});
 	}, []);
 
+	useEffect(() => {
+		if (typeof window !== 'undefined') {
+		  const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
+	  
+		  if (scrollContainer) {
+			const locomotiveScroll = new (LocomotiveScroll as any)({
+			  el: scrollContainer,
+			  smooth: true,
+			});
+	  
+			return () => {
+			  if (locomotiveScroll) locomotiveScroll.destroy();
+			};
+		  }
+		}
+	  }, []);
+
+
 	// Landing page UI (existing code)
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 sm:py-32 scroll-smooth">
+		<div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 sm:py-32 scroll-smooth" data-scroll-container>
 			<div className="w-full max-w-3xl flex flex-col gap-[10vh] sm:gap-[20vh] mt-[10vh] sm:mt-[20vh]">
 				<div
 					className="flex flex-col gap-8 sm:gap-12 w-full"

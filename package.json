@@ -59,6 +59,7 @@
     "install": "^0.13.0",
     "jsonwebtoken": "^9.0.2",
     "langchain": "^0.3.19",
+    "locomotive-scroll": "^4.1.4",
     "lucide-react": "^0.475.0",
     "next": "^15.2.0",
     "next-auth": "^4.24.11",
@@ -82,6 +83,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@types/jsonwebtoken": "^9.0.8",
+    "@types/locomotive-scroll": "^4.1.4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
