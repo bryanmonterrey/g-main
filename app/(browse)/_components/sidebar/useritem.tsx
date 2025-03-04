@@ -35,7 +35,7 @@ export const UserItem = ({
          variant="ghost"
          className={cn(
             "w-full h-10 px-2 rounded-[3px] hover:bg-buttongray/50",
-            collapsed ? "justify-center my-0.5 h-9 w-9 hover:bg-lightpurp transition-all ease-soft-spring items-center flex rounded-full" : "items-center flex justify-center",
+            collapsed ? "justify-center my-0.5 h-9 w-9 hover:bg-[#00FFA2] transition-all ease-soft-spring items-center flex rounded-full" : "items-center flex justify-center",
             isActive && "bg-buttongray/60",
             collapsed ? isActive && "bg-buttongray h-9 w-9 rounded-full" : "",
          )}

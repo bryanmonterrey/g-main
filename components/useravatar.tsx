@@ -46,7 +46,7 @@ export const UserAvatar = ({
         <div className="relative">
         <Avatar
         className={cn(
-            isLive && "ring-2 ring-azul border border-black",
+            isLive && "ring-2 ring-[#00FFA2] transition-all ease-in-out duration-300 border border-black",
             avatarSizes({ size })
 
         )}
