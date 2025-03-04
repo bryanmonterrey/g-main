@@ -78,7 +78,7 @@ export default Sidebar;
 
 export const SidebarSkeleton = () => {
     return (
-        <aside className='fixed left-0 flex flex-col w-[44px] lg:w-[44px] h-full z-50'>
+        <aside className='fixed left-0 flex flex-col w-[44px] lg:w-[44px] h-full z-10'>
             <FollowingSkeleton />
             <RecommendedSkeleton />
         </aside>
