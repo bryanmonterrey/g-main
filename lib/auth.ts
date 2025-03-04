@@ -64,21 +64,49 @@ export const authOptions: NextAuthOptions = {
           if (!user) {
             try {
               const supabase = await getSupabase();
+              const newUserId = crypto.randomUUID();
             
-              const { data: newUser, error: insertError } = await supabase
+              // Create user in next_auth schema
+                const { data: newUser, error: insertError } = await supabase
                 .from("users")
                 .insert([{ 
-                  id: crypto.randomUUID(),
-                  wallet_address: signinMessage.publicKey, 
-                  role: "user" 
+                    id: newUserId,
+                    wallet_address: signinMessage.publicKey, 
+                    role: "user",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    last_signed_in: new Date().toISOString()
                 }])
                 .select()
                 .single();
 
-              if (insertError) {
-                console.error("Insert error:", insertError);
-                throw new Error(`Failed to create user: ${insertError.message}`);
-              }
+            if (insertError) {
+                console.error("Insert error in next_auth:", insertError);
+                throw new Error(`Failed to create user in next_auth: ${insertError.message}`);
+            }
+
+                    // Create the same user in public schema
+                const { error: publicInsertError } = await supabase
+                .from("public.users")  // Explicitly specify public schema
+                .insert([{
+                    id: newUserId,
+                    wallet_address: signinMessage.publicKey,
+                    role: "user",
+                    created_at: new Date().toISOString(),
+                    updated_at: new Date().toISOString(),
+                    last_signed_in: new Date().toISOString()
+                }]);
+
+            if (publicInsertError) {
+                console.error("Insert error in public:", publicInsertError);
+                // Rollback the next_auth insert if public insert fails
+                await supabase
+                    .from("users")
+                    .delete()
+                    .eq("id", newUserId);
+                throw new Error(`Failed to create user in public: ${publicInsertError.message}`);
+            }
+
               user = newUser;
             } catch (error) {
               console.error("Insert error details:", error); 
@@ -208,7 +236,6 @@ export const authOptions: NextAuthOptions = {
         session.user.name = userData?.username || token.sub;
         session.user.image = userData?.avatar_url || ``;
         session.user.walletAddress = token.walletAddress;
-
         session.supabaseAccessToken = token.supabaseAccessToken;
         
       }
