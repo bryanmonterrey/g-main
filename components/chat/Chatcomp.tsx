@@ -34,7 +34,6 @@ import {
 } from "./icons";
 import { cn } from "@/lib/utils";
 import { useChatStore } from "@/store/useChatStore";
-import LocomotiveScroll from 'locomotive-scroll';
 
 import { useSession } from "next-auth/react";
 import { GlowEffect } from "../ui/glow-effect";
@@ -271,18 +270,22 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
-		  const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
-	  
-		  if (scrollContainer) {
-			const locomotiveScroll = new (LocomotiveScroll as any)({
-			  el: scrollContainer,
-			  smooth: true,
-			});
-	  
-			return () => {
-			  if (locomotiveScroll) locomotiveScroll.destroy();
-			};
-		  }
+		  // Dynamically import LocomotiveScroll
+		  (async () => {
+			const LocomotiveScroll = (await import('locomotive-scroll')).default;
+			const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
+			
+			if (scrollContainer) {
+			  const locomotiveScroll = new LocomotiveScroll({
+				el: scrollContainer,
+				smooth: true,
+			  });
+			  
+			  return () => {
+				if (locomotiveScroll) locomotiveScroll.destroy();
+			  };
+			}
+		  })();
 		}
 	  }, []);
 

@@ -3,7 +3,6 @@
 import { ChatProvider } from "@/components/chat/SolanaAgentProvider";
 import { FamilyButtonDemo } from "@/components/chat/sessionbutton";
 import { useEffect } from "react";
-import LocomotiveScroll from 'locomotive-scroll';
 
 export default function RootLayout({
   children,
@@ -12,21 +11,25 @@ export default function RootLayout({
 }>) {
 
   useEffect(() => {
-		if (typeof window !== 'undefined') {
-		  const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
-	  
-		  if (scrollContainer) {
-			const locomotiveScroll = new (LocomotiveScroll as any)({
-			  el: scrollContainer,
-			  smooth: true,
-			});
-	  
-			return () => {
-			  if (locomotiveScroll) locomotiveScroll.destroy();
-			};
-		  }
-		}
-	  }, []);
+    if (typeof window !== 'undefined') {
+      // Dynamically import LocomotiveScroll
+      (async () => {
+        const LocomotiveScroll = (await import('locomotive-scroll')).default;
+        const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
+        
+        if (scrollContainer) {
+          const locomotiveScroll = new LocomotiveScroll({
+            el: scrollContainer,
+            smooth: true,
+          });
+          
+          return () => {
+            if (locomotiveScroll) locomotiveScroll.destroy();
+          };
+        }
+      })();
+    }
+  }, []);
 
   return (
           <ChatProvider>

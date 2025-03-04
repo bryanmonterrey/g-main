@@ -7,7 +7,6 @@ import ReactMarkdown from 'react-markdown';
 import { ChatInput, MOCK_MODELS } from "./ChatInput";
 import { AGENT_MODES } from "./ModeSelector";
 import { useWallet } from '@solana/wallet-adapter-react';
-import LocomotiveScroll from 'locomotive-scroll';
 
 interface Message {
   id: string;
@@ -139,21 +138,25 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
   };
 
   useEffect(() => {
-		if (typeof window !== 'undefined') {
-		  const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
-	  
-		  if (scrollContainer) {
-			const locomotiveScroll = new (LocomotiveScroll as any)({
-			  el: scrollContainer,
-			  smooth: true,
-			});
-	  
-			return () => {
-			  if (locomotiveScroll) locomotiveScroll.destroy();
-			};
-		  }
-		}
-	  }, []);
+    if (typeof window !== 'undefined') {
+      // Dynamically import LocomotiveScroll
+      (async () => {
+        const LocomotiveScroll = (await import('locomotive-scroll')).default;
+        const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
+        
+        if (scrollContainer) {
+          const locomotiveScroll = new LocomotiveScroll({
+            el: scrollContainer,
+            smooth: true,
+          });
+          
+          return () => {
+            if (locomotiveScroll) locomotiveScroll.destroy();
+          };
+        }
+      })();
+    }
+  }, []);
 
   useEffect(() => {
     scrollToBottom();
