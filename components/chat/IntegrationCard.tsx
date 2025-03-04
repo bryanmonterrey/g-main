@@ -20,7 +20,7 @@ export function IntegrationCard({ title, description, icon, logo: Logo, category
         "flex flex-col gap-3 p-4",
         "bg-zinc-950 border border-zinc-500/5 rounded-3xl",
         "text-left",
-        "hover:bg-zinc-800/95 hover:border-white/0",
+        "hover:bg-zinc-900/60 hover:border-white/0",
         "transition-all duration-300 ease-in-out",
       )}
     >
@@ -28,11 +28,11 @@ export function IntegrationCard({ title, description, icon, logo: Logo, category
         {Logo && <Logo className="w-6 h-6" />}
         {icon}
         <div className="flex-1">
-          <h3 className="text-[15px] font-semibold text-white/85">{title}</h3>
-          <div className="text-xs font-semibold text-azul/85 mt-0.5">{category}</div>
+          <h3 className="text-[15px] font-semibold text-white">{title}</h3>
+          <div className="text-xs font-semibold text-azul/75 mt-0.5">{category}</div>
         </div>
       </div>
-      <div className="text-sm font-semibold text-azul/85 leading-relaxed">{description}</div>
+      <div className="text-sm font-semibold text-azul/75 leading-relaxed">{description}</div>
     </button>
   );
 }

@@ -332,7 +332,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 										"text-sm font-semibold hover:gradient-text",
 										"bg-zinc-950 border border-zinc-500/10 rounded-full",
 										"text-azul/70 hover:text-white",
-										"hover:bg-zinc-800/95 hover:border",
+										"hover:bg-zinc-900/65 hover:border",
 										"transition-all duration-300 ease-in-out",
 									)}
 								>
@@ -361,8 +361,8 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 									className={cn(
 										"px-3 py-1 text-sm font-semibold rounded-full transition-colors",
 										activeIntegrationCategory === category.id
-											? "bg-zinc-900/95 text-azul hover:bg-zinc-800/95"
-											: "text-azul/70 hover:text-white hover:bg-zinc-800/95",
+											? "bg-zinc-900/95 text-azul hover:bg-zinc-900/65"
+											: "text-azul/70 hover:text-white hover:bg-zinc-900/65",
 									)}
 									title={category.title}
 								>
