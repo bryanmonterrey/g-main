@@ -27,6 +27,13 @@ const Recommended = ({
   const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
 
+  console.log('Recommended component data:', data); // Debug log
+
+  if (!data || data.length === 0) {
+    console.log('No recommended users found'); // Debug log
+    return null;
+  }
+
   const showLabel = !collapsed && data.length > 0;
 
   return (

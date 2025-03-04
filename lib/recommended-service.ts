@@ -7,20 +7,26 @@ export const getRecommended = async (session: any) => {
     const supabase = getSupabase(session);
     let userId = session.user?.id;
 
+    // Define what we consider as "online" - within last 5 minutes
+    const onlineThreshold = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
     if (!userId) {
         try {
-            // For non-authenticated users, just get recent users
+            // For non-authenticated users, get only online recent users
             const { data, error } = await supabase
-                .from('users')  // Using public schema
+                .from('users')
                 .select('*')
-                .order('created_at', { ascending: false })
+                .gt('last_seen', onlineThreshold) // Only get online users
+                .order('last_seen', { ascending: false })
                 .limit(10);
                 
             if (error) {
+                console.log('Online threshold being used:', onlineThreshold);
                 console.error('Error fetching users:', error);
                 return [];
             }
             
+            console.log('Found online users:', data?.length || 0);
             return data || [];
         } catch (error) {
             console.error('Error fetching users:', error);
@@ -31,7 +37,7 @@ export const getRecommended = async (session: any) => {
     try {
         // Step 1: Get the IDs of users the current user is following
         const { data: followingData, error: followingError } = await supabase
-            .from('follow')  // Now using public.follow
+            .from('follow')
             .select('following_id')
             .eq('follower_id', userId);
             
@@ -42,7 +48,7 @@ export const getRecommended = async (session: any) => {
         
         // Step 2: Get IDs of users who have blocked the current user
         const { data: blockersData, error: blockersError } = await supabase
-            .from('block')  // Now using public.block
+            .from('block')
             .select('blocker_id')
             .eq('blocked_id', userId);
             
@@ -55,12 +61,13 @@ export const getRecommended = async (session: any) => {
         const followingIds = followingData?.map(item => item.following_id) || [];
         const blockerIds = blockersData?.map(item => item.blocker_id) || [];
         
-        // Build the main query
+        // Build the main query for online users only
         let query = supabase
-            .from('users')  // Using public schema
+            .from('users')
             .select('*')
             .neq('id', userId)
-            .order('created_at', { ascending: false })
+            .gt('last_seen', onlineThreshold) // Only get online users
+            .order('last_seen', { ascending: false }) // Order by most recently active
             .limit(10);
             
         // Apply filters only if we have IDs to filter with
@@ -78,6 +85,10 @@ export const getRecommended = async (session: any) => {
             console.error('Error fetching recommended users:', error);
             return [];
         }
+
+        console.log('Found online recommended users:', users?.length || 0);
+        console.log('Current time:', new Date().toISOString());
+        console.log('Online threshold:', onlineThreshold);
         
         return users || [];
     } catch (error) {
