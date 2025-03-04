@@ -28,29 +28,11 @@ const BrowseLayout = ({
         return () => clearTimeout(timer);
       }
     }, [session, router]);
-
-    useEffect(() => {
-      if (typeof window !== 'undefined') {
-        const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
-    
-        if (scrollContainer) {
-          const locomotiveScroll = new (LocomotiveScroll as any)({
-            el: scrollContainer,
-            smooth: true,
-          });
-    
-          return () => {
-            if (locomotiveScroll) locomotiveScroll.destroy();
-          };
-        }
-      }
-    }, []);
   
-
   return ( 
     <>
     <NavBar />
-        <div className="transition-all hidden-scrollbar flex h-full pt-[46px] " data-scroll-container>
+        <div className="transition-all hidden-scrollbar flex h-full pt-[46px] ">
         <Suspense fallback={<SidebarSkeleton />}>
                 <Sidebar />
             </Suspense>
