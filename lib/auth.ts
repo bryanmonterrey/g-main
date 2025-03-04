@@ -64,17 +64,18 @@ export const authOptions: NextAuthOptions = {
 if (!user) {
   try {
       const newUserId = crypto.randomUUID();
+      const now = new Date().toISOString();
       
-      // Create in public schema first
+      // Create user in next_auth schema
       const { data: newUser, error: insertError } = await supabase
-          .from("public.users")  // Explicitly targeting public schema
+          .from("users")
           .insert([{ 
               id: newUserId,
               wallet_address: signinMessage.publicKey, 
               role: "user",
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-              last_signed_in: new Date().toISOString()
+              created_at: now,
+              updated_at: now,
+              last_signed_in: now
           }])
           .select()
           .single();
