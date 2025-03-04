@@ -20,7 +20,7 @@ export function IntegrationCard({ title, description, icon, logo: Logo, category
         "flex flex-col gap-3 p-4",
         "bg-zinc-950 border border-zinc-500/5 rounded-3xl",
         "text-left",
-        "hover:bg-azul/30 hover:border-white/0",
+        "hover:bg-zinc-800/95 hover:border-white/0",
         "transition-all duration-300 ease-in-out",
       )}
     >
