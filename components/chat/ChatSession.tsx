@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { ChatInput, MOCK_MODELS } from "./ChatInput";
 import { AGENT_MODES } from "./ModeSelector";
 import { useWallet } from '@solana/wallet-adapter-react';
+import LocomotiveScroll from 'locomotive-scroll';
 
 interface Message {
   id: string;
@@ -136,6 +137,23 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+		if (typeof window !== 'undefined') {
+		  const scrollContainer = document.querySelector('[data-scroll-container]') as HTMLElement | null;
+	  
+		  if (scrollContainer) {
+			const locomotiveScroll = new (LocomotiveScroll as any)({
+			  el: scrollContainer,
+			  smooth: true,
+			});
+	  
+			return () => {
+			  if (locomotiveScroll) locomotiveScroll.destroy();
+			};
+		  }
+		}
+	  }, []);
 
   useEffect(() => {
     scrollToBottom();
@@ -275,7 +293,7 @@ export function ChatSession({ sessionId, initialMessages }: ChatSessionProps) {
   return (
     <div className="flex flex-col h-screen">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 pb-32 scroll-smooth scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]">
+      <div className="flex-1 overflow-y-auto p-4 pb-32 scroll-smooth scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]" data-scroll-container>
         <div className="max-w-3xl mx-auto w-full space-y-6">
           {messages.map((message) => (
             <div key={message.id}>
