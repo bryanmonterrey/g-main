@@ -6,6 +6,7 @@ import { UserItem, UserItemSkeleton } from './useritem';
 import { HandCoins } from 'lucide-react';
 import { Database } from "@/types/supabase";
 import { useSession } from "next-auth/react";
+import { GlowEffect } from '@/components/ui/glow-effect';
 
 // Define the user type from your Supabase schema
 type DbUser = Database["next_auth"]["Tables"]["users"]["Row"];
@@ -38,8 +39,18 @@ const Recommended = ({
         </div>
       )}
       {collapsed && (
-        <div className="flex justify-center items-center mb-2">
-          <HandCoins className='h-4 w-4 text-white/90'/>
+        <div className="flex justify-center items-center mb-2 -ml-1">
+          <div className='relative'>
+          <GlowEffect
+        colors={['#FFC6C6', '#ADFFE1', '#B8A4FF', '#E6B1FF']}
+        mode='static'
+        blur='soft'
+        className="absolute inset-0 rounded-full z-5"
+      />
+          <div className='h-2 w-2 gradient-border rounded-full'>
+
+          </div>
+          </div>
         </div>
       )}
       <div className='flex items-center justify-center w-full'>
