@@ -346,10 +346,10 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 				<div className="relative pt-4">
 					<div className="flex flex-col gap-4 px-1 mb-6">
 						<div className="flex items-center gap-2">
-							<h2 className="text-xl font-semibold text-white">
+							<h2 className="text-xl font-semibold text-white/80">
 								Integrations
 							</h2>
-							<span className="text-sm font-semibold text-azul">
+							<span className="text-sm font-semibold text-white/90">
 								({filteredIntegrations.length})
 							</span>
 						</div>
@@ -362,7 +362,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 										"px-3 py-1 text-sm font-semibold rounded-full transition-colors",
 										activeIntegrationCategory === category.id
 											? "bg-zinc-900/95 text-azul hover:bg-zinc-800/95"
-											: "text-white hover:text-white hover:bg-zinc-800/95",
+											: "text-azul/70 hover:text-white hover:bg-zinc-800/95",
 									)}
 									title={category.title}
 								>
