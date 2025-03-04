@@ -201,7 +201,7 @@ export default function WalletConnectButton() {
       <div className="relative">
       
       <GlowEffect
-        colors={['#0894FF', '#C959DD', '#FF2E54', '#FF9004']}
+        colors={['#FFC6C6', '#ADFFE1', '#B8A4FF', '#E6B1FF']}
         mode='static'
         blur='soft'
         className="absolute inset-0 rounded-full z-5"
