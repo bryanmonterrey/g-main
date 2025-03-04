@@ -60,73 +60,50 @@ export const authOptions: NextAuthOptions = {
             .eq("wallet_address", signinMessage.publicKey)
             .single();
 
-          // If the user doesn't exist, create them
-          if (!user) {
-            try {
-              const supabase = await getSupabase();
-              const newUserId = crypto.randomUUID();
-            
-              // Create user in next_auth schema
-                const { data: newUser, error: insertError } = await supabase
-                .from("users")
-                .insert([{ 
-                    id: newUserId,
-                    wallet_address: signinMessage.publicKey, 
-                    role: "user",
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                    last_signed_in: new Date().toISOString()
-                }])
-                .select()
-                .single();
+       // If the user doesn't exist, create them
+if (!user) {
+  try {
+      const newUserId = crypto.randomUUID();
+      
+      // Create in public schema first
+      const { data: newUser, error: insertError } = await supabase
+          .from("public.users")  // Explicitly targeting public schema
+          .insert([{ 
+              id: newUserId,
+              wallet_address: signinMessage.publicKey, 
+              role: "user",
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              last_signed_in: new Date().toISOString()
+          }])
+          .select()
+          .single();
 
-            if (insertError) {
-                console.error("Insert error in next_auth:", insertError);
-                throw new Error(`Failed to create user in next_auth: ${insertError.message}`);
-            }
-
-                    // Create the same user in public schema
-                const { error: publicInsertError } = await supabase
-                .from("public.users")  // Explicitly specify public schema
-                .insert([{
-                    id: newUserId,
-                    wallet_address: signinMessage.publicKey,
-                    role: "user",
-                    created_at: new Date().toISOString(),
-                    updated_at: new Date().toISOString(),
-                    last_signed_in: new Date().toISOString()
-                }]);
-
-            if (publicInsertError) {
-                console.error("Insert error in public:", publicInsertError);
-                // Rollback the next_auth insert if public insert fails
-                await supabase
-                    .from("users")
-                    .delete()
-                    .eq("id", newUserId);
-                throw new Error(`Failed to create user in public: ${publicInsertError.message}`);
-            }
-
-              user = newUser;
-            } catch (error) {
-              console.error("Insert error details:", error); 
-              console.error("Error creating user:", error);
-              return null;
-            }
-          }
-
-          console.log('user', user);
-          console.log('Authorization successful for wallet:', signinMessage.publicKey);
-          return {
-            id: user.id,
-            walletAddress: user.wallet_address || "",
-            role: user.role || "user",
-          };
-        } catch (error) {
-          console.error("Error during authorization:", error);
+      if (insertError) {
+          console.error("Error creating user:", insertError);
           return null;
-        }
-      },
+      }
+
+      user = newUser;
+  } catch (error) {
+      console.error("Error creating user:", error);
+      return null;
+  }
+}
+
+    console.log('User authenticated:', user);
+    console.log('Authorization successful for wallet:', signinMessage.publicKey);
+    
+    return {
+        id: user.id,
+        walletAddress: user.wallet_address || "",
+        role: user.role || "user",
+    };
+  } catch (error) {
+      console.error("Error during authorization:", error);
+      return null;
+  }
+  },
     }),
   ],
   adapter: SupabaseAdapter({
