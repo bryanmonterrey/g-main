@@ -26,7 +26,7 @@ export function DropdownComp({ selectedItems, onItemsChange, items }: DropdownCo
       <DropdownMenuTrigger asChild>
         <button
           className={cn(
-            "flex items-center gap-x-2 py-1.5 px-2.5 ml-2.5 rounded-full border border-zinc-700/5",
+            "flex items-center gap-x-2 py-2 px-2.5 ml-2.5 rounded-full border border-zinc-700/5",
             "font-semibold text-muted-foreground text-sm hover:text-white bg-black/50 hover:bg-zinc-900/40",
             "transition-all duration-300 ease-in-out",
             "group",
