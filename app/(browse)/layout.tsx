@@ -50,7 +50,7 @@ const BrowseLayout = ({
   return ( 
     <>
     <NavBar />
-        <div className="transition-all hidden-scrollbar flex h-full pt-[46px]" data-scroll-container>
+        <div className="transition-all hidden-scrollbar flex h-full pt-[46px] " data-scroll-container>
         <Suspense fallback={<SidebarSkeleton />}>
                 <Sidebar />
             </Suspense>

@@ -26,7 +26,7 @@ export const Container = ({
 
   return (
     <motion.div
-      className="flex-1"
+      className="flex-1 ml-[44px]"
     >
       {children}
     </motion.div>
