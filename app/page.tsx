@@ -37,14 +37,6 @@ export default function Home() {
           </p>
         </div>
       )}
-      <button
-        onClick={() => {
-          router.push("/protected");
-        }}
-        className="font-semibold"
-      >
-        Click to go to Protected Route
-      </button>
       <div>
         
       </div>

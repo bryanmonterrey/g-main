@@ -81,7 +81,7 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut, onRefres
   return (
     <Drawer.Root direction="right">
       <Drawer.Trigger className="flex items-center justify-center">
-        <Button variant="ghost" className="">
+        <Button className="bg-transparent">
         <UserAvatar 
             username={username} 
             avatarUrl={avatarUrl} 
