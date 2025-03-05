@@ -91,8 +91,11 @@ export const ProfileHeader = ({
                     onBannerUpdate={handleBannerUpdate}
                 />
             </div>
-            <div className="w-full px-10">
-                <div className="flex items-center gap-x-7 w-full">
+            <div className="w-full inline-flex">
+            <div className="inline-flex justify-between">
+            <div className="px-10">
+                
+                <div className="flex items-center gap-x-7">
                     <UserAvatar 
                     avatarUrl={avatarUrl || ""}
                     username={username || ""}
@@ -142,6 +145,8 @@ export const ProfileHeader = ({
           Edit Profile
         </Button>
       )}
+    </div>
+    </div>
     </div>
     </div>
   );
