@@ -1,7 +1,7 @@
 // components/profile/profile-banner.tsx
 "use client";
 
-import { UploadButton } from "@/components/upload-button"; // We'll create this
+import { UploadButton } from "@/components/upload-button";
 import Image from "next/image";
 import { CameraIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";

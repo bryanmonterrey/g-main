@@ -40,7 +40,7 @@ export const ProfileHeader = ({
 
   const handleBannerUpdate = async (newBannerUrl: string) => {
     try {
-      const session = await useSession();
+      const { data: session } = useSession(); // Change this line
       if (!session?.user?.id) return;
 
       const supabase = getSupabase(session);

@@ -15,6 +15,7 @@ interface ProfileProps {
     id: string;
     username: string | null;
     avatar_url: string | null;
+    banner_url: string | null;
     wallet_address: string | null;
     bio: string | null;
     created_at: string | null;
@@ -56,6 +57,12 @@ export const Profile = ({
     }
   };
 
+  const handleUnfollow = async () => {
+    try {
+      setIsLoading(true);
+      if (!user.id) return;
+
+      await onUnfollow(user.id);
   if (!user) {
     return <div>User not found</div>;
   }
@@ -66,14 +73,15 @@ export const Profile = ({
       <div className="flex flex-col gap-y-4">
         {/* Profile Header Section */}
         <ProfileHeader
-          username={user.username}
-          avatarUrl={user.avatar_url}
-          walletAddress={user.wallet_address || ''}
-          isOwnProfile={isOwnProfile}
-          isFollowing={isFollowing}
-          isLoading={isLoading}
-          onFollowToggle={handleFollow}
-        />
+            username={user.username}
+            avatarUrl={user.avatar_url}
+            bannerUrl={user.banner_url}
+            walletAddress={user.wallet_address || ''}
+            isOwnProfile={isOwnProfile}
+            isFollowing={isFollowing}
+            onFollow={handleFollow}
+            onUnfollow={handleUnfollow}
+            />
 
         {/* Profile Info Section */}
         <ProfileInfo
