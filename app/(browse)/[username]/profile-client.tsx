@@ -1,46 +1,40 @@
-// app/(browse)/[username]/page.tsx
+// app/(browse)/[username]/profile-client.tsx
 "use client";
 
 import { Profile } from "@/components/profile";
-import { getUserByUsername } from "@/lib/auth-service.server";
 import { isFollowingUser } from "@/lib/follow-servicee";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 
 interface ProfileClientProps {
-    username: string;
-  }
+  initialProfile: any; // Type this properly based on your user type
+}
 
-const ProfileClient = ({ username }: ProfileClientProps) => {
-  const { data: session } = useSession();
-  const [profile, setProfile] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
+  const { data: session, status } = useSession();
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        setIsLoading(true);
-        const userProfile = await getUserByUsername(username, session);
-        if (userProfile) {
-          setProfile(userProfile);
-          const following = await isFollowingUser(userProfile.id);
+    const checkFollowStatus = async () => {
+      if (session?.user?.id && initialProfile.id) {
+        try {
+          setIsLoading(true);
+          const following = await isFollowingUser(initialProfile.id);
           setIsFollowing(following);
+        } catch (error) {
+          console.error("Error checking follow status:", error);
+        } finally {
+          setIsLoading(false);
         }
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-      } finally {
-        setIsLoading(false);
       }
     };
 
-    if (session) {
-      fetchProfile();
-    }
-  }, [username, session]);
+    checkFollowStatus();
+  }, [session, initialProfile.id]);
 
-  if (isLoading) {
+  if (status === "loading" || isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -48,19 +42,13 @@ const ProfileClient = ({ username }: ProfileClientProps) => {
     );
   }
 
-  if (!profile) {
-    return <div>User not found</div>;
-  }
-
-  const isOwnProfile = session?.user?.id === profile.id;
+  const isOwnProfile = session?.user?.id === initialProfile.id;
 
   return (
     <Profile
-      user={profile}
+      user={initialProfile}
       isOwnProfile={isOwnProfile}
       isFollowing={isFollowing}
     />
   );
 };
-
-export default ProfileClient;

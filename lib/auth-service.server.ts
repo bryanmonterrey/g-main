@@ -141,31 +141,31 @@ export const getSelfByWalletAddress = async (walletAddress: string, session: any
   };
 };
 
-// Add a new function to get any user's profile
-export const getUserByUsername = async (username: string, session: any) => {
-  const supabase = getSupabase(session);
-  
-  const { data: user, error } = await supabase
-    .from('users')
-    .select(`
-      id,
-      username,
-      avatar_url,
-      wallet_address,
-      bio,
-      created_at,
-      updated_at,
-      _count {
-        followedBy,
-        following
-      }
-    `)
-    .eq('username', username)
-    .single();
 
-  if (error || !user) {
+export const getUserByUsername = async (username: string, session: any) => {
+  const supabase = getSupabase(session); // Your getSupabase utility should handle null session
+  
+  try {
+    const { data: user, error } = await supabase
+      .from('users')
+      .select(`
+        id,
+        username,
+        avatar_url,
+        wallet_address,
+        bio,
+        created_at,
+        updated_at
+      `)
+      .eq('username', username)
+      .single();
+
+    if (error) throw error;
+    if (!user) throw new Error("User not found");
+
+    return user;
+  } catch (error) {
+    console.error("Error in getUserByUsername:", error);
     throw new Error("User not found");
   }
-
-  return user;
 };
