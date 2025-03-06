@@ -2,7 +2,7 @@
 "use client";
 
 import { Profile } from "@/components/profile";
-import { getSelfByUsername } from "@/lib/auth-service.server";
+import { getUserByUsername } from "@/lib/auth-service.server";
 import { isFollowingUser } from "@/lib/follow-servicee";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -24,7 +24,7 @@ const ProfilePage = ({ params }: ProfilePageProps) => {
     const fetchProfile = async () => {
       try {
         setIsLoading(true);
-        const userProfile = await getSelfByUsername(params.username, session);
+        const userProfile = await getUserByUsername(params.username, session);
         if (userProfile) {
           setProfile(userProfile);
           const following = await isFollowingUser(userProfile.id);
