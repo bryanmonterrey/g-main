@@ -6,6 +6,7 @@ import { isFollowingUser } from "@/lib/follow-servicee";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { onFollow, onUnfollow } from "@/actions/follow";
 
 interface ProfileClientProps {
   initialProfile: any; // Type this properly based on your user type
@@ -34,6 +35,24 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
     checkFollowStatus();
   }, [session, initialProfile.id]);
 
+  const handleFollow = async (): Promise<void> => {
+    try {
+      await onFollow(initialProfile.id);
+      setIsFollowing(true);
+    } catch (error) {
+      console.error("Error following user:", error);
+    }
+  };
+
+  const handleUnfollow = async (): Promise<void> => {
+    try {
+      await onUnfollow(initialProfile.id);
+      setIsFollowing(false);
+    } catch (error) {
+      console.error("Error unfollowing user:", error);
+    }
+  };
+
   if (status === "loading" || isLoading) {
     return (
       <div className="h-screen flex items-center justify-center">
@@ -49,6 +68,8 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
       user={initialProfile}
       isOwnProfile={isOwnProfile}
       isFollowing={isFollowing}
+      onFollow={handleFollow}
+      onUnfollow={handleUnfollow}
     />
   );
 };

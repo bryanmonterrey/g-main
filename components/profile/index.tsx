@@ -11,19 +11,21 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 interface ProfileProps {
-  user: {
-    id: string;
-    username: string | null;
-    avatar_url: string | null;
-    banner_url: string | null;
-    wallet_address: string | null;
-    bio: string | null;
-    created_at: string | null;
-    updated_at: string | null;
-  };
-  isOwnProfile: boolean;
-  isFollowing: boolean;
-}
+    user: {
+      id: string;
+      username: string | null;
+      avatar_url: string | null;
+      banner_url: string | null;
+      wallet_address: string | null;
+      bio: string | null;
+      created_at: string | null;
+      updated_at: string | null;
+    };
+    isOwnProfile: boolean;
+    isFollowing: boolean;
+    onFollow: () => Promise<void>;
+    onUnfollow: () => Promise<void>;
+  }
 
 export const Profile = ({
   user,
@@ -73,15 +75,15 @@ export const Profile = ({
       <div className="flex flex-col gap-y-4">
         {/* Profile Header Section */}
         <ProfileHeader
-            username={user.username}
-            avatarUrl={user.avatar_url}
-            bannerUrl={user.banner_url}
-            walletAddress={user.wallet_address || ''}
-            isOwnProfile={isOwnProfile}
-            isFollowing={isFollowing}
-            onFollow={handleFollow}
-            onUnfollow={handleUnfollow}
-            />
+        username={user.username}
+        avatarUrl={user.avatar_url}
+        bannerUrl={user.banner_url}
+        walletAddress={user.wallet_address || ''}
+        isOwnProfile={isOwnProfile}
+        isFollowing={isFollowing}
+        onFollow={onFollow}
+        onUnfollow={onUnfollow}
+        />
 
         {/* Profile Info Section */}
         <ProfileInfo
