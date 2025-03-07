@@ -127,11 +127,11 @@ export const ProfileHeader = ({
         <div className="inline-flex gap-x-2 px-5 ">
             <div className="inline-flex gap-x-2">
             <div className="relative h-fit w-fit">
-        <div className="absolute inset-0 rounded-full p-0.5 z-5 gradient-border">
+        <div className="absolute inset-0 rounded-full z-5 gradient-border">
         <Button
           disabled={isLoading}
           onClick={handleFollow}
-          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full"
+          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full  border border-white"
         >
           <MessageCircle
           className="h-5 w-5"
@@ -140,11 +140,11 @@ export const ProfileHeader = ({
         </div>
         </div>
             <div className="relative h-fit w-fit">
-        <div className="absolute inset-0 rounded-full p-0.5 z-5 gradient-border">
+        <div className="absolute inset-0 rounded-full z-5 gradient-border">
         <Button
           disabled={isLoading}
           onClick={handleFollow}
-          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full"
+          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full  border border-white"
         >
           <MessageCircle
           className="h-5 w-5"
@@ -153,11 +153,11 @@ export const ProfileHeader = ({
         </div>
         </div>
             <div className="relative h-fit w-fit">
-        <div className="absolute inset-0 rounded-full p-0.5 z-5 gradient-border">
+        <div className="absolute inset-0 rounded-full z-5 gradient-border">
         <Button
           disabled={isLoading}
           onClick={handleFollow}
-          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full"
+          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full border border-white"
         >
           <MessageCircle
           className="h-5 w-5"
@@ -166,11 +166,11 @@ export const ProfileHeader = ({
         </div>
         </div>
             
-      <div className="absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
+      <div className="absolute inset-0 rounded-full z-5 gradient-border">
         <Button
           disabled={isLoading}
           onClick={handleFollow}
-          className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full"
+          className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full border border-white"
         >
           <Heart  
             className={cn(
