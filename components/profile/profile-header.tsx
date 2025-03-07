@@ -157,6 +157,19 @@ export const ProfileHeader = ({
         <Button
           disabled={isLoading}
           onClick={handleFollow}
+          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full  border border-white"
+        >
+          <MessageCircle
+          className="h-5 w-5"
+          />
+        </Button>
+        </div>
+        </div>
+            <div className="relative h-fit w-fit">
+        <div className="absolute inset-0 rounded-full z-5 gradient-border">
+        <Button
+          disabled={isLoading}
+          onClick={handleFollow}
           className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full border border-white"
         >
           <MessageCircle
