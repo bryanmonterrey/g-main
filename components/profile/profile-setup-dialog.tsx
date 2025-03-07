@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
@@ -16,128 +16,151 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadButton } from "@/components/upload-button";
-import { createSupabaseClient } from "@/utils/supabase/retrieveData";
+import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 
-import { UserPlus, Upload, Check, ArrowRight } from "lucide-react";
+import { Upload, Check, ArrowRight } from "lucide-react";
 
 // Step 1: Username, Step 2: Profile Picture
 type ProfileSetupStep = 1 | 2;
 
 export const ProfileSetupDialog = () => {
-  const { data: session, update } = useSession();
+  const { data: session, update, status } = useSession();
+  
+  // Create Supabase client only once (wrapped in useCallback to avoid recreating)
+  const getClient = useCallback(() => {
+    if (!session) return null;
+    return getSupabase(session);
+  }, [session]);
+  
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<ProfileSetupStep>(1);
+  const [currentStep, setCurrentStep] = useState<ProfileSetupStep>(1);
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [setupCompleted, setSetupCompleted] = useState(false);
   
-  // Check if the user profile needs setup
+  // Use a ref to maintain the current step
+  const currentStepRef = useRef<ProfileSetupStep>(1);
+  
+  // Update ref when step changes
   useEffect(() => {
-    if (session?.user) {
-      // Initialize username from session if available
-      if (session.user.name && session.user.name !== session.user.walletAddress) {
-        setUsername(session.user.name);
-      }
+    currentStepRef.current = currentStep;
+  }, [currentStep]);
+
+  // Check profile setup once when component mounts
+  useEffect(() => {
+    const checkProfileSetup = async () => {
+      if (status !== "authenticated" || !session?.user?.id) return;
       
-      // Don't show the dialog if both are set AND username is not just the wallet address
-      const hasRealUsername = session.user.name && session.user.name !== session.user.walletAddress;
-      const hasAvatar = !!session.user.image;
+      const supabase = getClient();
+      if (!supabase) return;
       
-      if (!hasRealUsername || !hasAvatar) {
-        setOpen(true);
+      try {
+        // Fetch user data
+        const { data: userData, error } = await supabase
+          .from('users')
+          .select('username, avatar_url, setup_completed')
+          .eq('id', session.user.id)
+          .single();
         
-        // Set initial step based on what's missing first
-        if (!hasRealUsername) {
-          setStep(1);
-        } else if (!hasAvatar) {
-          setStep(2);
+        if (error) {
+          console.error("Error fetching user data:", error);
+          return;
         }
+        
+        // Set states based on user data
+        setSetupCompleted(!!userData?.setup_completed);
+        
+        if (userData?.username) {
+          setUsername(userData.username);
+        } else if (session.user.name && session.user.name !== session.user.id) {
+          setUsername(session.user.name);
+        }
+        
+        if (userData?.avatar_url) {
+          setAvatarUrl(userData.avatar_url);
+        } else if (session.user.image) {
+          setAvatarUrl(session.user.image);
+        }
+        
+        // If setup is already done, don't show dialog
+        if (userData?.setup_completed) return;
+        
+        // Determine which step to show
+        const hasRealUsername = !!userData?.username || (!!session.user.name && session.user.name !== session.user.id);
+        const hasAvatar = !!userData?.avatar_url || !!session.user.image;
+        
+        if (!hasRealUsername || !hasAvatar) {
+          // Set the appropriate step
+          const initialStep = !hasRealUsername ? 1 : 2;
+          setCurrentStep(initialStep);
+          currentStepRef.current = initialStep;
+          
+          // Open dialog
+          setOpen(true);
+        } else {
+          // Profile complete, mark as setup completed
+          await supabase
+            .from('users')
+            .update({ setup_completed: true })
+            .eq('id', session.user.id);
+        }
+      } catch (err) {
+        console.error("Error in profile setup:", err);
+      }
+    };
+    
+    if (status === "authenticated") {
+      checkProfileSetup();
+    }
+  }, [session, status, getClient]);
+  
+  // Handle dialog close
+  const handleDialogClose = async (isOpen: boolean) => {
+    // Only allow closing the dialog if profile setup is complete or user explicitly skips
+    if (!isOpen && !setupCompleted) {
+      toast.error("Please complete setup or click Skip");
+      return;
+    }
+    
+    setOpen(isOpen);
+    
+    // If dialog is being closed and session exists
+    if (!isOpen && session?.user?.id) {
+      const supabase = getClient();
+      if (!supabase) return;
+      
+      try {
+        // Mark setup as completed in database
+        await supabase
+          .from('users')
+          .update({ setup_completed: true })
+          .eq('id', session.user.id);
+          
+        setSetupCompleted(true);
+      } catch (error) {
+        console.error("Error updating setup status:", error);
       }
     }
-  }, [session]);
+  };
   
-  // Update username
-  const handleUsernameSubmit = async () => {
+  // Handle continue to avatar step
+  const handleContinueToAvatar = () => {
     if (!username.trim()) {
       toast.error("Please enter a username");
       return;
     }
     
-    setIsLoading(true);
-    
-    try {
-      const supabase = createSupabaseClient();
-      
-      // Update username in database
-      const { error } = await supabase
-        .from('users')
-        .update({ username: username })
-        .eq('wallet_address', session?.user?.walletAddress);
-        
-      if (error) throw error;
-      
-      // Update session
-      await update({
-        ...session,
-        user: {
-          ...session?.user,
-          name: username
-        }
-      });
-      
-      toast.success("Username updated successfully!");
-      
-      // Check if avatar is also missing, if so go to step 2, otherwise close
-      if (!session?.user.image) {
-        setStep(2);
-      } else {
-        setTimeout(() => {
-          setOpen(false);
-        }, 1500);
-      }
-    } catch (error) {
-      console.error("Error updating username:", error);
-      toast.error("Failed to update username");
-    } finally {
-      setIsLoading(false);
-    }
+    // Update both state and ref to ensure consistency
+    setCurrentStep(2);
+    currentStepRef.current = 2;
   };
   
-  // Profile picture upload complete handler
+  // Handle avatar upload complete
   const handleAvatarUploadComplete = async (res: { url: string }[]) => {
     if (res && res[0]?.url) {
       setAvatarUrl(res[0].url);
-      
-      try {
-        const supabase = createSupabaseClient();
-        
-        // Update profile pic in database
-        const { error } = await supabase
-          .from('users')
-          .update({ avatar_url: res[0].url })
-          .eq('wallet_address', session?.user?.walletAddress);
-          
-        if (error) throw error;
-        
-        // Update session
-        await update({
-          ...session,
-          user: {
-            ...session?.user,
-            image: res[0].url
-          }
-        });
-        
-        toast.success("Profile picture updated successfully!");
-        
-        // Close dialog since we're done with setup
-        setTimeout(() => {
-          setOpen(false);
-        }, 1500);
-      } catch (error) {
-        console.error("Error updating profile picture:", error);
-        toast.error("Failed to update profile picture");
-      }
+      toast.success("Image uploaded successfully!");
     }
   };
   
@@ -147,41 +170,118 @@ export const ProfileSetupDialog = () => {
     toast.error("Failed to upload profile picture");
   };
   
+  // Save complete profile
+  const handleSaveProfile = async () => {
+    if (!session?.user?.id) return;
+    
+    const supabase = getClient();
+    if (!supabase) return;
+    
+    setIsLoading(true);
+    
+    try {
+      // Prepare data to update
+      const updateData: Record<string, any> = {
+        username: username,
+        setup_completed: true
+      };
+      
+      if (avatarUrl) {
+        updateData.avatar_url = avatarUrl;
+      }
+      
+      // Update in database
+      const { error } = await supabase
+        .from('users')
+        .update(updateData)
+        .eq('id', session.user.id);
+        
+      if (error) throw error;
+      
+      // Update session
+      const sessionUpdate: any = {
+        ...session,
+        user: {
+          ...session.user,
+          name: username
+        }
+      };
+      
+      if (avatarUrl) {
+        sessionUpdate.user.image = avatarUrl;
+      }
+      
+      await update(sessionUpdate);
+      
+      setSetupCompleted(true);
+      toast.success("Profile updated successfully!");
+      
+      // Close dialog
+      setTimeout(() => setOpen(false), 1500);
+    } catch (err) {
+      console.error("Error saving profile:", err);
+      toast.error("Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Skip button handler
+  const handleSkip = async () => {
+    if (!session?.user?.id) return;
+    
+    const supabase = getClient();
+    if (!supabase) return;
+    
+    try {
+      await supabase
+        .from('users')
+        .update({ setup_completed: true })
+        .eq('id', session.user.id);
+        
+      setSetupCompleted(true);
+      setOpen(false);
+    } catch (err) {
+      console.error("Error skipping setup:", err);
+    }
+  };
+  
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            {step === 1 ? "Set Your Username" : "Add Profile Picture"}
+            {currentStepRef.current === 1 ? "Choose Your Username" : "Add Profile Picture"}
           </DialogTitle>
           <DialogDescription>
-            {step === 1 
+            {currentStepRef.current === 1 
               ? "Please choose a username that will identify you to other users."
               : "Upload a profile picture to personalize your account."
             }
           </DialogDescription>
         </DialogHeader>
         
-        {step === 1 ? (
+        {currentStepRef.current === 1 ? (
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Input
                 placeholder="Enter your username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full"
+                className="w-full rounded-full"
               />
             </div>
             <DialogFooter>
-              <Button 
-                onClick={handleUsernameSubmit} 
-                disabled={isLoading || !username.trim()}
-                className="w-full"
-              >
-                {isLoading ? "Saving..." : "Continue"}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <div className="w-full rounded-full z-5 p-0.5 gradient-border">
+                <Button 
+                  onClick={handleContinueToAvatar} 
+                  disabled={!username.trim()}
+                  className="w-full relative rounded-full bg-black hover:bg-zinc-800"
+                >
+                  Continue
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
             </DialogFooter>
           </div>
         ) : (
@@ -214,15 +314,19 @@ export const ProfileSetupDialog = () => {
               </UploadButton>
             </div>
             
-            <DialogFooter>
-              <Button 
-                onClick={() => setOpen(false)}
-                variant="outline"
-                className="w-full"
-                disabled={!avatarUrl}
-              >
-                {avatarUrl ? "Complete Setup" : "Skip for Now"}
-              </Button>
+            <DialogFooter className="space-y-3">
+                <div className=" relative w-full">
+              <div className="w-full absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
+                <Button 
+                  onClick={handleSaveProfile}
+                  disabled={isLoading}
+                  className="w-full relative rounded-full bg-black hover:bg-zinc-800"
+                >
+                  {isLoading ? "Saving..." : "Save Profile"}
+                  <Check className="ml-2 h-4 w-4" />
+                </Button>
+              </div>   
+              </div>
             </DialogFooter>
           </div>
         )}
