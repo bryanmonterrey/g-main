@@ -7,14 +7,12 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { ProfileBanner } from "./profile-banner";
 import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 import { useSession } from "next-auth/react";
-import { Heart, MessageCircle } from "lucide-react";
-import { GlowEffect } from "@/components/ui/glow-effect";
-import { ProfileInfo } from "./profile-info";
+import { CalendarDays, Heart, MessageCircle, Wallet } from "lucide-react";
+import { format } from "date-fns";
 
 interface ProfileHeaderProps {
     username: string | null;
@@ -27,16 +25,16 @@ interface ProfileHeaderProps {
     isFollowing: boolean;
     onFollow?: () => Promise<void>;
     onUnfollow?: () => Promise<void>;
-  }
+}
 
 export const ProfileHeader = ({
     username,
     avatarUrl,
     bannerUrl,
     walletAddress,
-    isOwnProfile,
     bio,
     createdAt,
+    isOwnProfile,
     isFollowing,
     onFollow,
     onUnfollow,
@@ -44,10 +42,10 @@ export const ProfileHeader = ({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [currentBannerUrl, setCurrentBannerUrl] = useState(bannerUrl);
+  const { data: session } = useSession();
 
   const handleBannerUpdate = async (newBannerUrl: string) => {
     try {
-      const { data: session } = useSession(); // Change this line
       if (!session?.user?.id) return;
 
       const supabase = getSupabase(session);
@@ -88,148 +86,99 @@ export const ProfileHeader = ({
 
   return (
     <div className="flex items-center justify-center">      
-    <div className="inline-block max-w-[85ch] min-w-[85ch] px-0 pt-0 bg-zinc-950 rounded-3xl gap-y-4 lg:gap-y-0 items-center justify-center ">
+      <div className="inline-block max-w-[85ch] min-w-[85ch] px-0 pt-0 bg-zinc-950 rounded-3xl gap-y-4 lg:gap-y-0 items-center justify-center">
         <div className="inline-block w-full">
-            <div className="w-full">
-                <ProfileBanner
-                    bannerUrl={currentBannerUrl}
-                    username={username}
-                    isOwnProfile={isOwnProfile}
-                    onBannerUpdate={handleBannerUpdate}
-                />
-            </div>
-            <div className="w-full inline-flex justify-between">
-            <div className="inline-flex justify-between w-full">
-            <div className="px-10">
-                
+          <div className="w-full">
+            <ProfileBanner
+              bannerUrl={currentBannerUrl}
+              username={username}
+              isOwnProfile={isOwnProfile}
+              onBannerUpdate={handleBannerUpdate}
+            />
+          </div>
+          <div className="px-10 py-4">
+            <div className="flex flex-col">
+              {/* Profile Header */}
+              <div className="flex items-start justify-between">
                 <div className="flex items-center gap-x-7">
-                    <div className="relative -mt-6">
+                  <div className="relative -mt-12">
                     <UserAvatar 
-                    avatarUrl={avatarUrl || ""}
-                    username={username || ""}
-                    size="xl"
+                      avatarUrl={avatarUrl || ""}
+                      username={username || ""}
+                      size="xl"
                     />
-                    </div>
-                    <div className="">
-                        <div className="flex items-center gap-x-2">
-                            <h2 className="text-lg font-semibold">
-                                {username || "Unnamed"}
-                            </h2>
-                        </div>
-                        <div className="flex items-center gap-x-2">
-                            <p className="text-sm font-semibold text-muted-foreground">
-                                @{username || "Unnamed"}
-                            </p>
-                            </div>
-                        </div>
-                    </div>
+                  </div>
+                  <div className="flex flex-col">
+                    <h2 className="text-lg font-semibold">
+                      {username || "Unnamed"}
+                    </h2>
+                    <p className="text-sm font-semibold text-muted-foreground">
+                      @{username || "Unnamed"}
+                    </p>
+                  </div>
                 </div>
-            
-        </div>
-      
-      {!isOwnProfile && (
-        <div className="flex items-center gap-x-2">
-        <div className="inline-flex gap-x-2 px-5 ">
-            <div className="inline-flex gap-x-2">
-            <div className="relative h-fit w-fit">
-        <div className="relative rounded-full z-5">
-        <Button
-          disabled={isLoading}
-          onClick={handleFollow}
-          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full  border border-zinc-50/65"
-        >
-          <MessageCircle
-          className="h-5 w-5"
-          />
-        </Button>
-        </div>
-        </div>
-            <div className="relative h-fit w-fit">
-        <div className="relative rounded-full z-5">
-        <Button
-          disabled={isLoading}
-          onClick={handleFollow}
-          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full  border border-zinc-50/65"
-        >
-          <MessageCircle
-          className="h-5 w-5"
-          />
-        </Button>
-        </div>
-        </div>
-            <div className="relative h-fit w-fit">
-        <div className="relative rounded-full z-5">
-        <Button
-          disabled={isLoading}
-          onClick={handleFollow}
-          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full  border border-zinc-50/65"
-        >
-          <MessageCircle
-          className="h-5 w-5"
-          />
-        </Button>
-        </div>
-        </div>
-            <div className="relative h-fit w-fit">
-        <div className="relative rounded-full z-5">
-        <Button
-          disabled={isLoading}
-          onClick={handleFollow}
-          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full border border-zinc-50/65"
-        >
-          <MessageCircle
-          className="h-5 w-5"
-          />
-        </Button>
-        </div>
-        </div>
-            
-      <div className="relative rounded-full z-5">
-        <Button
-          disabled={isLoading}
-          onClick={handleFollow}
-          className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full border border-zinc-50/65"
-        >
-          <Heart  
-            className={cn(
-              "h-5 w-5",
-              isFollowing ? "fill-white" : "hidden mx-3"
-            )}
-          />
-          {isFollowing ? "" : "Follow"}
-        </Button>
-        </div >
-        
-        </div>
-        </div>
-        </div>
-      )}
-      
-      {isOwnProfile && (
-        <Button
-          onClick={() => router.push('/settings')}
-          variant="outline"
-          className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full"
-        >
-          Edit Profile
-        </Button>
-      )}
-    </div>
-    </div>
-    </div>
-    <ProfileInfo
-          bio={user.bio}
-          createdAt={user.created_at}
-          walletAddress={user.wallet_address}
-        />
-    </div>
-  );
-};
 
-export const ProfileHeaderSkeleton = () => {
-  return (
-    <div className="flex flex-col lg:flex-row gap-y-4 lg:gap-y-0 items-start justify-between px-4">
-      {/* Add your skeleton loading state here */}
+                {/* Action Buttons */}
+                <div className="flex items-center gap-x-2">
+                  {!isOwnProfile ? (
+                    <div className="flex items-center gap-x-2">
+                      <Button
+                        disabled={isLoading}
+                        onClick={() => {}}
+                        className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full border border-zinc-50/65"
+                      >
+                        <MessageCircle className="h-5 w-5" />
+                      </Button>
+                      <Button
+                        disabled={isLoading}
+                        onClick={handleFollow}
+                        className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full border border-zinc-50/65"
+                      >
+                        <Heart className={cn(
+                          "h-5 w-5",
+                          isFollowing ? "fill-white" : "hidden mx-3"
+                        )} />
+                        {isFollowing ? "" : "Follow"}
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => router.push('/settings')}
+                      variant="outline"
+                      className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full"
+                    >
+                      Edit Profile
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Profile Info */}
+              <div className="mt-4">
+                {bio && (
+                  <p className="text-sm mb-4">{bio}</p>
+                )}
+                <div className="flex flex-row gap-4 items-center text-muted-foreground">
+                  {walletAddress && (
+                    <div className="flex items-center gap-2">
+                      <Wallet className="h-4 w-4" />
+                      <p className="text-sm">{shortenWalletAddress(walletAddress)}</p>
+                    </div>
+                  )}
+                  {createdAt && (
+                    <div className="flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4" />
+                      <p className="text-sm">
+                        Joined {format(new Date(createdAt), 'MMMM yyyy')}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

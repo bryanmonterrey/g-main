@@ -79,22 +79,20 @@ export const Profile = ({
       <div className="flex flex-col gap-y-4 mt-6">
         {/* Profile Header Section */}
         <ProfileHeader
-          username={user.username}
-          avatarUrl={user.avatar_url}
-          bannerUrl={user.banner_url}
-          walletAddress={user.wallet_address || ''}
-          isOwnProfile={isOwnProfile}
-          isFollowing={isFollowing}
-          onFollow={onFollow || handleFollow}
-          onUnfollow={onUnfollow || handleFollow}
+            username={user.username}
+            avatarUrl={user.avatar_url}
+            bannerUrl={user.banner_url}
+            walletAddress={user.wallet_address || ''}
+            bio={user.bio}
+            createdAt={user.created_at}
+            isOwnProfile={isOwnProfile}
+            isFollowing={isFollowing}
+            onFollow={onFollow || handleFollow}
+            onUnfollow={onUnfollow || handleFollow}
         />
 
         {/* Profile Info Section */}
-        <ProfileInfo
-          bio={user.bio}
-          createdAt={user.created_at}
-          walletAddress={user.wallet_address}
-        />
+        
 
         {/* Profile Posts Section */}
         <ProfilePosts
