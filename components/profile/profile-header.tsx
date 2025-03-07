@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { ProfileBanner } from "./profile-banner";
 import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 import { useSession } from "next-auth/react";
+import { Heart, MessageCircle } from "lucide-react";
+import { GlowEffect } from "@/components/ui/glow-effect";
 
 interface ProfileHeaderProps {
     username: string | null;
@@ -91,25 +93,29 @@ export const ProfileHeader = ({
                     onBannerUpdate={handleBannerUpdate}
                 />
             </div>
-            <div className="w-full inline-flex">
-            <div className="inline-flex justify-between">
+            <div className="w-full inline-flex justify-between">
+            <div className="inline-flex justify-between w-full">
             <div className="px-10">
                 
                 <div className="flex items-center gap-x-7">
+                    <div className="relative -mt-6">
                     <UserAvatar 
                     avatarUrl={avatarUrl || ""}
                     username={username || ""}
-                    size="lg"
+                    size="xl"
                     />
-                    <div className="space-y-1">
+                    </div>
+                    <div className="">
                         <div className="flex items-center gap-x-2">
                             <h2 className="text-lg font-semibold">
                                 {username || "Unnamed"}
                             </h2>
                         </div>
+                        <div className="flex items-center gap-x-2">
                             <p className="text-sm font-semibold text-muted-foreground">
-                                {shortenWalletAddress(walletAddress)}
+                                @{username || "Unnamed"}
                             </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -117,16 +123,56 @@ export const ProfileHeader = ({
         </div>
       
       {!isOwnProfile && (
+        <div className="flex items-center gap-x-2">
+        <div className="inline-flex gap-x-2 px-5 ">
+            <div className="inline-flex gap-x-2">
+            <div className="relative h-fit w-fit">
+        <div className="absolute inset-0 rounded-full p-0.5 z-5 gradient-border">
+        <Button
+          disabled={isLoading}
+          onClick={handleFollow}
+          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full"
+        >
+          <MessageCircle
+          className="h-5 w-5"
+          />
+        </Button>
+        </div>
+        </div>
+            <div className="relative h-fit w-fit">
+        <div className="absolute inset-0 rounded-full p-0.5 z-5 gradient-border">
+        <Button
+          disabled={isLoading}
+          onClick={handleFollow}
+          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full"
+        >
+          <MessageCircle
+          className="h-5 w-5"
+          />
+        </Button>
+        </div>
+        </div>
+            <div className="relative h-fit w-fit">
+        <div className="absolute inset-0 rounded-full p-0.5 z-5 gradient-border">
+        <Button
+          disabled={isLoading}
+          onClick={handleFollow}
+          className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full"
+        >
+          <MessageCircle
+          className="h-5 w-5"
+          />
+        </Button>
+        </div>
+        </div>
+            
+      <div className="absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
         <Button
           disabled={isLoading}
           onClick={handleFollow}
           className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full"
         >
-          <Image 
-            src="/broken.svg" 
-            width={20} 
-            height={20} 
-            alt="heart" 
+          <Heart  
             className={cn(
               "h-5 w-5",
               isFollowing ? "fill-white" : "hidden mx-3"
@@ -134,6 +180,11 @@ export const ProfileHeader = ({
           />
           {isFollowing ? "" : "Follow"}
         </Button>
+        </div >
+        
+        </div>
+        </div>
+        </div>
       )}
       
       {isOwnProfile && (
