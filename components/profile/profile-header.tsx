@@ -14,12 +14,15 @@ import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 import { useSession } from "next-auth/react";
 import { Heart, MessageCircle } from "lucide-react";
 import { GlowEffect } from "@/components/ui/glow-effect";
+import { ProfileInfo } from "./profile-info";
 
 interface ProfileHeaderProps {
     username: string | null;
     avatarUrl: string | null;
     bannerUrl: string | null;
     walletAddress: string;
+    bio: string | null;
+    createdAt: string | null;
     isOwnProfile: boolean;
     isFollowing: boolean;
     onFollow?: () => Promise<void>;
@@ -32,6 +35,8 @@ export const ProfileHeader = ({
     bannerUrl,
     walletAddress,
     isOwnProfile,
+    bio,
+    createdAt,
     isFollowing,
     onFollow,
     onUnfollow,
@@ -212,6 +217,11 @@ export const ProfileHeader = ({
     </div>
     </div>
     </div>
+    <ProfileInfo
+          bio={user.bio}
+          createdAt={user.created_at}
+          walletAddress={user.wallet_address}
+        />
     </div>
   );
 };
