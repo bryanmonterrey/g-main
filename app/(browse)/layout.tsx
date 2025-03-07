@@ -9,6 +9,7 @@ import Sidebar, { SidebarSkeleton} from './_components/sidebar';
 import LocomotiveScroll from 'locomotive-scroll';
 
 import { useSession } from "next-auth/react";
+import { ProfileSetupDialog } from '@/components/profile/profile-setup-dialog';
 
 const BrowseLayout = ({ 
     children, 
@@ -42,6 +43,7 @@ const BrowseLayout = ({
                 {children}
             </Container>
         </ div>
+        {session && <ProfileSetupDialog />}
     </>
    
   )
