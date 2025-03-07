@@ -2,6 +2,7 @@
 "use client";
 
 import { Profile } from "@/components/profile";
+import { getUserByUsername } from "@/lib/auth-service.server";
 import { isFollowingUser } from "@/lib/follow-servicee";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
@@ -9,35 +10,38 @@ import { Loader2 } from "lucide-react";
 import { onFollow, onUnfollow } from "@/actions/follow";
 
 interface ProfileClientProps {
-  initialProfile: any; // Type this properly based on your user type
+  username: string; // Changed from initialProfile to username
 }
 
-export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
+const ProfileClient = ({ username }: ProfileClientProps) => {
   const { data: session, status } = useSession();
+  const [profile, setProfile] = useState<any>(null);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkFollowStatus = async () => {
-      if (session?.user?.id && initialProfile.id) {
-        try {
-          setIsLoading(true);
-          const following = await isFollowingUser(initialProfile.id);
+    const loadProfile = async () => {
+      try {
+        const userProfile = await getUserByUsername(username, session);
+        setProfile(userProfile);
+        
+        if (session?.user?.id && userProfile.id) {
+          const following = await isFollowingUser(userProfile.id);
           setIsFollowing(following);
-        } catch (error) {
-          console.error("Error checking follow status:", error);
-        } finally {
-          setIsLoading(false);
         }
+      } catch (error) {
+        console.error("Error loading profile:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    checkFollowStatus();
-  }, [session, initialProfile.id]);
+    loadProfile();
+  }, [username, session]);
 
   const handleFollow = async (): Promise<void> => {
     try {
-      await onFollow(initialProfile.id);
+      await onFollow(profile.id);
       setIsFollowing(true);
     } catch (error) {
       console.error("Error following user:", error);
@@ -46,7 +50,7 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
 
   const handleUnfollow = async (): Promise<void> => {
     try {
-      await onUnfollow(initialProfile.id);
+      await onUnfollow(profile.id);
       setIsFollowing(false);
     } catch (error) {
       console.error("Error unfollowing user:", error);
@@ -61,11 +65,19 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
     );
   }
 
-  const isOwnProfile = session?.user?.id === initialProfile.id;
+  if (!profile) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="text-muted-foreground">User not found</div>
+      </div>
+    );
+  }
+
+  const isOwnProfile = session?.user?.id === profile.id;
 
   return (
     <Profile
-      user={initialProfile}
+      user={profile}
       isOwnProfile={isOwnProfile}
       isFollowing={isFollowing}
       onFollow={handleFollow}
@@ -73,3 +85,5 @@ export const ProfileClient = ({ initialProfile }: ProfileClientProps) => {
     />
   );
 };
+
+export default ProfileClient;

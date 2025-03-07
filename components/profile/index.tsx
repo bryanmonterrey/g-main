@@ -11,26 +11,28 @@ import { toast } from "sonner";
 import { useState } from "react";
 
 interface ProfileProps {
-    user: {
-      id: string;
-      username: string | null;
-      avatar_url: string | null;
-      banner_url: string | null;
-      wallet_address: string | null;
-      bio: string | null;
-      created_at: string | null;
-      updated_at: string | null;
-    };
-    isOwnProfile: boolean;
-    isFollowing: boolean;
-    onFollow: () => Promise<void>;
-    onUnfollow: () => Promise<void>;
-  }
+  user: {
+    id: string;
+    username: string | null;
+    avatar_url: string | null;
+    banner_url: string | null;
+    wallet_address: string | null;
+    bio: string | null;
+    created_at: string | null;
+    updated_at: string | null;
+  };
+  isOwnProfile: boolean;
+  isFollowing: boolean;
+  onFollow?: () => Promise<void>;
+  onUnfollow?: () => Promise<void>;
+}
 
 export const Profile = ({
   user,
   isOwnProfile,
-  isFollowing: initialIsFollowing
+  isFollowing: initialIsFollowing,
+  onFollow,
+  onUnfollow
 }: ProfileProps) => {
   const router = useRouter();
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
@@ -42,11 +44,19 @@ export const Profile = ({
       if (!user.id) return;
 
       if (isFollowing) {
-        await onUnfollow(user.id);
+        if (onUnfollow) {
+          await onUnfollow();
+        } else {
+          await onUnfollow(user.id);
+        }
         toast.success(`Unfollowed ${user.username || 'user'}`);
         setIsFollowing(false);
       } else {
-        await onFollow(user.id);
+        if (onFollow) {
+          await onFollow();
+        } else {
+          await onFollow(user.id);
+        }
         toast.success(`Following ${user.username || 'user'}`);
         setIsFollowing(true);
       }
@@ -59,12 +69,6 @@ export const Profile = ({
     }
   };
 
-  const handleUnfollow = async () => {
-    try {
-      setIsLoading(true);
-      if (!user.id) return;
-
-      await onUnfollow(user.id);
   if (!user) {
     return <div>User not found</div>;
   }
@@ -75,14 +79,14 @@ export const Profile = ({
       <div className="flex flex-col gap-y-4">
         {/* Profile Header Section */}
         <ProfileHeader
-        username={user.username}
-        avatarUrl={user.avatar_url}
-        bannerUrl={user.banner_url}
-        walletAddress={user.wallet_address || ''}
-        isOwnProfile={isOwnProfile}
-        isFollowing={isFollowing}
-        onFollow={onFollow}
-        onUnfollow={onUnfollow}
+          username={user.username}
+          avatarUrl={user.avatar_url}
+          bannerUrl={user.banner_url}
+          walletAddress={user.wallet_address || ''}
+          isOwnProfile={isOwnProfile}
+          isFollowing={isFollowing}
+          onFollow={onFollow || handleFollow}
+          onUnfollow={onUnfollow || handleFollow}
         />
 
         {/* Profile Info Section */}
