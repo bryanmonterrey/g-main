@@ -65,7 +65,7 @@ export default function WalletConnectButton() {
         nonce: csrfToken,
         uri: "https://solana.com/",
         version: "1",
-        chainId: "devnet",
+        chainId: "Mainnet",
         issuedAt: new Date().toISOString(),
         requestId: crypto.randomUUID(),
       });

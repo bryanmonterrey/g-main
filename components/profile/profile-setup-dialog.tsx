@@ -276,10 +276,10 @@ export const ProfileSetupDialog = () => {
                 <Button 
                   onClick={handleContinueToAvatar} 
                   disabled={!username.trim()}
-                  className="w-full relative rounded-full bg-black hover:bg-zinc-800"
+                  className="w-full relative rounded-full bg-black disabled:bg-black hover:bg-zinc-800"
                 >
                   Continue
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-4 w-4" strokeWidth={2.5} />
                 </Button>
               </div>
             </DialogFooter>
