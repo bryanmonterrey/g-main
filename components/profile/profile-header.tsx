@@ -142,13 +142,19 @@ export const ProfileHeader = ({
                       </Button>
                     </div>
                   ) : (
+                    <div className="relative w-full">
+                    <div className="w-full absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
                     <Button
                       onClick={() => router.push('/settings')}
                       variant="outline"
-                      className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full"
+                      className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full border-white/5"
                     >
-                      Edit Profile
+                        <p className="text-sm gradient-text">
+                            Edit Profile
+                        </p>
                     </Button>
+                    </div>
+                    </div>
                   )}
                 </div>
               </div>

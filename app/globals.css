@@ -346,3 +346,10 @@ body.hidden-scrollbar {
     background-clip: text;
     color: transparent;
   }
+
+  .gradient-border {
+    position: relative;
+    background-image: linear-gradient(to right, #FFC6C6, #ADFFE1, #B8A4FF, #E6B1FF);
+    background-clip: border-box;
+    border: 1px solid transparent; /* Set the border thickness */
+  }
