@@ -57,6 +57,31 @@ export const ProfileSetupDialog = () => {
     currentStepRef.current = currentStep;
   }, [currentStep]);
 
+  const validateUsername = (value: string): { valid: boolean; message: string | null } => {
+    if (!value || value.trim().length === 0) {
+      return { valid: false, message: "Username is required" };
+    }
+    
+    if (value.length < 3) {
+      return { valid: false, message: "Username must be at least 3 characters" };
+    }
+    
+    if (value.length > 15) {
+      return { valid: false, message: "Username must be no more than 15 characters" };
+    }
+    
+    // Regex pattern for Twitter-style usernames: letters, numbers, and underscores only
+    const pattern = /^[a-zA-Z0-9_]+$/;
+    if (!pattern.test(value)) {
+      return { 
+        valid: false, 
+        message: "Username can only contain letters, numbers, and underscores" 
+      };
+    }
+    
+    return { valid: true, message: null };
+  };
+
   // Check username availability when username changes
   useEffect(() => {
     // Clear any existing timeout
@@ -396,57 +421,66 @@ export const ProfileSetupDialog = () => {
         {currentStepRef.current === 1 ? (
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <div className="relative">
-                <Input
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className={`w-full rounded-full pr-10 ${
-                    usernameAvailable === true ? 'border-green-500 focus-visible:ring-green-500' : 
-                    usernameAvailable === false ? 'border-red-500 focus-visible:ring-red-500' : ''
-                  }`}
-                />
-                {checkingUsername && (
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-black"></div>
-                  </div>
-                )}
-                {!checkingUsername && usernameAvailable === true && (
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-green-500">
-                    <Check className="h-4 w-4" />
-                  </div>
-                )}
-                {!checkingUsername && usernameAvailable === false && (
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500">
-                    <X className="h-4 w-4" />
-                  </div>
-                )}
-              </div>
-              
-              {/* Availability message */}
-              {username.length > 0 && (
-                <div className="text-xs mt-1">
-                  {checkingUsername ? (
-                    <span className="text-gray-500">Checking availability...</span>
-                  ) : usernameAvailable === true ? (
-                    <span className="text-green-500">Username is available!</span>
-                  ) : usernameAvailable === false ? (
-                    <span className="text-red-500">Username is already taken.</span>
-                  ) : username.length < 3 ? (
-                    <span className="text-amber-500">Username must be at least 3 characters.</span>
-                  ) : null}
+                <div className="relative">
+                    <Input
+                    placeholder="Enter your username"
+                    value={username}
+                    onChange={(e) => {
+                        setUsername(e.target.value);
+                        // Reset username validity when typing
+                        setUsernameAvailable(null);
+                    }}
+                    className={`w-full rounded-full pr-10 transition-all duration-200 ease-in-out${
+                        usernameAvailable === true ? 'border-green-500 focus-visible:ring-green-500' : 
+                        usernameAvailable === false || validateUsername(username).valid === false ? 'border-zinc-900/70 focus-visible:ring-zinc-900/70' : ''
+                    }`}
+                    />
+                    {checkingUsername && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-black"></div>
+                    </div>
+                    )}
+                    {!checkingUsername && usernameAvailable === true && validateUsername(username).valid && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-green-500">
+                        <Check className="h-4 w-4" />
+                    </div>
+                    )}
+                    {(!checkingUsername && (usernameAvailable === false || validateUsername(username).valid === false)) && (
+                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500">
+                        <X className="h-4 w-4" />
+                    </div>
+                    )}
                 </div>
-              )}
-            </div>
+                
+                {/* Display validation messages */}
+                {username.length > 0 && (
+                    <div className="text-xs mt-1">
+                    {checkingUsername ? (
+                        <span className="text-gray-500">Checking availability...</span>
+                    ) : usernameAvailable === false ? (
+                        <span className="text-red-500">Username is already taken.</span>
+                    ) : validateUsername(username).valid === false ? (
+                        <span className="text-gray-500">{validateUsername(username).message}</span>
+                    ) : usernameAvailable === true ? (
+                        <span className="text-green-500">Username is available!</span>
+                    ) : null}
+                    </div>
+                )}
+                </div>
             <DialogFooter>
               <div className="w-full rounded-full z-5 p-0.5 gradient-border">
-                <Button 
-                  onClick={handleContinueToAvatar} 
-                  disabled={!username.trim() || username.length < 3 || usernameAvailable === false || checkingUsername}
-                  className="w-full relative rounded-full bg-black disabled:bg-black hover:bg-zinc-800"
+              <Button 
+                onClick={handleContinueToAvatar} 
+                disabled={
+                    !username.trim() || 
+                    !validateUsername(username).valid || 
+                    usernameAvailable !== true || 
+                    checkingUsername
+                }
+                className="w-full relative rounded-full bg-black disabled:bg-black hover:bg-zinc-800"
                 >
-                  Continue
-                  <ArrowRight className="ml-2 h-4 w-4" strokeWidth={2.5} />
+                Continue
+                <ArrowRight className="ml-2 h-4 w-4" strokeWidth={2.5} />
                 </Button>
               </div>
             </DialogFooter>
