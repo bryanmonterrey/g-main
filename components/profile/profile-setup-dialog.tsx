@@ -304,13 +304,14 @@ export const ProfileSetupDialog = () => {
                 )}
                 
                 {/* Overlay with upload button */}
-                <div className="absolute inset-0 hover:cursor-pointer bg-black/40 flex items-center justify-center opacity-100 transition-opacity">
+                <div className="absolute h-full w-full inset-0 hover:cursor-pointer bg-black/40 flex items-center justify-center opacity-100 transition-opacity">
                   <UploadButton
                     endpoint="avatars"
                     onClientUploadComplete={handleAvatarUploadComplete}
                     onUploadError={handleAvatarUploadError}
+                    className="inset-0 h-full w-full flex items-center justify-center"
                   >
-                    <div className="text-white text-xs font-medium hover:cursor-pointer">
+                    <div className="text-white/80 h-full w-full flex inset-0 items-center justify-center relative hover:cursor-pointer">
                       {avatarUrl ? <Camera className="h-7 w-7" strokeWidth={2.5}/> : <Camera className="h-7 w-7" strokeWidth={2.5}/>}
                       
                     </div>

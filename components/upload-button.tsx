@@ -11,6 +11,7 @@ interface UploadButtonProps {
   children: React.ReactNode;
   onClientUploadComplete?: (res: { url: string }[]) => void;
   onUploadError?: (error: Error) => void;
+  className?: string;
 }
 
 export const UploadButton = ({
@@ -18,6 +19,7 @@ export const UploadButton = ({
   children,
   onClientUploadComplete,
   onUploadError,
+  className,
 }: UploadButtonProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -55,18 +57,18 @@ export const UploadButton = ({
   };
 
   return (
-    <div>
+    <div className={className}>
       <input
         type="file"
         id="file-upload"
-        className="hidden"
+        className="hidden h-full w-full inset-0"
         accept="image/*"
         onChange={handleUpload}
         disabled={isUploading}
       />
       <label htmlFor="file-upload">
         {typeof children === 'string' ? (
-          <Button disabled={isUploading}>
+          <Button className="h-full w-full inset-0" disabled={isUploading}>
             {isUploading ? 'Uploading...' : children}
           </Button>
         ) : (
