@@ -190,7 +190,7 @@ export const ProfilePosts = ({
             className={cn(
               "px-4 py-2 text-sm font-semibold rounded-full transition-all relative z-10",
               activeTab === tab.id
-                ? "text-zinc-50" // Dark text for contrast
+                ? "gradient-text" // Dark text for contrast
                 : "text-white/70 hover:text-white"
             )}
           >
@@ -203,10 +203,10 @@ export const ProfilePosts = ({
                 className="absolute inset-0 bg-white/15 rounded-full -z-10"
                 initial={false}
                 transition={{ 
-                  type: "spring", 
-                  stiffness: 500, 
-                  damping: 30 
-                }}
+                    type: "spring", 
+                    stiffness: 250, 
+                    damping: 30 
+                  }}
               />
             )}
           </button>

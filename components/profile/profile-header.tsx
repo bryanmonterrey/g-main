@@ -125,20 +125,20 @@ export const ProfileHeader = ({
                       <Button
                         disabled={isLoading}
                         onClick={() => {}}
-                        className="h-8 w-8 bg-black text-white hover:bg-zinc-800 rounded-full border border-zinc-50/65"
+                        className="h-8 w-8 bg-white/15 text-white hover:bg-white/35 rounded-full transition-all duration-300 ease-in-out"
                       >
                         <MessageCircle className="h-5 w-5" />
                       </Button>
                       <Button
                         disabled={isLoading}
                         onClick={handleFollow}
-                        className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full border border-zinc-50/65"
+                        className="h-[34px] px-6 py-2 bg-white/15 hover:bg-white/35 rounded-full transition-all duration-300 ease-in-out"
                       >
                         <Heart className={cn(
                           "h-5 w-5",
                           isFollowing ? "fill-white" : "hidden mx-3"
                         )} />
-                        {isFollowing ? "" : "Follow"}
+                        {isFollowing ? <p className="text-sm gradient-text">Following</p> : <p className="text-sm gradient-text">Follow</p>}
                       </Button>
                     </div>
                   ) : (
@@ -147,7 +147,7 @@ export const ProfileHeader = ({
                     <Button
                       onClick={() => router.push('/settings')}
                       variant="outline"
-                      className="h-[34px] px-6 bg-black text-white hover:bg-zinc-800 rounded-full border-white/5"
+                      className="h-[34px] px-6 bg-white/15 text-white hover:bg-white/35 rounded-full border-white/5 transition-all duration-300 ease-in-out"
                     >
                         <p className="text-sm gradient-text">
                             Edit Profile
