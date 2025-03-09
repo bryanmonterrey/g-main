@@ -1066,6 +1066,7 @@ export type Database = {
           banner_url: string | null
           bio: string | null
           created_at: string | null
+          display_name: string | null
           email: string | null
           emailVerified: string | null
           id: string
@@ -1082,6 +1083,7 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           created_at?: string | null
+          display_name?: string | null
           email?: string | null
           emailVerified?: string | null
           id?: string
@@ -1098,6 +1100,7 @@ export type Database = {
           banner_url?: string | null
           bio?: string | null
           created_at?: string | null
+          display_name?: string | null
           email?: string | null
           emailVerified?: string | null
           id?: string
