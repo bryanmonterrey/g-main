@@ -61,14 +61,14 @@ export const UploadButton = ({
       <input
         type="file"
         id="file-upload"
-        className="hidden h-full w-full inset-0"
+        className="hidden"
         accept="image/*"
         onChange={handleUpload}
         disabled={isUploading}
       />
       <label htmlFor="file-upload">
         {typeof children === 'string' ? (
-          <Button className="h-full w-full inset-0" disabled={isUploading}>
+          <Button disabled={isUploading}>
             {isUploading ? 'Uploading...' : children}
           </Button>
         ) : (

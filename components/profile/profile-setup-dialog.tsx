@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { UploadButton } from "@/components/upload-button";
 import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 import { Camera } from 'lucide-react';
 
@@ -37,7 +36,10 @@ export const ProfileSetupDialog = () => {
   const [currentStep, setCurrentStep] = useState<ProfileSetupStep>(1);
   const [username, setUsername] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [setupCompleted, setSetupCompleted] = useState(false);
   
   // Use a ref to maintain the current step
@@ -157,21 +159,97 @@ export const ProfileSetupDialog = () => {
     currentStepRef.current = 2;
   };
   
-  // Handle avatar upload complete
-  const handleAvatarUploadComplete = async (res: { url: string }[]) => {
-    if (res && res[0]?.url) {
-      setAvatarUrl(res[0].url);
-      toast.success("Image uploaded successfully!");
+  // Handle file selection for avatar
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Log file details
+    console.log('File selected:', {
+      name: file.name,
+      type: file.type,
+      size: Math.round(file.size / 1024) + 'KB'
+    });
+    
+    // Validate file type
+    const acceptedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!acceptedTypes.includes(file.type)) {
+      toast.error("Please upload a JPEG, PNG, or GIF image");
+      return;
+    }
+    
+    // Validate file size (2MB max)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Maximum file size is 2MB");
+      return;
+    }
+    
+    setAvatarFile(file);
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPreviewUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  const uploadAvatar = async () => {
+    if (!avatarFile || !session?.user?.id) return;
+    
+    setIsUploading(true);
+    
+    try {
+      const supabase = getClient();
+      if (!supabase) {
+        toast.error("Could not connect to storage service");
+        return;
+      }
+      
+      // Create a unique filename with timestamp
+      const timestamp = Date.now();
+      const fileExt = avatarFile.name.split('.').pop()?.toLowerCase();
+      const fileName = `avatar_${timestamp}.${fileExt}`;
+      
+      console.log('Starting upload with filename:', fileName);
+      
+      // Step 1: Upload file to storage
+      const { data, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, avatarFile, {
+          upsert: true
+        });
+      
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast.error("Failed to upload avatar: " + uploadError.message);
+        return;
+      }
+      
+      console.log('File uploaded successfully:', data);
+      
+      // Step 2: Get public URL
+      const { data: urlData } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+      
+      const newAvatarUrl = urlData.publicUrl;
+      console.log('Generated URL:', newAvatarUrl);
+      
+      // Update the avatar URL state to show the new image
+      setAvatarUrl(newAvatarUrl);
+      console.log("Set avatarUrl state to:", newAvatarUrl);
+      
+      toast.success("Avatar uploaded! Click Save Profile to complete setup.");
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast.error("Failed to upload avatar");
+    } finally {
+      setIsUploading(false);
+      setAvatarFile(null);
     }
   };
   
-  // Handle avatar upload error
-  const handleAvatarUploadError = (error: Error) => {
-    console.error("Error uploading avatar:", error);
-    toast.error("Failed to upload profile picture");
-  };
-  
-  // Save complete profile
   const handleSaveProfile = async () => {
     if (!session?.user?.id) return;
     
@@ -181,14 +259,46 @@ export const ProfileSetupDialog = () => {
     setIsLoading(true);
     
     try {
+      let finalAvatarUrl = avatarUrl;
+      
+      // If there's a file selected but not uploaded yet, upload it now
+      if (avatarFile) {
+        // Create a unique filename with timestamp
+        const timestamp = Date.now();
+        const fileExt = avatarFile.name.split('.').pop()?.toLowerCase();
+        const fileName = `avatar_${timestamp}.${fileExt}`;
+        
+        // Upload file to storage
+        const { data, error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(fileName, avatarFile, {
+            upsert: true
+          });
+        
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          toast.error("Failed to upload avatar: " + uploadError.message);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Get public URL
+        const { data: urlData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(fileName);
+        
+        finalAvatarUrl = urlData.publicUrl;
+      }
+      
       // Prepare data to update
       const updateData: Record<string, any> = {
         username: username,
         setup_completed: true
       };
       
-      if (avatarUrl) {
-        updateData.avatar_url = avatarUrl;
+      // Include avatar_url if we have one
+      if (finalAvatarUrl) {
+        updateData.avatar_url = finalAvatarUrl;
       }
       
       // Update in database
@@ -203,13 +313,13 @@ export const ProfileSetupDialog = () => {
       const sessionUpdate: any = {
         ...session,
         user: {
-          ...session.user,
+          ...session?.user,
           name: username
         }
       };
       
-      if (avatarUrl) {
-        sessionUpdate.user.image = avatarUrl;
+      if (finalAvatarUrl) {
+        sessionUpdate.user.image = finalAvatarUrl;
       }
       
       await update(sessionUpdate);
@@ -224,6 +334,7 @@ export const ProfileSetupDialog = () => {
       toast.error("Failed to update profile");
     } finally {
       setIsLoading(false);
+      setAvatarFile(null);
     }
   };
   
@@ -286,55 +397,61 @@ export const ProfileSetupDialog = () => {
             </DialogFooter>
           </div>
         ) : (
-            <div className="space-y-4 py-4">
-            <div className="flex flex-col items-center justify-center gap-4">
-              <div className="relative h-24 w-24 rounded-full overflow-hidden group">
-                {/* Image or placeholder */}
-                {avatarUrl ? (
-                  <Image
-                    src={avatarUrl}
-                    alt="Profile avatar"
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="h-full w-full bg-zinc-100 flex items-center justify-center">
-                    <Upload className="h-8 w-8 text-zinc-400" />
-                  </div>
-                )}
-                
-                {/* Overlay with upload button */}
-                <div className="absolute h-full w-full inset-0 hover:cursor-pointer bg-black/40 flex items-center justify-center opacity-100 transition-opacity">
-                  <UploadButton
-                    endpoint="avatars"
-                    onClientUploadComplete={handleAvatarUploadComplete}
-                    onUploadError={handleAvatarUploadError}
-                    className="inset-0 h-full w-full flex items-center justify-center"
-                  >
-                    <div className="text-white/80 h-full w-full flex inset-0 items-center justify-center relative hover:cursor-pointer">
-                      {avatarUrl ? <Camera className="h-7 w-7" strokeWidth={2.5}/> : <Camera className="h-7 w-7" strokeWidth={2.5}/>}
-                      
-                    </div>
-                  </UploadButton>
-                </div>
-              </div>
-              
-              <DialogFooter className="space-y-3 w-full">
-                <div className="relative w-full">
-                  <div className="w-full absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
-                    <Button 
-                      onClick={handleSaveProfile}
-                      disabled={isLoading}
-                      className="w-full relative rounded-full bg-black hover:bg-zinc-800"
-                    >
-                      {isLoading ? "Saving..." : "Save Profile"}
-                      <Check className="ml-2 h-4 w-4" />
-                    </Button>
-                  </div>   
-                </div>
-              </DialogFooter>
-            </div>
-          </div>
+          // Modified avatar section with simplified workflow
+<div className="space-y-4 py-4">
+  <div className="flex flex-col items-center justify-center gap-4">
+    <div className="relative h-24 w-24 rounded-full overflow-hidden">
+      {/* Image or placeholder */}
+      {previewUrl ? (
+        <Image
+          src={previewUrl}
+          alt="Profile avatar preview"
+          fill
+          className="object-cover"
+        />
+      ) : avatarUrl ? (
+        <Image
+          src={avatarUrl}
+          alt="Profile avatar"
+          fill
+          className="object-cover"
+        />
+      ) : (
+        <div className="h-full w-full bg-zinc-100 flex items-center justify-center">
+          <Upload className="h-8 w-8 text-zinc-400" />
+        </div>
+      )}
+      
+      {/* Upload button overlay */}
+      <label htmlFor="avatar-upload" className="absolute inset-0 h-full w-full bg-black/40 flex items-center justify-center cursor-pointer">
+        <Camera className="h-7 w-7 text-white/80" strokeWidth={2.5} />
+        <input
+          id="avatar-upload"
+          type="file"
+          className="hidden"
+          accept="image/jpeg,image/png,image/gif"
+          onChange={handleFileChange}
+        />
+      </label>
+    </div>
+    
+    {/* Single Save Profile button that handles both upload and save */}
+    <DialogFooter className="space-y-3 w-full">
+      <div className="relative w-full">
+        <div className="w-full absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
+          <Button 
+            onClick={handleSaveProfile}
+            disabled={isLoading}
+            className="w-full relative rounded-full bg-black hover:bg-zinc-800"
+          >
+            {isLoading ? "Saving..." : "Save Profile"}
+            <Check className="ml-2 h-4 w-4" />
+          </Button>
+        </div>   
+      </div>
+    </DialogFooter>
+  </div>
+</div>
         )}
       </DialogContent>
     </Dialog>
