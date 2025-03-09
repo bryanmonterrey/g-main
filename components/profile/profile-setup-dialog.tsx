@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 import { Camera } from 'lucide-react';
 
-import { Upload, Check, ArrowRight } from "lucide-react";
+import { Upload, Check, ArrowRight, X } from "lucide-react";
 
 // Step 1: Username, Step 2: Profile Picture
 type ProfileSetupStep = 1 | 2;
@@ -42,6 +42,13 @@ export const ProfileSetupDialog = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [setupCompleted, setSetupCompleted] = useState(false);
   
+  // State for username availability
+  const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
+  const [checkingUsername, setCheckingUsername] = useState(false);
+  
+  // Implement debounce without using a custom hook
+  const usernameCheckTimeout = useRef<NodeJS.Timeout | null>(null);
+  
   // Use a ref to maintain the current step
   const currentStepRef = useRef<ProfileSetupStep>(1);
   
@@ -49,6 +56,58 @@ export const ProfileSetupDialog = () => {
   useEffect(() => {
     currentStepRef.current = currentStep;
   }, [currentStep]);
+
+  // Check username availability when username changes
+  useEffect(() => {
+    // Clear any existing timeout
+    if (usernameCheckTimeout.current) {
+      clearTimeout(usernameCheckTimeout.current);
+    }
+    
+    // If username is too short, don't check
+    if (!username || username.length < 3) {
+      setUsernameAvailable(null);
+      return;
+    }
+    
+    // Set a timeout to check the username after a delay
+    setCheckingUsername(true);
+    usernameCheckTimeout.current = setTimeout(async () => {
+      const supabase = getClient();
+      if (!supabase || !session?.user?.id) {
+        setCheckingUsername(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('users')
+          .select('id')
+          .eq('username', username)
+          .neq('id', session.user.id)
+          .single();
+        
+        // If no data is returned, the username is available
+        setUsernameAvailable(!data);
+      } catch (error) {
+        // If the error is "No rows returned" then username is available
+        if (typeof error === 'object' && error && 'code' in error && error.code === 'PGRST116') {
+          setUsernameAvailable(true);
+        } else {
+          console.error("Error checking username:", error);
+        }
+      } finally {
+        setCheckingUsername(false);
+      }
+    }, 500); // 500ms debounce time
+    
+    // Cleanup function to clear the timeout when component unmounts
+    return () => {
+      if (usernameCheckTimeout.current) {
+        clearTimeout(usernameCheckTimeout.current);
+      }
+    };
+  }, [username, getClient, session?.user?.id]);
 
   // Check profile setup once when component mounts
   useEffect(() => {
@@ -154,6 +213,11 @@ export const ProfileSetupDialog = () => {
       return;
     }
     
+    if (usernameAvailable === false) {
+      toast.error("Username is already taken. Please choose a different one.");
+      return;
+    }
+    
     // Update both state and ref to ensure consistency
     setCurrentStep(2);
     currentStepRef.current = 2;
@@ -194,62 +258,7 @@ export const ProfileSetupDialog = () => {
     reader.readAsDataURL(file);
   };
   
-  const uploadAvatar = async () => {
-    if (!avatarFile || !session?.user?.id) return;
-    
-    setIsUploading(true);
-    
-    try {
-      const supabase = getClient();
-      if (!supabase) {
-        toast.error("Could not connect to storage service");
-        return;
-      }
-      
-      // Create a unique filename with timestamp
-      const timestamp = Date.now();
-      const fileExt = avatarFile.name.split('.').pop()?.toLowerCase();
-      const fileName = `avatar_${timestamp}.${fileExt}`;
-      
-      console.log('Starting upload with filename:', fileName);
-      
-      // Step 1: Upload file to storage
-      const { data, error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, avatarFile, {
-          upsert: true
-        });
-      
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        toast.error("Failed to upload avatar: " + uploadError.message);
-        return;
-      }
-      
-      console.log('File uploaded successfully:', data);
-      
-      // Step 2: Get public URL
-      const { data: urlData } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-      
-      const newAvatarUrl = urlData.publicUrl;
-      console.log('Generated URL:', newAvatarUrl);
-      
-      // Update the avatar URL state to show the new image
-      setAvatarUrl(newAvatarUrl);
-      console.log("Set avatarUrl state to:", newAvatarUrl);
-      
-      toast.success("Avatar uploaded! Click Save Profile to complete setup.");
-    } catch (error) {
-      console.error('Error uploading avatar:', error);
-      toast.error("Failed to upload avatar");
-    } finally {
-      setIsUploading(false);
-      setAvatarFile(null);
-    }
-  };
-  
+  // Save complete profile
   const handleSaveProfile = async () => {
     if (!session?.user?.id) return;
     
@@ -307,7 +316,18 @@ export const ProfileSetupDialog = () => {
         .update(updateData)
         .eq('id', session.user.id);
         
-      if (error) throw error;
+      if (error) {
+        // Handle duplicate username error
+        if (error.code === '23505' && error.message.includes('users_username_key')) {
+          toast.error("Username is already taken. Please choose a different one.");
+          // Go back to username step
+          setCurrentStep(1);
+          currentStepRef.current = 1;
+          setIsLoading(false);
+          return;
+        }
+        throw error;
+      }
       
       // Update session
       const sessionUpdate: any = {
@@ -376,18 +396,53 @@ export const ProfileSetupDialog = () => {
         {currentStepRef.current === 1 ? (
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Input
-                placeholder="Enter your username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full rounded-full"
-              />
+              <div className="relative">
+                <Input
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className={`w-full rounded-full pr-10 ${
+                    usernameAvailable === true ? 'border-green-500 focus-visible:ring-green-500' : 
+                    usernameAvailable === false ? 'border-red-500 focus-visible:ring-red-500' : ''
+                  }`}
+                />
+                {checkingUsername && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-black"></div>
+                  </div>
+                )}
+                {!checkingUsername && usernameAvailable === true && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-green-500">
+                    <Check className="h-4 w-4" />
+                  </div>
+                )}
+                {!checkingUsername && usernameAvailable === false && (
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 text-red-500">
+                    <X className="h-4 w-4" />
+                  </div>
+                )}
+              </div>
+              
+              {/* Availability message */}
+              {username.length > 0 && (
+                <div className="text-xs mt-1">
+                  {checkingUsername ? (
+                    <span className="text-gray-500">Checking availability...</span>
+                  ) : usernameAvailable === true ? (
+                    <span className="text-green-500">Username is available!</span>
+                  ) : usernameAvailable === false ? (
+                    <span className="text-red-500">Username is already taken.</span>
+                  ) : username.length < 3 ? (
+                    <span className="text-amber-500">Username must be at least 3 characters.</span>
+                  ) : null}
+                </div>
+              )}
             </div>
             <DialogFooter>
               <div className="w-full rounded-full z-5 p-0.5 gradient-border">
                 <Button 
                   onClick={handleContinueToAvatar} 
-                  disabled={!username.trim()}
+                  disabled={!username.trim() || username.length < 3 || usernameAvailable === false || checkingUsername}
                   className="w-full relative rounded-full bg-black disabled:bg-black hover:bg-zinc-800"
                 >
                   Continue
@@ -397,61 +452,59 @@ export const ProfileSetupDialog = () => {
             </DialogFooter>
           </div>
         ) : (
-          // Modified avatar section with simplified workflow
-<div className="space-y-4 py-4">
-  <div className="flex flex-col items-center justify-center gap-4">
-    <div className="relative h-24 w-24 rounded-full overflow-hidden">
-      {/* Image or placeholder */}
-      {previewUrl ? (
-        <Image
-          src={previewUrl}
-          alt="Profile avatar preview"
-          fill
-          className="object-cover"
-        />
-      ) : avatarUrl ? (
-        <Image
-          src={avatarUrl}
-          alt="Profile avatar"
-          fill
-          className="object-cover"
-        />
-      ) : (
-        <div className="h-full w-full bg-zinc-100 flex items-center justify-center">
-          <Upload className="h-8 w-8 text-zinc-400" />
-        </div>
-      )}
-      
-      {/* Upload button overlay */}
-      <label htmlFor="avatar-upload" className="absolute inset-0 h-full w-full bg-black/40 flex items-center justify-center cursor-pointer">
-        <Camera className="h-7 w-7 text-white/80" strokeWidth={2.5} />
-        <input
-          id="avatar-upload"
-          type="file"
-          className="hidden"
-          accept="image/jpeg,image/png,image/gif"
-          onChange={handleFileChange}
-        />
-      </label>
-    </div>
-    
-    {/* Single Save Profile button that handles both upload and save */}
-    <DialogFooter className="space-y-3 w-full">
-      <div className="relative w-full">
-        <div className="w-full absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
-          <Button 
-            onClick={handleSaveProfile}
-            disabled={isLoading}
-            className="w-full relative rounded-full bg-black hover:bg-zinc-800"
-          >
-            {isLoading ? "Saving..." : "Save Profile"}
-            <Check className="ml-2 h-4 w-4" />
-          </Button>
-        </div>   
-      </div>
-    </DialogFooter>
-  </div>
-</div>
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col items-center justify-center gap-4">
+              <div className="relative h-24 w-24 rounded-full overflow-hidden">
+                {/* Image or placeholder */}
+                {previewUrl ? (
+                  <Image
+                    src={previewUrl}
+                    alt="Profile avatar preview"
+                    fill
+                    className="object-cover"
+                  />
+                ) : avatarUrl ? (
+                  <Image
+                    src={avatarUrl}
+                    alt="Profile avatar"
+                    fill
+                    className="object-cover"
+                  />
+                ) : (
+                  <div className="h-full w-full bg-zinc-100 flex items-center justify-center">
+                    <Upload className="h-8 w-8 text-zinc-400" />
+                  </div>
+                )}
+                
+                {/* Upload button overlay */}
+                <label htmlFor="avatar-upload" className="absolute inset-0 h-full w-full bg-black/40 flex items-center justify-center cursor-pointer">
+                  <Camera className="h-7 w-7 text-white/80" strokeWidth={2.5} />
+                  <input
+                    id="avatar-upload"
+                    type="file"
+                    className="hidden"
+                    accept="image/jpeg,image/png,image/gif"
+                    onChange={handleFileChange}
+                  />
+                </label>
+              </div>
+              
+              <DialogFooter className="space-y-3 w-full">
+                <div className="relative w-full">
+                  <div className="w-full absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
+                    <Button 
+                      onClick={handleSaveProfile}
+                      disabled={isLoading}
+                      className="w-full relative rounded-full bg-black hover:bg-zinc-800"
+                    >
+                      {isLoading ? "Saving..." : "Save Profile"}
+                      <Check className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>   
+                </div>
+              </DialogFooter>
+            </div>
+          </div>
         )}
       </DialogContent>
     </Dialog>
