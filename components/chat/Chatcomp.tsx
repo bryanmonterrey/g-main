@@ -12,6 +12,7 @@ import { AGENT_MODES } from "./ModeSelector";
 import { MOCK_MODELS } from "../layout/goodinput";
 import { IntegrationCard } from "./IntegrationCard";
 import { ChatInput } from "../layout/goodinput";
+import { motion } from "framer-motion";
 import {
 	MetaplexLogo,
 	JupiterLogo,
@@ -290,7 +291,6 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 	  }, []);
 
 
-	// Landing page UI (existing code)
 	return (
 		<div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 sm:py-32 scroll-smooth" data-scroll-container>
 			<div className="w-full max-w-3xl flex flex-col gap-[10vh] sm:gap-[20vh] mt-[10vh] sm:mt-[20vh]">
@@ -304,11 +304,8 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 						</h1>
 					</div>
 					<div className="space-y-4">
-						<div className="relative">
-						
-						
-						<div className="rounded-3xl p-[5px] bg-zinc-950 z-20 relative">
-							
+						<div className="relative">				
+						<div className="rounded-3xl p-[5px] bg-zinc-950 z-20 relative">				
 							<ChatInput
 								input={input}
 								setInput={setInput}
@@ -344,57 +341,71 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 				</div>
 
 				<div className="relative pt-4">
-					<div className="flex flex-col gap-4 px-1 mb-6">
-						<div className="flex items-center gap-2">
-							<h2 className="text-xl font-semibold text-white/80">
-								Integrations
-							</h2>
-							<span className="text-sm font-semibold text-white/90">
-								({filteredIntegrations.length})
-							</span>
-						</div>
-						<div className="flex gap-2 flex-wrap">
-							{CATEGORIES.map((category, index) => (
-								<button
-									key={index}
-									onClick={() => setActiveIntegrationCategory(category.id)}
-									className={cn(
-										"px-3 py-1 text-sm font-semibold rounded-full transition-colors",
-										activeIntegrationCategory === category.id
-											? "bg-zinc-900/95 text-azul hover:bg-zinc-900/65"
-											: "text-azul/70 hover:text-white hover:bg-zinc-900/65",
-									)}
-									title={category.title}
-								>
-									{category.name}
-								</button>
-							))}
-						</div>
-					</div>
+  <div className="flex flex-col gap-4 px-1 mb-6">
+    <div className="flex items-center gap-2">
+      <h2 className="text-xl font-semibold text-white/80">
+        Integrations
+      </h2>
+      <span className="text-sm font-semibold text-white/90">
+        ({filteredIntegrations.length})
+      </span>
+    </div>
+    <div className="flex gap-2 flex-wrap relative">
+      {CATEGORIES.map((category, index) => (
+        <button
+          key={index}
+          onClick={() => setActiveIntegrationCategory(category.id)}
+          className={cn(
+            "py-1.5 px-3 text-sm font-semibold rounded-full transition-all relative z-10",
+            activeIntegrationCategory === category.id
+              ? "text-white/80" // Dark text for contrast against background
+              : "text-azul/70 hover:text-white hover:bg-zinc-900/65"
+          )}
+          title={category.title}
+        >
+          {category.name}
+          
+          {/* Animated pill background */}
+          {activeIntegrationCategory === category.id && (
+            <motion.div 
+              layoutId="tabHighlight"
+              className="absolute inset-0 bg-azul/15 text-white rounded-full -z-10"
+              initial={false}
+              transition={{ 
+                type: "spring", 
+                stiffness: 250, 
+                damping: 30 
+              }}
+            />
+          )}
+        </button>
+      ))}
+    </div>
+  </div>
 
-					<div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pb-16 sm:pb-32">
-						{filteredIntegrations.map((integration, index) => (
-							<IntegrationCard
-								key={index}
-								title={integration.title}
-								description={integration.description}
-								logo={integration.logo}
-								category={integration.category}
-								onClick={() => {
-									setInput(integration.prompt);
-									(
-										document.querySelector(
-											'input[type="text"]',
-										) as HTMLInputElement
-									)?.focus();
-									inputSectionRef.current?.scrollIntoView({
-										behavior: "smooth",
-									});
-								}}
-							/>
-						))}
-					</div>
-				</div>
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 pb-16 sm:pb-32 transition-all duration-300 ease-in-out">
+    {filteredIntegrations.map((integration, index) => (
+      <IntegrationCard
+        key={index}
+        title={integration.title}
+        description={integration.description}
+        logo={integration.logo}
+        category={integration.category}
+        onClick={() => {
+          setInput(integration.prompt);
+          (
+            document.querySelector(
+              'input[type="text"]',
+            ) as HTMLInputElement
+          )?.focus();
+          inputSectionRef.current?.scrollIntoView({
+            behavior: "smooth",
+          });
+        }}
+      />
+    ))}
+  </div>
+</div>
 			</div>
 		</div>
 	);

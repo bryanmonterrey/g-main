@@ -20,21 +20,22 @@ export const ProfileBanner = ({
   onBannerUpdate,
 }: ProfileBannerProps) => {
   return (
-    <div className="relative w-full h-36">
+    <div className="relative w-full h-36 rounded-t-3xl">
       {bannerUrl ? (
         <Image
           src={bannerUrl}
           alt={`${username}'s banner`}
           fill
-          className="object-cover rounded-xl"
+          className="object-cover rounded-t-3xl"
         />
       ) : (
         <div className="w-full h-full bg-zinc-800/10 rounded-t-3xl" />
       )}
 
       {isOwnProfile && (
-        <div className="absolute bottom-4 right-4">
+        <div className="absolute inset-0 flex items-center justify-center rounded-t-3xl">
           <UploadButton
+            className="h-full w-full bg-transparent rounded-t-3xl"
             endpoint="bannerImage"
             onClientUploadComplete={(res) => {
               if (res?.[0]?.url && onBannerUpdate) {
@@ -46,11 +47,10 @@ export const ProfileBanner = ({
             }}
           >
             <Button 
-              variant="secondary" 
-              className="bg-background/60 backdrop-blur-sm hover:bg-background/80"
+              variant="ghost" 
+              className="bg-black/20 h-full w-full inset-0 hover:bg-black/30 rounded-t-3xl"
             >
-              <CameraIcon className="h-4 w-4 mr-2" />
-              Change Banner
+              <CameraIcon className="h-10 w-10 text-white/80"/>
             </Button>
           </UploadButton>
         </div>
