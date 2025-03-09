@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { UploadButton } from "@/components/upload-button";
 import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
+import { Camera } from 'lucide-react';
 
 import { Upload, Check, ArrowRight } from "lucide-react";
 
@@ -285,49 +286,53 @@ export const ProfileSetupDialog = () => {
             </DialogFooter>
           </div>
         ) : (
-          <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4">
             <div className="flex flex-col items-center justify-center gap-4">
-              {avatarUrl ? (
-                <div className="relative h-24 w-24 rounded-full overflow-hidden">
+              <div className="relative h-24 w-24 rounded-full overflow-hidden group">
+                {/* Image or placeholder */}
+                {avatarUrl ? (
                   <Image
                     src={avatarUrl}
                     alt="Profile avatar"
                     fill
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                    <Check className="h-8 w-8 text-white" />
+                ) : (
+                  <div className="h-full w-full bg-zinc-100 flex items-center justify-center">
+                    <Upload className="h-8 w-8 text-zinc-400" />
                   </div>
+                )}
+                
+                {/* Overlay with upload button */}
+                <div className="absolute inset-0 hover:cursor-pointer bg-black/40 flex items-center justify-center opacity-100 transition-opacity">
+                  <UploadButton
+                    endpoint="avatars"
+                    onClientUploadComplete={handleAvatarUploadComplete}
+                    onUploadError={handleAvatarUploadError}
+                  >
+                    <div className="text-white text-xs font-medium hover:cursor-pointer">
+                      {avatarUrl ? <Camera className="h-7 w-7" strokeWidth={2.5}/> : <Camera className="h-7 w-7" strokeWidth={2.5}/>}
+                      
+                    </div>
+                  </UploadButton>
                 </div>
-              ) : (
-                <div className="h-24 w-24 rounded-full bg-zinc-100 flex items-center justify-center">
-                  <Upload className="h-8 w-8 text-zinc-400" />
-                </div>
-              )}
-              
-              <UploadButton
-                endpoint="avatars"
-                onClientUploadComplete={handleAvatarUploadComplete}
-                onUploadError={handleAvatarUploadError}
-              >
-                {avatarUrl ? "Change Profile Picture" : "Upload Profile Picture"}
-              </UploadButton>
-            </div>
-            
-            <DialogFooter className="space-y-3">
-                <div className=" relative w-full">
-              <div className="w-full absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
-                <Button 
-                  onClick={handleSaveProfile}
-                  disabled={isLoading}
-                  className="w-full relative rounded-full bg-black hover:bg-zinc-800"
-                >
-                  {isLoading ? "Saving..." : "Save Profile"}
-                  <Check className="ml-2 h-4 w-4" />
-                </Button>
-              </div>   
               </div>
-            </DialogFooter>
+              
+              <DialogFooter className="space-y-3 w-full">
+                <div className="relative w-full">
+                  <div className="w-full absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
+                    <Button 
+                      onClick={handleSaveProfile}
+                      disabled={isLoading}
+                      className="w-full relative rounded-full bg-black hover:bg-zinc-800"
+                    >
+                      {isLoading ? "Saving..." : "Save Profile"}
+                      <Check className="ml-2 h-4 w-4" />
+                    </Button>
+                  </div>   
+                </div>
+              </DialogFooter>
+            </div>
           </div>
         )}
       </DialogContent>
