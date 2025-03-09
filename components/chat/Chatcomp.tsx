@@ -12,7 +12,7 @@ import { AGENT_MODES } from "./ModeSelector";
 import { MOCK_MODELS } from "../layout/goodinput";
 import { IntegrationCard } from "./IntegrationCard";
 import { ChatInput } from "../layout/goodinput";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
 	MetaplexLogo,
 	JupiterLogo,
@@ -292,6 +292,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 
 
 	return (
+		<AnimatePresence>
 		<div className="flex flex-col items-center justify-center min-h-screen px-4 py-16 sm:py-32 scroll-smooth" data-scroll-container>
 			<div className="w-full max-w-3xl flex flex-col gap-[10vh] sm:gap-[20vh] mt-[10vh] sm:mt-[20vh]">
 				<div
@@ -408,5 +409,6 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 </div>
 			</div>
 		</div>
+		</AnimatePresence>
 	);
 }

@@ -76,7 +76,7 @@ export const Profile = ({
   return (
     <div className="flex flex-col h-[calc(100vh-52px)] overflow-y-auto">
       {/* Main Profile Layout */}
-      <div className="flex flex-col gap-y-4 mt-6">
+      <div className="flex flex-col gap-y-2 mt-6">
         {/* Profile Header Section */}
         <ProfileHeader
             username={user.username}
