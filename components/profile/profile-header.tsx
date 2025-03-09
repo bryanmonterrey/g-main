@@ -86,7 +86,7 @@ export const ProfileHeader = ({
 
   return (
     <div className="flex items-center justify-center">      
-      <div className="inline-block max-w-[85ch] min-w-[85ch] px-0 pt-0 bg-zinc-950 rounded-3xl gap-y-4 lg:gap-y-0 items-center justify-center">
+      <div className="inline-block max-w-[85ch] min-w-[85ch] px-0 pt-0 bg-zinc-950 rounded-3xl gap-y-4 lg:gap-y-0 items-center justify-center outline outline-zinc-600/15">
         <div className="inline-block w-full">
           <div className="w-full">
             <ProfileBanner

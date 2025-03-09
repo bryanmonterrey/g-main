@@ -214,7 +214,7 @@ export const ProfilePosts = ({
       </div>
 
       {/* Tab Content */}
-      <div className="bg-zinc-950 rounded-3xl p-4">
+      <div className="bg-zinc-950 rounded-3xl p-4 outline outline-zinc-600/15">
         {renderTabContent()}
       </div>
     </div>
