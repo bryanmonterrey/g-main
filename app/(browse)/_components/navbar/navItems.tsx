@@ -8,8 +8,6 @@ import { cn } from "@/lib/utils";
 import { useSession } from 'next-auth/react';
 import { Search } from 'lucide-react';
 
-
-
 interface NavItemsProps {
     session: any;
   }
@@ -82,7 +80,7 @@ export const NavItems: React.FC<NavItemsProps> = ({
           </Button>
         )
       ))}
-      <Button className=' rounded-full bg-white/5 p-2 px-2.5 shadow-none hover:bg-white/5 transition-all ease-in-out duration-300 '>
+      <Button className='rounded-full bg-white/5 p-2 px-2.5 shadow-none hover:bg-white/5 transition-all ease-in-out duration-300'>
         <Search className='w-4 h-4 text-white/75 hover:text-white' strokeWidth={2.50} />
       </Button>
     </>
