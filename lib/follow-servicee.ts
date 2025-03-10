@@ -3,85 +3,81 @@ import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 import type { Database } from '@/types/supabase';
 import { useSession } from "next-auth/react";
 
+interface UserData {
+    id: string;
+    username: string | null;
+    avatar_url: string | null;
+    wallet_address: string | null;
+  }
+  
+  interface FollowData {
+    follower: UserData;
+    following: UserData;
+  }
+
 export const followUser = async (id: string, session: any) => {
     try {
       if (!session?.user?.id) {
-        throw new Error("Unauthorized");
+        throw new Error("Unauthorized - No user ID");
       }
   
       const supabase = getSupabase(session);
   
-      console.log("Follow attempt:", {
+      // Debug log with more info
+      console.log("Follow attempt details:", {
         follower: session.user.id,
         following: id,
-        token: !!session.supabaseAccessToken
+        hasToken: !!session.supabaseAccessToken,
+        tokenStart: session.supabaseAccessToken?.substring(0, 20), // Just log start of token for debugging
       });
   
-      // Check if trying to follow self
-      if (id === session.user.id) {
-        throw new Error("Cannot follow yourself");
-      }
-  
-      // Check if already following
-      const { data: existingFollow, error: checkError } = await supabase
-        .from('follow')
-        .select()
-        .eq('follower_id', session.user.id)
-        .eq('following_id', id)
-        .maybeSingle();
-  
-      if (checkError) {
-        console.error("Follow check error:", checkError);
-        throw new Error("Failed to check follow status");
-      }
-  
-      if (existingFollow) {
-        throw new Error("Already following");
-      }
-  
-      // Generate a unique ID for both schemas
-      const followId = crypto.randomUUID();
-      const timestamp = new Date().toISOString();
-  
-      // Insert into follow table (removed 'public.' prefix)
+      // Insert follow relationship
       const { data: follow, error: insertError } = await supabase
         .from('follow')
         .insert({
-          id: followId,
           follower_id: session.user.id,
           following_id: id,
-          created_at: timestamp,
-          updated_at: timestamp
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
         })
-        .select(`
-          follower:follower_id(
-            id,
-            username,
-            avatar_url,
-            wallet_address
-          ),
-          following:following_id(
-            id,
-            username,
-            avatar_url,
-            wallet_address
-          )
-        `)
+        .select()
         .single();
   
       if (insertError) {
-        console.error("Follow insert error:", insertError);
-        throw new Error("Failed to follow user");
+        console.error("Follow insert error details:", {
+          code: insertError.code,
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint
+        });
+        throw new Error(`Failed to follow user: ${insertError.message}`);
       }
   
-      return follow;
+      // After successful insert, get the full user details
+      const { data: enrichedFollow, error: enrichError } = await supabase
+        .from('follow')
+        .select(`
+          follower:follower_id(id, username, avatar_url, wallet_address),
+          following:following_id(id, username, avatar_url, wallet_address)
+        `)
+        .eq('follower_id', session.user.id)
+        .eq('following_id', id)
+        .single();
+  
+      if (enrichError) {
+        console.error("Error enriching follow data:", enrichError);
+      }
+  
+      return enrichedFollow || follow;
     } catch (error) {
       console.error("Error in followUser:", error);
       throw error;
     }
   };
   
-  export const unfollowUser = async (id: string, session: any) => {
+  
+// Update the function with proper type annotations
+export const unfollowUser = async (id: string, session: any): Promise<FollowData | null> => {
     try {
       if (!session?.user?.id) {
         throw new Error("Unauthorized");
@@ -134,7 +130,7 @@ export const followUser = async (id: string, session: any) => {
     }
   };
   
-  export const isFollowingUser = async (id: string, session: any) => {
+  export const isFollowingUser = async (id: string, session: any): Promise<boolean> => {
     try {
       if (!session?.user?.id) {
         return false;
