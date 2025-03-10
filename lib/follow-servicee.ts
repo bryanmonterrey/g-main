@@ -1,139 +1,170 @@
 // lib/follow-service.ts
 import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
-import { getSession } from "next-auth/react";
+import type { Database } from '@/types/supabase';
+import { useSession } from "next-auth/react";
 
-export const isFollowingUser = async (id: string) => {
-  try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+export const followUser = async (id: string, session: any) => {
+    try {
+      if (!session?.user?.id) {
+        throw new Error("Unauthorized");
+      }
+  
+      const supabase = getSupabase(session);
+  
+      console.log("Follow attempt:", {
+        follower: session.user.id,
+        following: id,
+        token: !!session.supabaseAccessToken
+      });
+  
+      // Check if trying to follow self
+      if (id === session.user.id) {
+        throw new Error("Cannot follow yourself");
+      }
+  
+      // Check if already following
+      const { data: existingFollow, error: checkError } = await supabase
+        .from('follow')
+        .select()
+        .eq('follower_id', session.user.id)
+        .eq('following_id', id)
+        .maybeSingle();
+  
+      if (checkError) {
+        console.error("Follow check error:", checkError);
+        throw new Error("Failed to check follow status");
+      }
+  
+      if (existingFollow) {
+        throw new Error("Already following");
+      }
+  
+      // Generate a unique ID for both schemas
+      const followId = crypto.randomUUID();
+      const timestamp = new Date().toISOString();
+  
+      // Insert into follow table (removed 'public.' prefix)
+      const { data: follow, error: insertError } = await supabase
+        .from('follow')
+        .insert({
+          id: followId,
+          follower_id: session.user.id,
+          following_id: id,
+          created_at: timestamp,
+          updated_at: timestamp
+        })
+        .select(`
+          follower:follower_id(
+            id,
+            username,
+            avatar_url,
+            wallet_address
+          ),
+          following:following_id(
+            id,
+            username,
+            avatar_url,
+            wallet_address
+          )
+        `)
+        .single();
+  
+      if (insertError) {
+        console.error("Follow insert error:", insertError);
+        throw new Error("Failed to follow user");
+      }
+  
+      return follow;
+    } catch (error) {
+      console.error("Error in followUser:", error);
+      throw error;
+    }
+  };
+  
+  export const unfollowUser = async (id: string, session: any) => {
+    try {
+      if (!session?.user?.id) {
+        throw new Error("Unauthorized");
+      }
+  
+      const supabase = getSupabase(session);
+  
+      // Get follow data before deleting
+      const { data: follow, error: selectError } = await supabase
+        .from('follow')
+        .select(`
+          follower:follower_id(
+            id,
+            username,
+            avatar_url,
+            wallet_address
+          ),
+          following:following_id(
+            id,
+            username,
+            avatar_url,
+            wallet_address
+          )
+        `)
+        .eq('follower_id', session.user.id)
+        .eq('following_id', id)
+        .single();
+  
+      if (selectError) {
+        console.error("Unfollow select error:", selectError);
+        throw new Error("Failed to fetch follow data");
+      }
+  
+      // Delete the follow
+      const { error: deleteError } = await supabase
+        .from('follow')
+        .delete()
+        .eq('follower_id', session.user.id)
+        .eq('following_id', id);
+  
+      if (deleteError) {
+        console.error("Unfollow delete error:", deleteError);
+        throw new Error("Failed to unfollow user");
+      }
+  
+      return follow;
+    } catch (error) {
+      console.error("Error in unfollowUser:", error);
+      throw error;
+    }
+  };
+  
+  export const isFollowingUser = async (id: string, session: any) => {
+    try {
+      if (!session?.user?.id) {
+        return false;
+      }
+  
+      const supabase = getSupabase(session);
+  
+      const { data, error } = await supabase
+        .from('follow')
+        .select()
+        .eq('follower_id', session.user.id)
+        .eq('following_id', id)
+        .maybeSingle();
+  
+      if (error) {
+        console.error("Follow check error:", error);
+        return false;
+      }
+  
+      return !!data;
+    } catch (error) {
+      console.error("Error in isFollowingUser:", error);
       return false;
     }
-
-    const supabase = getSupabase(session);
-
-    const { data, error } = await supabase
-      .from('follow')
-      .select()
-      .eq('follower_id', session.user.id)
-      .eq('following_id', id)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error checking follow status:", error);
-      return false;
-    }
-
-    return !!data;
-  } catch (error) {
-    console.error("Error in isFollowingUser:", error);
-    return false;
-  }
-};
-
-export const followUser = async (id: string) => {
-  try {
-    const session = await getSession();
-    if (!session?.user?.id) {
-      throw new Error("Not authenticated");
-    }
-
-    const supabase = getSupabase(session);
-
-    // Check if trying to follow self
-    if (id === session.user.id) {
-      throw new Error("Cannot follow yourself");
-    }
-
-    // Check if already following
-    const { data: existingFollow } = await supabase
-      .from('follow')
-      .select()
-      .eq('follower_id', session.user.id)
-      .eq('following_id', id)
-      .maybeSingle();
-
-    if (existingFollow) {
-      throw new Error("Already following");
-    }
-
-    // Create follow relationship
-    const { data: follow, error } = await supabase
-      .from('follow')
-      .insert({
-        follower_id: session.user.id,
-        following_id: id,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .select(`
-        follower:follower_id(
-          id,
-          username,
-          avatar_url
-        ),
-        following:following_id(
-          id,
-          username,
-          avatar_url
-        )
-      `)
-      .single();
-
-    if (error) throw error;
-    return follow;
-  } catch (error) {
-    console.error("Error in followUser:", error);
-    throw error;
-  }
-};
-
-export const unfollowUser = async (id: string) => {
-  try {
-    const session = await getSession();
-    if (!session?.user?.id) {
-      throw new Error("Not authenticated");
-    }
-
-    const supabase = getSupabase(session);
-
-    // Get the follow relationship before deleting
-    const { data: follow } = await supabase
-      .from('follow')
-      .select(`
-        follower:follower_id(
-          id,
-          username,
-          avatar_url
-        ),
-        following:following_id(
-          id,
-          username,
-          avatar_url
-        )
-      `)
-      .eq('follower_id', session.user.id)
-      .eq('following_id', id)
-      .single();
-
-    // Delete the follow relationship
-    const { error } = await supabase
-      .from('follow')
-      .delete()
-      .eq('follower_id', session.user.id)
-      .eq('following_id', id);
-
-    if (error) throw error;
-    return follow;
-  } catch (error) {
-    console.error("Error in unfollowUser:", error);
-    throw error;
-  }
-};
+  };
 
 export const getFollowedUsers = async () => {
   try {
-    const session = await getSession();
-    if (!session?.user?.id) {
+    const session = await useSession();
+    if (!session?.data?.user?.id) {
       return [];
     }
 
@@ -150,7 +181,7 @@ export const getFollowedUsers = async () => {
           wallet_address
         )
       `)
-      .eq('follower_id', session.user.id);
+      .eq('follower_id', session.data.user.id);
 
     if (error) throw error;
     return followedUsers.map(fu => fu.following);

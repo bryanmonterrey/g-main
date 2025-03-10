@@ -3,11 +3,12 @@
 
 import { Profile } from "@/components/profile";
 import { getUserByUsername } from "@/lib/auth-service.server";
-import { isFollowingUser } from "@/lib/follow-servicee";
+import { followUser, isFollowingUser, unfollowUser } from "@/lib/follow-servicee";
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { onFollow, onUnfollow } from "@/actions/follow";
+import { toast } from "sonner";
 
 interface ProfileClientProps {
   username: string; // Changed from initialProfile to username
@@ -26,7 +27,7 @@ const ProfileClient = ({ username }: ProfileClientProps) => {
         setProfile(userProfile);
         
         if (session?.user?.id && userProfile.id) {
-          const following = await isFollowingUser(userProfile.id);
+          const following = await isFollowingUser(userProfile.id, session);
           setIsFollowing(following);
         }
       } catch (error) {
@@ -35,25 +36,39 @@ const ProfileClient = ({ username }: ProfileClientProps) => {
         setIsLoading(false);
       }
     };
-
+  
     loadProfile();
   }, [username, session]);
 
   const handleFollow = async (): Promise<void> => {
     try {
-      await onFollow(profile.id);
-      setIsFollowing(true);
+      setIsLoading(true);
+      const followedUser = await followUser(profile.id, session);
+      if (followedUser) {
+        setIsFollowing(true);
+        toast.success(`Following ${profile.username}`);
+      }
     } catch (error) {
       console.error("Error following user:", error);
+      toast.error("Failed to follow user");
+    } finally {
+      setIsLoading(false);
     }
   };
-
+  
   const handleUnfollow = async (): Promise<void> => {
     try {
-      await onUnfollow(profile.id);
-      setIsFollowing(false);
+      setIsLoading(true);
+      const unfollowedUser = await unfollowUser(profile.id, session);
+      if (unfollowedUser) {
+        setIsFollowing(false);
+        toast.success(`Unfollowed ${profile.username}`);
+      }
     } catch (error) {
       console.error("Error unfollowing user:", error);
+      toast.error("Failed to unfollow user");
+    } finally {
+      setIsLoading(false);
     }
   };
 
