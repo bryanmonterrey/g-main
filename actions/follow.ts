@@ -4,16 +4,16 @@
 import { revalidatePath } from "next/cache";
 import { followUser, unfollowUser } from "@/lib/follow-servicee";
 
-export const onFollow = async (id: string) => {
+export const onFollow = async (id: string, session: any) => {
   try {
-    const followedUser = await followUser(id);
+    const followedUser = await followUser(id, session);
     
     // Revalidate both profile pages and any other relevant paths
     revalidatePath("/");    
 
-    if (followedUser?.following?.username) {
-        
-      revalidatePath(`/${followedUser.following.username}`);
+    // Access username through the joined user data
+    if (followedUser?.user?.username) {
+      revalidatePath(`/${followedUser.user.username}`);
     }
     
     return followedUser;
@@ -23,14 +23,14 @@ export const onFollow = async (id: string) => {
   }
 };
 
-export const onUnfollow = async (id: string) => {
+export const onUnfollow = async (id: string, session: any) => {
   try {
-    const unfollowedUser = await unfollowUser(id);
+    const unfollowedUser = await unfollowUser(id, session);
     
     // Revalidate both profile pages and any other relevant paths
     revalidatePath("/");
-    if (unfollowedUser?.following?.username) {
-      revalidatePath(`/${unfollowedUser.following.username}`);
+    if (unfollowedUser?.user?.username) {
+      revalidatePath(`/${unfollowedUser.user.username}`);
     }
     
     return unfollowedUser;
