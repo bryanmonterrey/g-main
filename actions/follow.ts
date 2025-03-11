@@ -8,12 +8,20 @@ export const onFollow = async (id: string, session: any) => {
   try {
     const followedUser = await followUser(id, session);
     
-    // Revalidate both profile pages and any other relevant paths
+    // Revalidate home path
     revalidatePath("/");    
 
-    // Access username through the joined user data
-    if (followedUser?.user?.username) {
-      revalidatePath(`/${followedUser.user.username}`);
+    // We need to check what structure was returned
+    // If it has enriched data (with nested objects), use that
+    if ('following' in followedUser && followedUser.following && 'username' in followedUser.following) {
+      revalidatePath(`/${followedUser.following.username}`);
+    } 
+    // If it's the raw database row, we'd need to fetch the username separately
+    // or simply revalidate all profile pages
+    else {
+      // This will revalidate the specific profile page if we know the username
+      // Otherwise, you could add logic to fetch the username using the following_id
+      revalidatePath(`/[username]`); // This is a catch-all approach
     }
     
     return followedUser;
@@ -27,10 +35,14 @@ export const onUnfollow = async (id: string, session: any) => {
   try {
     const unfollowedUser = await unfollowUser(id, session);
     
-    // Revalidate both profile pages and any other relevant paths
+    // Revalidate home path
     revalidatePath("/");
-    if (unfollowedUser?.user?.username) {
-      revalidatePath(`/${unfollowedUser.user.username}`);
+    
+    // Use same logic as in onFollow
+    if ('following' in unfollowedUser && unfollowedUser.following && 'username' in unfollowedUser.following) {
+      revalidatePath(`/${unfollowedUser.following.username}`);
+    } else {
+      revalidatePath(`/[username]`); // Catch-all approach
     }
     
     return unfollowedUser;
