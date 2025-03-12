@@ -13,6 +13,8 @@ import { getSupabase } from "@/utils/supabase/getDataWhenAuth";
 import { useSession } from "next-auth/react";
 import { CalendarDays, Heart, MessageCircle, Wallet } from "lucide-react";
 import { format } from "date-fns";
+import { SendDialog } from "@/components/send/send-dialog";
+
 
 interface ProfileHeaderProps {
     username: string | null;
@@ -41,8 +43,19 @@ export const ProfileHeader = ({
 }: ProfileHeaderProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSendDialogOpen, setIsSendDialogOpen] = useState(false);
   const [currentBannerUrl, setCurrentBannerUrl] = useState(bannerUrl);
   const { data: session } = useSession();
+
+  // 3. Add this handler function:
+  const handleSendClick = () => {
+    setIsSendDialogOpen(true);
+  };
+
+  const closeSendDialog = () => {
+    setIsSendDialogOpen(false);
+  };
+
 
   const handleBannerUpdate = async (newBannerUrl: string) => {
     try {
@@ -130,6 +143,14 @@ export const ProfileHeader = ({
                         <MessageCircle className="h-5 w-5" />
                       </Button>
                       <Button
+                        disabled={isLoading || !walletAddress}
+                        onClick={handleSendClick}
+                        className="h-8 w-8 bg-white/15 text-white hover:bg-white/35 rounded-full transition-all duration-300 ease-in-out"
+                        title="Send SOL"
+                      >
+                        S
+                      </Button>
+                      <Button
                         disabled={isLoading}
                         onClick={handleFollow}
                         className="h-[34px] px-6 py-2 bg-white/15 hover:bg-white/35 rounded-full transition-all duration-300 ease-in-out"
@@ -185,6 +206,12 @@ export const ProfileHeader = ({
           </div>
         </div>
       </div>
+      <SendDialog 
+        isOpen={isSendDialogOpen}
+        onClose={closeSendDialog}
+        recipientAddress={walletAddress}
+        recipientUsername={username}
+      />
     </div>
   );
 };
