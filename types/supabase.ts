@@ -1495,9 +1495,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      debug_auth_status: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          uid: string
+          role: string
+          is_authenticated: boolean
+        }[]
+      }
       expire_sessions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
+      }
+      follow_user: {
+        Args: {
+          follower_id_param: string
+          following_id_param: string
+        }
+        Returns: Json
       }
       sync_avatar_to_next_auth: {
         Args: {
