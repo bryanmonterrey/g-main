@@ -257,11 +257,12 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="bg-slate-800/50 border-none hover:bg-slate-800/70 rounded-full">
             Cancel
           </Button>
           <Button 
             onClick={handleSend} 
+            className="bg-slate-800/50 hover:bg-slate-800/70 rounded-full"
             disabled={
               isSubmitting || 
               !wallet.connected || 
