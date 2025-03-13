@@ -4,8 +4,6 @@ import { NavItems } from "./navItems";
 import { useSession } from 'next-auth/react';
 import { Loader } from "@/components/ui/loader";
 
-
-
 const NavBar: React.FC = () => {
   const { data: session } = useSession();
   
