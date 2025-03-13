@@ -380,7 +380,7 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
         </div>
         
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" className="bg-slate-800/50 hover:bg-slate-800/70 rounded-full border-none" onClick={onClose}>
             Cancel
           </Button>
           <Button 
@@ -392,7 +392,7 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
               (!isPrivate && parseFloat(amount) <= feeAmount) ||
               parseFloat(amount) > walletBalance
             }
-            className={isPrivate ? "bg-green-900 hover:bg-green-800" : ""}
+            className={isPrivate ? "bg-green-900 hover:bg-green-800 rounded-full" : "bg-slate-800/50 hover:bg-slate-800/70 rounded-full"}
           >
             {isSubmitting ? (
               <>
