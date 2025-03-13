@@ -57,7 +57,7 @@ export const sendPrivateTransaction = async (options: PrivateTransferOptions): P
 
   const connection = await createRpc(RPC_URL);
   const recipientPubKey = new PublicKey(recipientAddress);
-  const lamportsAmount = Math.floor(amount * 1e9);
+  const lamportsAmount = Math.floor(amount * 1e9); // Amount is already after fee deduction
 
   // Step 1: Compress SOL from the sender's regular wallet
   console.log('Compressing SOL...');

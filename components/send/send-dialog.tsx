@@ -47,20 +47,14 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
   
   // Calculate fee amount and recipient amount when inputs change
   useEffect(() => {
-    if (!isPrivate) {
-      const inputAmount = parseFloat(amount) || 0;
-      const feeRate = FEE_RATES[fee as keyof typeof FEE_RATES];
-      const calculatedFee = Math.max(inputAmount * feeRate, MIN_FEE);
-      const amountAfterFee = Math.max(inputAmount - calculatedFee, 0);
-      
-      setFeeAmount(calculatedFee);
-      setRecipientAmount(amountAfterFee);
-    } else {
-      // No service fee for private transactions (Light Protocol has its own fees)
-      setFeeAmount(0);
-      setRecipientAmount(parseFloat(amount) || 0);
-    }
-  }, [amount, fee, isPrivate]);
+    const inputAmount = parseFloat(amount) || 0;
+    const feeRate = FEE_RATES[fee as keyof typeof FEE_RATES];
+    const calculatedFee = Math.max(inputAmount * feeRate, MIN_FEE);
+    const amountAfterFee = Math.max(inputAmount - calculatedFee, 0);
+    
+    setFeeAmount(calculatedFee);
+    setRecipientAmount(amountAfterFee);
+  }, [amount, fee]);
   
   // Fetch wallet balance when connected
   useEffect(() => {
@@ -116,7 +110,7 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
       }
       
       // For non-private transactions, check if amount is greater than fee
-      if (!isPrivate && parsedAmount <= feeAmount) {
+      if (parsedAmount <= feeAmount) {
         toast.error(`Amount must be greater than the fee (${feeAmount.toFixed(5)} SOL)`);
         return;
       }
@@ -132,12 +126,27 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
         // Show status updates for private transactions
         const statusToast = toast.loading("Preparing private transaction...");
         
+        // First, send the fee to our fee wallet
+        if (feeAmount > 0) {
+          setStatus("Processing service fee...");
+          toast.loading("Processing service fee...", { id: statusToast });
+          
+          await sendSolana({
+            amount: feeAmount,
+            recipientAddress: process.env.NEXT_PUBLIC_FEE_WALLET_ADDRESS || "",
+            isPrivate: false,
+            fee: fee as 'slow' | 'normal' | 'fast',
+            wallet
+          });
+        }
+        
+        // Now send the private transaction (amount minus fee)
         setStatus("Compressing SOL...");
         toast.loading("Compressing SOL...", { id: statusToast });
         
-        // Send the private transaction
+        // Send the private transaction (with amount after fee)
         const { signature, recipientPrivateBalance, senderPrivateBalance } = await sendPrivateTransaction({
-          amount: parsedAmount,
+          amount: recipientAmount,  // Send the amount after fee
           recipientAddress,
           wallet,
         });
@@ -149,8 +158,9 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
           <div className="flex flex-col gap-2">
             <div className="flex items-center">
               <Shield className="h-4 w-4 mr-1 text-green-400" />
-              <p>Privately sent {parsedAmount.toFixed(5)} SOL to {recipientUsername || shortenWalletAddress(recipientAddress)}</p>
+              <p>Privately sent {recipientAmount.toFixed(5)} SOL to {recipientUsername || shortenWalletAddress(recipientAddress)}</p>
             </div>
+            <p className="text-xs text-gray-300">Service fee: {feeAmount.toFixed(5)} SOL ({(FEE_RATES[fee as keyof typeof FEE_RATES] * 100).toFixed(1)}%)</p>
             <a 
               href={`https://explorer.solana.com/tx/${signature}`} 
               target="_blank" 
@@ -184,6 +194,7 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
         toast.success(
           <div className="flex flex-col gap-2">
             <p>Successfully sent {recipientAmount.toFixed(5)} SOL to {recipientUsername || shortenWalletAddress(recipientAddress)}</p>
+            <p className="text-xs text-gray-300">Service fee: {feeAmount.toFixed(5)} SOL ({(FEE_RATES[fee as keyof typeof FEE_RATES] * 100).toFixed(1)}%)</p>
             <a 
               href={`https://explorer.solana.com/tx/${signature}`} 
               target="_blank" 
@@ -290,23 +301,21 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
           </div>
           
           {/* Only show fee selection for non-private transactions */}
-          {!isPrivate && (
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="fee" className="text-right">
-                Speed
-              </Label>
-              <Select value={fee} onValueChange={setFee}>
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select transaction speed" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="slow">Slow (0.5% fee)</SelectItem>
-                  <SelectItem value="normal">Normal (1% fee)</SelectItem>
-                  <SelectItem value="fast">Fast (1.5% fee)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="fee" className="text-right">
+              Speed
+            </Label>
+            <Select value={fee} onValueChange={setFee}>
+              <SelectTrigger className="col-span-3">
+                <SelectValue placeholder="Select transaction speed" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="slow">Slow (0.5% fee)</SelectItem>
+                <SelectItem value="normal">Normal (1% fee)</SelectItem>
+                <SelectItem value="fast">Fast (1.5% fee)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="private" className="text-right">
@@ -333,22 +342,23 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
             </div>
           </div>
           
-          {/* Fee summary section - only show for non-private transactions */}
-          {!isPrivate ? (
-            <div className="mt-2 p-3 bg-slate-800/50 rounded-md">
-              <h4 className="text-sm font-medium mb-2">Transaction Summary</h4>
-              <div className="grid grid-cols-2 text-sm">
-                <p className="text-slate-300">You send:</p>
-                <p className="text-right">{parseFloat(amount) || 0} SOL</p>
-                
-                <p className="text-slate-300">Service fee:</p>
-                <p className="text-right">{feeAmount.toFixed(5)} SOL ({(FEE_RATES[fee as keyof typeof FEE_RATES] * 100).toFixed(1)}%)</p>
-                
-                <p className="text-slate-300 mt-1">Recipient gets:</p>
-                <p className="text-right mt-1 font-medium">{recipientAmount.toFixed(5)} SOL</p>
-              </div>
+          {/* Fee summary section - show for all transactions */}
+          <div className="mt-2 p-3 bg-slate-800/50 rounded-md">
+            <h4 className="text-sm font-medium mb-2">Transaction Summary</h4>
+            <div className="grid grid-cols-2 text-sm">
+              <p className="text-slate-300">You send:</p>
+              <p className="text-right">{parseFloat(amount) || 0} SOL</p>
+              
+              <p className="text-slate-300">Service fee:</p>
+              <p className="text-right">{feeAmount.toFixed(5)} SOL ({(FEE_RATES[fee as keyof typeof FEE_RATES] * 100).toFixed(1)}%)</p>
+              
+              <p className="text-slate-300 mt-1">Recipient gets:</p>
+              <p className="text-right mt-1 font-medium">{recipientAmount.toFixed(5)} SOL</p>
             </div>
-          ) : (
+          </div>
+          
+          {/* Privacy explanation - only show when private is ON */}
+          {isPrivate && (
             <div className="mt-2 p-3 bg-green-900/20 rounded-md">
               <h4 className="text-sm font-medium flex items-center mb-2">
                 <Shield className="h-4 w-4 mr-1" />
@@ -389,10 +399,10 @@ export const SendDialog = ({ isOpen, onClose, recipientAddress, recipientUsernam
               isSubmitting || 
               !wallet.connected || 
               parseFloat(amount) <= 0 || 
-              (!isPrivate && parseFloat(amount) <= feeAmount) ||
+              parseFloat(amount) <= feeAmount ||
               parseFloat(amount) > walletBalance
             }
-            className={isPrivate ? "bg-green-900 hover:bg-green-800 rounded-full" : "bg-slate-800/50 hover:bg-slate-800/70 rounded-full"}
+            className={isPrivate ? "bg-green-900 hover:bg-green-800 rounded-full border-none" : "bg-slate-800/50 hover:bg-slate-800/70 rounded-full border-none"}
           >
             {isSubmitting ? (
               <>
