@@ -176,7 +176,7 @@ export default function WalletConnectButton() {
     }
   }, [connected, status, isSigningIn, isSigningOut]);
 
-
+  
   // Function to determine button class based on connection state
   const getButtonClass = () => {
     if (connecting) return "bg-white/15 hover:bg-white/35 rounded-full"; // Connecting state
