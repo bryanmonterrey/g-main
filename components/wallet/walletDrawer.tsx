@@ -105,7 +105,7 @@ export function DrawerDemo({ username, avatarUrl, className, onSignOut, onRefres
                     avatarUrl={avatarUrl} 
                     size="default"
                   />
-                  <span className="text-white font-semibold text-sm">{username}</span>
+                  <span className="text-white font-semibold text-sm">hi</span>
                   </div>
                 <button
                   onClick={onSignOut}

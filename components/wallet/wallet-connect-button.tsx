@@ -176,7 +176,7 @@ export default function WalletConnectButton() {
     }
   }, [connected, status, isSigningIn, isSigningOut]);
 
-  
+
   // Function to determine button class based on connection state
   const getButtonClass = () => {
     if (connecting) return "bg-white/15 hover:bg-white/35 rounded-full"; // Connecting state
@@ -199,16 +199,13 @@ export default function WalletConnectButton() {
   return (
     <div className="relative inline-flex gap-x-4">
       <div className="relative">
-      
-      
-      
+      <div className="absolute inset-0 rounded-full z-5 p-0.5 gradient-border">
     <button
         onClick={!connected ? handleConnectClick : () => {}}
         disabled={connecting || disconnecting}
-        className={`px-5 py-2 font-semibold transition-all duration-300 ease-in-out text-xs z-20 relative ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
+        className={`px-5 py-2 border border-zinc-950 bg-zinc-950 hover:bg-zinc-900 font-semibold transition-all duration-300 ease-in-out text-xs z-20 relative ${getButtonClass()} ${(connecting || disconnecting) ? 'opacity-80 cursor-not-allowed' : ''}`}
       >
-        
-        <span className="flex items-center gradient-text">
+        <span className="flex items-center">
           {(connecting || disconnecting) && (
             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -220,6 +217,7 @@ export default function WalletConnectButton() {
         
       </button>
       
+      </div>
       </div>
     {session && (
       <div className="flex items-center">
