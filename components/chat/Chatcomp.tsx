@@ -306,7 +306,7 @@ export function Chatcomp({ sessionId }: ChatcompProps) {
 					</div>
 					<div className="space-y-4">
 						<div className="relative">				
-						<div className="rounded-3xl p-[5px] bg-zinc-950 z-20 relative">				
+						<div className="rounded-3xl p-[5px] bg-zinc-900/70 z-20 relative">				
 							<ChatInput
 								input={input}
 								setInput={setInput}
