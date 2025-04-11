@@ -32,6 +32,8 @@ export default function WalletConnectButton() {
     avatar_url: ''
   });
 
+  const [currentUsername, setCurrentUsername] = useState('');
+
   const handleConnectClick = () => {
     // Show the wallet modal when the connect button is clicked
     walletModal.setVisible(true);
@@ -148,6 +150,37 @@ export default function WalletConnectButton() {
     }
   }, [session]);
   
+  useEffect(() => {
+    const fetchUsername = async () => {
+      if (!session?.user?.id) return;
+      
+      try {
+        const supabase = getSupabase(session);
+        const { data, error } = await supabase
+          .from('users')
+          .select('username')
+          .eq('id', session.user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching username:', error);
+          return;
+        }
+        
+        if (data && data.username) {
+          setCurrentUsername(data.username);
+        } else {
+          // Fallback to session or wallet address
+          setCurrentUsername(session.user.name || shortenWalletAddress(session.user.walletAddress || ''));
+        }
+      } catch (error) {
+        console.error('Error fetching username:', error);
+      }
+    };
+    
+    fetchUsername();
+  }, [session]);
+
   // Fetch avatar when session changes
   useEffect(() => {
     fetchLatestAvatar();
@@ -227,12 +260,12 @@ export default function WalletConnectButton() {
         </Button>
         </Link>
         <DrawerDemo 
-        username={session.user.name || shortenWalletAddress(session.user.walletAddress || '')}
-        avatarUrl={currentAvatarUrl || session.user.image || '/default.png'}  
-        className="flex items-center relative"
-        onSignOut={handleWalletDisconnect}
-        onRefresh={refreshAvatar}
-      />
+          username={currentUsername || shortenWalletAddress(session.user.walletAddress || '')}
+          avatarUrl={currentAvatarUrl || session.user.image || '/default.png'}  
+          className="flex items-center relative"
+          onSignOut={handleWalletDisconnect}
+          onRefresh={refreshAvatar}
+        />
       </div>
       )}
     </div>
