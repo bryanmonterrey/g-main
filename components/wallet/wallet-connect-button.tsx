@@ -227,7 +227,7 @@ export default function WalletConnectButton() {
         </Button>
         </Link>
         <DrawerDemo 
-        username={session.user.walletAddress || ''}
+        username={session.user.name || shortenWalletAddress(session.user.walletAddress || '')}
         avatarUrl={currentAvatarUrl || session.user.image || '/default.png'}  
         className="flex items-center relative"
         onSignOut={handleWalletDisconnect}
