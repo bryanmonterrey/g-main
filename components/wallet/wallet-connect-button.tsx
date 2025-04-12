@@ -263,6 +263,7 @@ export default function WalletConnectButton() {
           username={currentUsername || shortenWalletAddress(session.user.walletAddress || '')}
           avatarUrl={currentAvatarUrl || session.user.image || '/default.png'}  
           className="flex items-center relative"
+          walletAddress={session.user.walletAddress}
           onSignOut={handleWalletDisconnect}
           onRefresh={refreshAvatar}
         />
