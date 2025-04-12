@@ -7,7 +7,7 @@ import { useConnection } from "@solana/wallet-adapter-react";
 import { PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { Button } from "@/components/ui/button"
 import { Drawer } from 'vaul';
-import { Power, Wallet } from "lucide-react";
+import { ArrowUpRight, CreditCard, Power, Wallet } from "lucide-react";
 
 interface DrawerDemoProps {
   username: string;
@@ -131,6 +131,8 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
     return () => clearInterval(intervalId);
   }, [fetchWalletBalance]);
 
+  const moonpayUrl = `https://www.moonpay.com/buy/sol`;
+
 
   return (
     <Drawer.Root direction="right">
@@ -195,6 +197,31 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
                     )}
                   </div>
                 </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <a 
+                  href={moonpayUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-gradient-to-br from-purple-700/20 to-purple-600/10 hover:from-purple-700/30 hover:to-purple-600/20 border border-purple-500/20 transition-all duration-300"
+                >
+                  <div className="w-7 h-7 rounded-full bg-purple-600/20 flex items-center justify-center">
+                    <CreditCard className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <span className="text-sm font-medium text-white">Buy SOL</span>
+                </a>
+                
+                <a 
+                  href={`https://explorer.solana.com/address/${walletAddress}`}
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center justify-center gap-2 p-4 rounded-xl bg-gradient-to-br from-blue-700/20 to-blue-600/10 hover:from-blue-700/30 hover:to-blue-600/20 border border-blue-500/20 transition-all duration-300"
+                >
+                  <div className="w-7 h-7 rounded-full bg-blue-600/20 flex items-center justify-center">
+                    <ArrowUpRight className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <span className="text-sm font-medium text-white">Explorer</span>
+                </a>
               </div>
               <Drawer.Description className="text-zinc-600 mb-2">
                 Manage your wallet and account settings here.
