@@ -89,7 +89,7 @@ export function CommandMenu() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center justify-center rounded-3xl py-2 text-sm hover:bg-white/20 text-white gap-2 bg-white/5 p-2 px-2.5 shadow-none transition-all ease-in-out duration-300"
+        className="inline-flex items-center justify-center rounded-3xl py-2 text-sm hover:bg-white/20 text-white gap-2 bg-zinc-900 p-2 px-2.5 shadow-none transition-all ease-in-out duration-300"
       >
         <Search className="h-4 w-4 text-white/75 hover:text-white" strokeWidth={2.50} />
         <kbd className="hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border border-gray-700 bg-black/30 px-1.5 font-mono text-[10px] font-medium text-gray-400">
