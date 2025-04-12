@@ -67,6 +67,7 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
   const [loading, setLoading] = React.useState(true)
   const [snap, setSnap] = React.useState<number | string | null>(snapPoints[0]);
   const [balance, setBalance] = React.useState<number | null>(null);
+  const [usdBalance, setUsdBalance] = React.useState<number | null>(null);
   const [isLoadingBalance, setIsLoadingBalance] = React.useState(false);
   const { connection } = useConnection();
 
@@ -81,6 +82,18 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
     }
   };
 
+   // Function to fetch SOL price in USD
+   const fetchSolPrice = async () => {
+    try {
+      const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd');
+      const data = await response.json();
+      return data.solana.usd;
+    } catch (error) {
+      console.error("Error fetching SOL price:", error);
+      return null;
+    }
+  };
+
   // Function to fetch wallet balance
   const fetchWalletBalance = React.useCallback(async () => {
     if (!walletAddress || !connection) return;
@@ -88,11 +101,19 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
     try {
       setIsLoadingBalance(true);
       const publicKey = new PublicKey(walletAddress);
-      const balance = await connection.getBalance(publicKey);
-      setBalance(balance / LAMPORTS_PER_SOL); // Convert lamports to SOL
+      const balanceInLamports = await connection.getBalance(publicKey);
+      const solBalance = balanceInLamports / LAMPORTS_PER_SOL;
+      setBalance(solBalance);
+      
+      // Get SOL price in USD
+      const solPrice = await fetchSolPrice();
+      if (solPrice) {
+        setUsdBalance(solBalance * solPrice);
+      }
     } catch (error) {
       console.error("Error fetching balance:", error);
       setBalance(null);
+      setUsdBalance(null);
     } finally {
       setIsLoadingBalance(false);
     }
@@ -101,6 +122,13 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
   // Fetch balance when component mounts or wallet address changes
   React.useEffect(() => {
     fetchWalletBalance();
+    
+    // Set up an interval to refresh the balance every 60 seconds
+    const intervalId = setInterval(() => {
+      fetchWalletBalance();
+    }, 60000); // 60 seconds
+    
+    return () => clearInterval(intervalId);
   }, [fetchWalletBalance]);
 
 
@@ -122,10 +150,10 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
           // The gap between the edge of the screen and the drawer is 8px in this case.
           style={{ '--initial-transform': 'calc(100% + 8px)' } as React.CSSProperties}
         >
-          <div className="bg-zinc-950/95 border border-zinc-50/5 backdrop-blur-custom  h-full w-full grow p-5 flex flex-col rounded-[16px]">
-            <div className="max-w-md">
+          <div className="bg-zinc-950/95 border border-zinc-50/5 backdrop-blur-custom h-full w-full grow p-5 flex flex-col rounded-[16px]">
+            <div className="max-w-md mx-auto">
             <Drawer.Title className="font-semibold mb-4 text-white flex justify-between items-center">
-              <div className="inline-flex items-center justify-between gap-2">
+              <div className="inline-flex items-center gap-2">
               <UserAvatar 
                     username={username} 
                     avatarUrl={avatarUrl} 
@@ -145,39 +173,34 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
                 </button>
               </Drawer.Title>
               <div className="flex items-center gap-4 mb-4">
-              <div className="flex items-center gap-2">
-                  <Wallet className="w-5 h-5 text-zinc-400" />
+                <div className="flex items-center gap-2">
                   <div className="flex flex-col">
-                    <span className="text-xs text-zinc-400">Balance</span>
-                    <span className="text-white font-semibold">
-                      {isLoadingBalance ? (
-                        <span className="text-sm text-zinc-400">Loading...</span>
-                      ) : balance !== null ? (
-                        <span className="text-sm">{balance.toFixed(4)} SOL</span>
-                      ) : (
-                        <span className="text-sm text-zinc-400">Unavailable</span>
-                      )}
-                    </span>
+                    {isLoadingBalance ? (
+                      <span className="text-sm  text-zinc-400">Loading...</span>
+                    ) : (
+                      <div className="flex flex-col">
+                        {usdBalance !== null ? (
+                          <span className="text-4xl font-bold text-emerald-500">
+                            ${usdBalance.toFixed(2)} USD
+                          </span>
+                        ) : (
+                          <span className="text-sm text-zinc-400">Unavailable</span>
+                        )}
+                        {balance !== null && (
+                          <span className="text-xs text-zinc-500">
+                            {balance.toFixed(4)} SOL
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
-                <Button 
-                  size="sm" 
-                  variant="ghost" 
-                  className="ml-auto rounded-full p-2 h-auto bg-zinc-800 hover:bg-zinc-700"
-                  onClick={handleRefresh}
-                  disabled={isLoadingBalance}
-                >
-                  <svg className={`w-4 h-4 ${isLoadingBalance ? 'animate-spin' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                </Button>
-              </div>
-                
               </div>
               <Drawer.Description className="text-zinc-600 mb-2">
                 Manage your wallet and account settings here.
               </Drawer.Description>
             </div>
+          </div>
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>
