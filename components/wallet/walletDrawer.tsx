@@ -180,7 +180,7 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
                     ) : (
                       <div className="flex flex-col">
                         {usdBalance !== null ? (
-                          <span className="text-4xl font-bold text-emerald-500">
+                          <span className="text-4xl font-bold text-lucky">
                             ${usdBalance.toFixed(2)} USD
                           </span>
                         ) : (

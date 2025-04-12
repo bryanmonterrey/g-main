@@ -49,6 +49,7 @@ export default {
 			azul: "#ffffff",
 			satin: "#1B1B29",
 			juul: "#0071E3",
+			lucky: "#00FFA2",
 			rainbow: 'linear-gradient(to right, #FFC6C6, #ADFFE1, #B8A4FF, #E6B1FF)',
   			chart: {
   				'1': 'hsl(var(--chart-1))',
