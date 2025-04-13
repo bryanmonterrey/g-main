@@ -22,7 +22,13 @@ export default function Home() {
   }, [session, router]);
 
   return (
-    <main className="flex flex-col w-full h-screen space-y-5 items-center justify-center z-50">
+    <main className="flex flex-col w-full h-screen space-y-5 items-center justify-center z-50 gap-7">
+      <div className="flex flex-col items-center space-y-2">
+        <h1 className="text-4xl font-bold text-white"></h1>
+        <p className="text-zinc-400 text-4xl">
+          The next generation of Social Media is here.
+        </p>
+      </div>
       <WalletConnectButton />
       {!session && (
         <>
