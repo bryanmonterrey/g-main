@@ -196,9 +196,9 @@ export function DrawerDemo({ username, avatarUrl, walletAddress, className, onSi
     
     setIsLoadingNfts(true);
     try {
-      // Replace YOUR_HELIUS_API_KEY with your actual Helius API key
+      // Using the Helius API from environment variables
       const response = await fetch(
-        `https://mainnet.helius-rpc.com/?api-key=YOUR_HELIUS_API_KEY`,
+        `https://mainnet.helius-rpc.com/?api-key=89acb127-21f1-48fd-a752-77abb2a7fd78`,
         {
           method: 'POST',
           headers: {
