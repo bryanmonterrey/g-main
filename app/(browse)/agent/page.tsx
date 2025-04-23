@@ -26,6 +26,12 @@ interface AIAgent {
     tweet_frequency?: number;
     response_style?: string;
     engagement_enabled?: boolean;
+    emotionalState?: string;
+    technical_depth?: number;
+    provocative_tendency?: number;
+    chaos_threshold?: number;
+    philosophical_inclination?: number;
+    meme_affinity?: number;
   };
   performance_metrics?: {
     total_tweets: number;
@@ -88,7 +94,13 @@ const Page = () => {
                     tone: 'professional',
                     topics: ['ai', 'technology', 'business'],
                     tweet_frequency: 1,
-                    engagement_enabled: false
+                    engagement_enabled: false,
+                    emotionalState: 'neutral',
+                    technical_depth: 5,
+                    provocative_tendency: 5, 
+                    chaos_threshold: 5,
+                    philosophical_inclination: 5,
+                    meme_affinity: 5
                   },
                   performance_metrics: {
                     total_tweets: 0,
@@ -442,7 +454,7 @@ const Page = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Tone</label>
+                  <label className="block text-sm font-medium mb-2">Tweet Style</label>
                   <select 
                     className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
                     value={agent?.settings?.tone || 'professional'}
@@ -455,7 +467,124 @@ const Page = () => {
                     <option value="casual">Casual</option>
                     <option value="humorous">Humorous</option>
                     <option value="educational">Educational</option>
+                    <option value="absurdist">Absurdist</option>
+                    <option value="philosophical">Philosophical</option>
+                    <option value="chaotic">Chaotic</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Emotional State</label>
+                  <select 
+                    className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
+                    value={agent?.settings?.emotionalState || 'neutral'}
+                    onChange={(e) => setAgent(prev => prev ? {
+                      ...prev, 
+                      settings: {...prev.settings, emotionalState: e.target.value}
+                    } : null)}
+                  >
+                    <option value="neutral">Neutral</option>
+                    <option value="excited">Excited</option>
+                    <option value="contemplative">Contemplative</option>
+                    <option value="chaotic">Chaotic</option>
+                    <option value="manic">Manic</option>
+                    <option value="nihilistic">Nihilistic</option>
+                    <option value="enlightened">Enlightened</option>
+                  </select>
+                </div>
+
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium">Personality Traits</label>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-xs">Technical Depth</span>
+                      <span className="text-xs">{agent?.settings?.technical_depth || 5}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={agent?.settings?.technical_depth || 5}
+                      onChange={(e) => setAgent(prev => prev ? {
+                        ...prev, 
+                        settings: {...prev.settings, technical_depth: parseInt(e.target.value)}
+                      } : null)}
+                      className="w-full "
+                    />
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-xs">Provocative Tendency</span>
+                      <span className="text-xs">{agent?.settings?.provocative_tendency || 5}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={agent?.settings?.provocative_tendency || 5}
+                      onChange={(e) => setAgent(prev => prev ? {
+                        ...prev, 
+                        settings: {...prev.settings, provocative_tendency: parseInt(e.target.value)}
+                      } : null)}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-xs">Chaos Threshold</span>
+                      <span className="text-xs">{agent?.settings?.chaos_threshold || 5}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={agent?.settings?.chaos_threshold || 5}
+                      onChange={(e) => setAgent(prev => prev ? {
+                        ...prev, 
+                        settings: {...prev.settings, chaos_threshold: parseInt(e.target.value)}
+                      } : null)}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-xs">Philosophical Inclination</span>
+                      <span className="text-xs">{agent?.settings?.philosophical_inclination || 5}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={agent?.settings?.philosophical_inclination || 5}
+                      onChange={(e) => setAgent(prev => prev ? {
+                        ...prev, 
+                        settings: {...prev.settings, philosophical_inclination: parseInt(e.target.value)}
+                      } : null)}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <div className="flex justify-between mb-1">
+                      <span className="text-xs">Meme Affinity</span>
+                      <span className="text-xs">{agent?.settings?.meme_affinity || 5}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="1"
+                      max="10"
+                      value={agent?.settings?.meme_affinity || 5}
+                      onChange={(e) => setAgent(prev => prev ? {
+                        ...prev, 
+                        settings: {...prev.settings, meme_affinity: parseInt(e.target.value)}
+                      } : null)}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
 
                 <div>
