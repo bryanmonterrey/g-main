@@ -4,12 +4,12 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { getSupabase } from '@/utils/supabase/getDataWhenAuth';
-import { Database } from "@/types/supabase";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Bot, AlertCircle, CheckCircle2, Twitter } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Bot, AlertCircle, CheckCircle2, Twitter } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -55,6 +55,7 @@ const Page = () => {
   const [success, setSuccess] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedModel, setSelectedModel] = useState<'openai' | 'claude'>('openai');
+  const [creatingAgent, setCreatingAgent] = useState(false);
   
   const supabase = getSupabase(session);
 
@@ -69,9 +70,59 @@ const Page = () => {
           .eq('user_id', session.user.id)
           .single();
 
-        if (error) throw error;
-        setAgent(data);
+        if (error) {
+          // If no agent exists, create one directly with Supabase
+          if (error.code === 'PGRST116') {
+            setCreatingAgent(true);
+            try {
+              // Create agent directly with Supabase
+              const now = new Date().toISOString();
+              const { data: newAgent, error: createError } = await supabase
+                .from('ai_agents')
+                .insert({
+                  user_id: session.user.id,
+                  name: 'My Twitter Agent',
+                  status: 'inactive',
+                  mode: 'manual',
+                  settings: {
+                    tone: 'professional',
+                    topics: ['ai', 'technology', 'business'],
+                    tweet_frequency: 1,
+                    engagement_enabled: false
+                  },
+                  performance_metrics: {
+                    total_tweets: 0,
+                    total_likes: 0,
+                    total_retweets: 0,
+                    avg_engagement_rate: 0
+                  },
+                  created_at: now,
+                  updated_at: now
+                })
+                .select()
+                .single();
+
+              if (createError) {
+                console.error('Supabase creation error:', createError);
+                throw new Error(createError.message);
+              }
+              
+              setAgent(newAgent);
+              setSuccess('Created your AI agent successfully!');
+            } catch (createError) {
+              console.error('Error creating agent directly:', createError);
+              setError('Failed to create agent. Please try again.');
+            } finally {
+              setCreatingAgent(false);
+            }
+          } else {
+            throw error;
+          }
+        } else {
+          setAgent(data);
+        }
       } catch (err) {
+        console.error('Fetch agent error:', err);
         setError(err instanceof Error ? err.message : 'Failed to load agent');
       } finally {
         setLoading(false);
@@ -79,7 +130,7 @@ const Page = () => {
     };
 
     fetchAgent();
-  }, [session]);
+  }, [session?.user?.id]);
 
   const handleAgentModeChange = async (newMode: 'auto' | 'manual') => {
     if (!agent || !session?.user?.id) return;
@@ -100,7 +151,7 @@ const Page = () => {
   };
 
   const handleGenerateTweet = async () => {
-    if (!prompt.trim()) return;
+    if (!prompt.trim() || !agent?.id) return;
 
     setIsGenerating(true);
     setError(null);
@@ -111,12 +162,15 @@ const Page = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           prompt, 
-          agentId: agent?.id,
+          agentId: agent.id,
           model: selectedModel 
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to generate tweet');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to generate tweet');
+      }
 
       const data = await response.json();
       setTweetPreview(data.tweet);
@@ -140,20 +194,91 @@ const Page = () => {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to send tweet');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to send tweet');
+      }
 
       setSuccess('Tweet sent successfully!');
       setTweetPreview("");
       setPrompt("");
+      
+      // Refresh agent data to update stats
+      const { data: refreshedAgent } = await supabase
+        .from('ai_agents')
+        .select('*')
+        .eq('id', agent.id)
+        .single();
+        
+      if (refreshedAgent) {
+        setAgent(refreshedAgent);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send tweet');
     }
   };
 
-  if (loading) {
+  // Skeleton loading components
+  const renderSkeleton = () => (
+    <div className="space-y-6">
+      <div>
+        <Skeleton className="h-8 w-64 mb-2" />
+        <Skeleton className="h-5 w-full max-w-md" />
+      </div>
+
+      <div className="flex gap-2 flex-wrap relative mb-8">
+        {AGENT_TABS.map((_, index) => (
+          <Skeleton key={index} className="h-9 w-24 rounded-full" />
+        ))}
+      </div>
+
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48 mb-2" />
+          <Skeleton className="h-4 w-64" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Skeleton className="h-5 w-32 mb-2" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+              <Skeleton className="h-6 w-12 rounded-full" />
+            </div>
+
+            <div>
+              <Skeleton className="h-5 w-24 mb-2" />
+              <Skeleton className="h-4 w-60" />
+            </div>
+
+            <div>
+              <Skeleton className="h-5 w-36 mb-2" />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Skeleton className="h-4 w-20 mb-1" />
+                  <Skeleton className="h-5 w-8" />
+                </div>
+                <div>
+                  <Skeleton className="h-4 w-24 mb-1" />
+                  <Skeleton className="h-5 w-12" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+
+  if (loading || creatingAgent) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="w-8 h-8 animate-spin" />
+      <div className="container mx-auto p-6 max-w-6xl">
+        <div className="mb-8">
+          <Skeleton className="h-10 w-72 mb-2" />
+          <Skeleton className="h-5 w-full max-w-lg" />
+        </div>
+        {renderSkeleton()}
       </div>
     );
   }
@@ -261,14 +386,7 @@ const Page = () => {
                   disabled={isGenerating || !prompt.trim()}
                   className="w-full"
                 >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    'Generate Tweet'
-                  )}
+                  {isGenerating ? 'Generating...' : 'Generate Tweet'}
                 </Button>
 
                 {tweetPreview && (
@@ -358,16 +476,16 @@ const Page = () => {
                   onClick={async () => {
                     if (!agent) return;
                     try {
-                      const response = await fetch('/api/agent/settings', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                          agentId: agent.id, 
-                          settings: agent.settings 
-                        }),
-                      });
+                      const { error } = await supabase
+                        .from('ai_agents')
+                        .update({
+                          name: agent.name,
+                          settings: agent.settings,
+                          updated_at: new Date().toISOString()
+                        })
+                        .eq('id', agent.id);
                       
-                      if (!response.ok) throw new Error('Failed to save settings');
+                      if (error) throw error;
                       
                       setSuccess('Settings saved successfully!');
                     } catch (err) {
