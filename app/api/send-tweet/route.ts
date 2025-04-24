@@ -1,91 +1,97 @@
 // app/api/send-tweet/route.ts
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { NextResponse } from 'next/server';
-import { TwitterApi } from 'twitter-api-v2';
-import { getSupabase } from '@/utils/supabase/supabase';
+import { NextResponse } from 'next/server'
+import { getServerSession } from "next-auth"
+import { getSupabase } from '@/utils/supabase/getDataWhenAuth'
 
 export async function POST(request: Request) {
   try {
-    const session = await getServerSession(authOptions);
+    const requestData = await request.json()
+    const { tweet, agentId } = requestData
 
-    if (!session || !session.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    // Validate request
+    if (!tweet || !agentId) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
     }
 
-    const supabase = getSupabase();
-    const { tweet, agentId } = await request.json();
-
-    // Fetch agent settings and user API keys
-    const [{ data: agent }, { data: apiKeys }] = await Promise.all([
-      supabase
-        .from('ai_agents')
-        .select('*')
-        .eq('id', agentId)
-        .eq('user_id', session.user.id)
-        .single(),
-      supabase
-        .from('user_api_keys')
-        .select('*')
-        .eq('user_id', session.user.id)
-        .single()
-    ]);
-
-    if (!agent) {
-      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+    // Get the NextAuth session
+    const session = await getServerSession()
+    
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Authentication required' },
+        { status: 401 }
+      )
     }
 
-    if (!apiKeys?.twitter_api_key || !apiKeys?.twitter_api_secret || 
-        !apiKeys?.twitter_access_token || !apiKeys?.twitter_access_secret) {
-      return NextResponse.json({ error: 'Twitter credentials not configured' }, { status: 400 });
-    }
+    // Get authenticated Supabase client using your utility function
+    const supabase = getSupabase(session)
 
-    const twitterClient = new TwitterApi({
-      appKey: apiKeys.twitter_api_key,
-      appSecret: apiKeys.twitter_api_secret,
-      accessToken: apiKeys.twitter_access_token,
-      accessSecret: apiKeys.twitter_access_secret,
-    });
-
-    // Send tweet
-    const tweeted = await twitterClient.v2.tweet(tweet);
-
-    // Update agent's last tweet timestamp
-    await supabase
+    // Get the agent
+    const { data: agent, error: agentError } = await supabase
       .from('ai_agents')
-      .update({ 
-        last_tweet_at: new Date().toISOString(),
-        performance_metrics: {
-          ...agent.performance_metrics,
-          total_tweets: (agent.performance_metrics?.total_tweets || 0) + 1
-        }
-      })
-      .eq('id', agentId);
+      .select('*')
+      .eq('id', agentId)
+      .single()
 
-    // Log the tweet in your database
-    await supabase
+    if (agentError || !agent) {
+      console.error('Agent not found error:', agentError)
+      return NextResponse.json(
+        { error: 'Agent not found' },
+        { status: 404 }
+      )
+    }
+
+    // Store the tweet in the posts table
+    const { error: postError } = await supabase
       .from('posts')
       .insert({
-        content: tweet,
         user_id: session.user.id,
-        type: 'text',
-        created_at: new Date().toISOString(),
+        content: tweet,
+        type: 'tweet',
         metadata: {
-          source: 'ai_agent',
           agent_id: agentId,
-          twitter_tweet_id: tweeted.data.id
+          twitter_status: 'pending' // You could implement actual Twitter posting later
         }
-      });
+      })
 
-    return NextResponse.json({ 
-      success: true, 
-      tweet_id: tweeted.data.id 
-    });
+    if (postError) {
+      console.error('Post creation error:', postError)
+      return NextResponse.json(
+        { error: 'Failed to save tweet' },
+        { status: 500 }
+      )
+    }
+
+    // Update agent's stats
+    const now = new Date().toISOString()
+    const newTweetCount = (agent.performance_metrics?.total_tweets || 0) + 1
+    
+    const { error: updateError } = await supabase
+      .from('ai_agents')
+      .update({
+        last_tweet_at: now,
+        performance_metrics: {
+          ...agent.performance_metrics,
+          total_tweets: newTweetCount
+        },
+        updated_at: now
+      })
+      .eq('id', agentId)
+
+    if (updateError) {
+      console.error('Agent update error:', updateError)
+      // We don't need to return an error here as the tweet was saved
+    }
+
+    return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Error sending tweet:', error);
+    console.error('Send tweet error:', error)
     return NextResponse.json(
       { error: 'Failed to send tweet' },
       { status: 500 }
-    );
+    )
   }
 }
