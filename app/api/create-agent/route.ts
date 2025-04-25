@@ -1,4 +1,4 @@
-// app/api/agent/create/route.ts
+// app/api/create-agent/route.ts
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { getSupabase } from '@/utils/supabase/getDataWhenAuth'
@@ -25,7 +25,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get authenticated Supabase client
+    // Get authenticated Supabase client using your utility function
     const supabase = getSupabase(session)
 
     // Default agent settings

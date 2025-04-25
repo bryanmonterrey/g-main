@@ -1,6 +1,6 @@
 // app/api/send-tweet/route.ts
 import { NextResponse } from 'next/server'
-import { getServerSession } from "next-auth"
+import { getServerSession } from 'next-auth'
 import { getSupabase } from '@/utils/supabase/getDataWhenAuth'
 
 export async function POST(request: Request) {
@@ -34,10 +34,17 @@ export async function POST(request: Request) {
       .from('ai_agents')
       .select('*')
       .eq('id', agentId)
-      .single()
+      .maybeSingle()
 
-    if (agentError || !agent) {
-      console.error('Agent not found error:', agentError)
+    if (agentError) {
+      console.error('Agent query error:', agentError)
+      return NextResponse.json(
+        { error: 'Error querying agent' },
+        { status: 500 }
+      )
+    }
+    
+    if (!agent) {
       return NextResponse.json(
         { error: 'Agent not found' },
         { status: 404 }
@@ -90,7 +97,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Send tweet error:', error)
     return NextResponse.json(
-      { error: 'Failed to send tweet' },
+      { error: 'Failed to send tweet: ' + (error instanceof Error ? error.message : String(error)) },
       { status: 500 }
     )
   }

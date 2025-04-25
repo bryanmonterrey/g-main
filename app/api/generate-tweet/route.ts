@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server'
 import OpenAI from 'openai'
 import Anthropic from '@anthropic-ai/sdk'
-import { getServerSession } from "next-auth"
+import { getServerSession } from 'next-auth'
 import { getSupabase } from '@/utils/supabase/getDataWhenAuth'
 
 const openai = new OpenAI({
@@ -19,15 +19,17 @@ export async function POST(request: Request) {
     const { prompt, agentId, model } = requestData
 
     // Validate request
-    if (!prompt || !agentId) {
+    if (!prompt) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing prompt' },
         { status: 400 }
       )
     }
 
-    // Get the NextAuth session
+    // Get the NextAuth session without authOptions
     const session = await getServerSession()
+    
+    console.log('Session in API:', JSON.stringify(session, null, 2));
     
     if (!session?.user) {
       return NextResponse.json(
@@ -36,84 +38,68 @@ export async function POST(request: Request) {
       )
     }
 
-    console.log('Session user:', session.user);
-    console.log('Agent ID:', agentId);
-
-    // Get authenticated Supabase client using your utility function
-    const supabase = getSupabase(session)
-
-    // First, let's check if the agent exists at all without user_id filter
-    const { data: allAgents, error: allAgentsError } = await supabase
-      .from('ai_agents')
-      .select('id, user_id')
+    // Default settings for tweet generation
+    let settings = {
+      tone: 'professional',
+      emotionalState: 'neutral',
+      topics: ['general'],
+      technical_depth: 5,
+      provocative_tendency: 5,
+      chaos_threshold: 5,
+      philosophical_inclination: 5,
+      meme_affinity: 5
+    };
+    
+    // Try to get agent settings if agentId is provided
+    if (agentId) {
+      // Get the Supabase client using your utility
+      const supabase = getSupabase(session);
       
-    console.log('All agents found:', allAgents);
-    
-    if (allAgentsError) {
-      console.error('Error fetching all agents:', allAgentsError);
+      // Debug: check auth headers and user ID
+      console.log('Session user ID:', session.user.id);
+      console.log('Agent ID being queried:', agentId);
+      
+      // Get the agent
+      const { data: agent, error: agentError } = await supabase
+        .from('ai_agents')
+        .select('*')
+        .eq('id', agentId)
+        .maybeSingle();
+      
+      console.log('Agent query result:', agent);
+      console.log('Agent query error:', agentError);
+      
+      if (agent?.settings) {
+        // Use agent settings if found
+        settings = {
+          tone: agent.settings.tone || settings.tone,
+          emotionalState: agent.settings.emotionalState || settings.emotionalState,
+          topics: agent.settings.topics || settings.topics,
+          technical_depth: agent.settings.technical_depth || settings.technical_depth,
+          provocative_tendency: agent.settings.provocative_tendency || settings.provocative_tendency,
+          chaos_threshold: agent.settings.chaos_threshold || settings.chaos_threshold,
+          philosophical_inclination: agent.settings.philosophical_inclination || settings.philosophical_inclination,
+          meme_affinity: agent.settings.meme_affinity || settings.meme_affinity
+        };
+      }
     }
-
-    // Now try to get the specific agent
-    const { data: agent, error: agentError } = await supabase
-      .from('ai_agents')
-      .select('*')
-      .eq('id', agentId)
-      .maybeSingle() // Use maybeSingle instead of single to avoid the error
-
-    console.log('Agent query result:', agent);
-    
-    if (agentError) {
-      console.error('Agent query error:', agentError);
-      return NextResponse.json(
-        { error: 'Error querying agent' },
-        { status: 500 }
-      )
-    }
-    
-    if (!agent) {
-      return NextResponse.json(
-        { error: 'Agent not found' },
-        { status: 404 }
-      )
-    }
-
-    // Verify the agent belongs to the current user
-    if (agent.user_id !== session.user.id) {
-      console.log('User ID mismatch - Agent user_id:', agent.user_id, 'Session user.id:', session.user.id);
-      return NextResponse.json(
-        { error: 'Not authorized to access this agent' },
-        { status: 403 }
-      )
-    }
-
-    // Build prompt based on agent settings
-    const tweetStyle = agent.settings.tone || 'professional'
-    const emotionalState = agent.settings.emotionalState || 'neutral'
-    const topics = agent.settings.topics || ['general']
-    
-    // Add personality traits with defaults if not present
-    const technical_depth = agent.settings.technical_depth || 5
-    const provocative_tendency = agent.settings.provocative_tendency || 5
-    const chaos_threshold = agent.settings.chaos_threshold || 5
-    const philosophical_inclination = agent.settings.philosophical_inclination || 5
-    const meme_affinity = agent.settings.meme_affinity || 5
 
     // Create AI prompt
-    let systemPrompt = `Generate a tweet about "${prompt}" in a ${tweetStyle} style.
+    let systemPrompt = `Generate a tweet about "${prompt}" in a ${settings.tone} style.
     
-Emotional state: ${emotionalState}
-Technical depth (1-10): ${technical_depth}
-Provocative tendency (1-10): ${provocative_tendency}
-Chaos threshold (1-10): ${chaos_threshold}
-Philosophical inclination (1-10): ${philosophical_inclination}
-Meme affinity (1-10): ${meme_affinity}
+Emotional state: ${settings.emotionalState}
+Technical depth (1-10): ${settings.technical_depth}
+Provocative tendency (1-10): ${settings.provocative_tendency}
+Chaos threshold (1-10): ${settings.chaos_threshold}
+Philosophical inclination (1-10): ${settings.philosophical_inclination}
+Meme affinity (1-10): ${settings.meme_affinity}
 
-The tweet should be related to the following topics: ${topics.join(', ')}.
+The tweet should be related to the following topics: ${settings.topics.join(', ')}.
 Keep the tweet under 280 characters.
-Write only the tweet text without any additional explanations.`
+Write only the tweet text without any additional explanations.`;
 
     // Generate tweet
-    let tweet = ''
+    let tweet = '';
     
     if (model === 'claude') {
       const response = await anthropic.messages.create({
@@ -123,8 +109,8 @@ Write only the tweet text without any additional explanations.`
         messages: [
           { role: 'user', content: `Generate a tweet about: ${prompt}` }
         ]
-      })
-      tweet = response.content[0].text.trim()
+      });
+      tweet = response.content[0].text.trim();
     } else {
       // Default to OpenAI
       const response = await openai.chat.completions.create({
@@ -134,21 +120,21 @@ Write only the tweet text without any additional explanations.`
           { role: 'user', content: `Generate a tweet about: ${prompt}` }
         ],
         max_tokens: 300,
-      })
-      tweet = response.choices[0].message.content?.trim() || ''
+      });
+      tweet = response.choices[0].message.content?.trim() || '';
     }
 
     // Ensure the tweet is under 280 characters
     if (tweet.length > 280) {
-      tweet = tweet.substring(0, 277) + '...'
+      tweet = tweet.substring(0, 277) + '...';
     }
 
-    return NextResponse.json({ tweet })
+    return NextResponse.json({ tweet });
   } catch (error) {
-    console.error('Generate tweet error:', error)
+    console.error('Generate tweet error:', error);
     return NextResponse.json(
-      { error: 'Failed to generate tweet' },
+      { error: 'Failed to generate tweet: ' + (error instanceof Error ? error.message : String(error)) },
       { status: 500 }
-    )
+    );
   }
 }
