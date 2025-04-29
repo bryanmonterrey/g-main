@@ -1,6 +1,7 @@
-// app/api/send-tweet/route.ts (updated)
+// app/api/send-tweet/route.ts (revised)
 import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
+import { authOptions } from '@/lib/auth'
 import { getSupabase } from '@/utils/supabase/getDataWhenAuth'
 
 export async function POST(request: Request) {
@@ -16,12 +17,18 @@ export async function POST(request: Request) {
       )
     }
 
-    // Get the NextAuth session
-    const session = await getServerSession()
+    // Get the NextAuth session WITH authOptions
+    const session = await getServerSession(authOptions)
     console.log('Send-tweet session:', JSON.stringify(session, null, 2));
+    
+    // Check if we have a valid session with the token
+    if (!session?.supabaseAccessToken) {
+      console.log('Missing supabaseAccessToken in session, authentication will likely fail');
+    }
     
     // Get authenticated Supabase client
     const supabase = getSupabase(session)
+    console.log('Created Supabase client with session token');
     
     // Try to determine the user ID
     let userId = providedUserId;
@@ -47,40 +54,45 @@ export async function POST(request: Request) {
       console.log('Got user ID from session:', userId);
     }
     
-    // As a fallback, try the first user in the database
-    if (!userId) {
-      console.log('No user ID found, attempting to get first user from database');
-      
-      // Query users table to find a valid user ID
-      const { data: firstUser } = await supabase
-        .from('users')
-        .select('id')
-        .limit(1)
-        .single();
-        
-      if (firstUser?.id) {
-        userId = firstUser.id;
-        console.log('Found first user ID:', userId);
-      }
+    // CRITICAL: Ensure the user_id field matches the authenticated user's ID
+    // to satisfy the RLS policy: (auth.uid() = user_id)
+    if (session?.user?.id && userId !== session.user.id) {
+      console.log(`Overriding user_id to match authenticated user (${userId} -> ${session.user.id})`);
+      userId = session.user.id;
     }
     
     if (!userId) {
       return NextResponse.json(
-        { error: 'Unable to determine user ID. Please provide a userId in the request.' },
+        { error: 'Unable to determine user ID.' },
         { status: 400 }
       );
     }
 
-    // Based on the error, 'post' isn't a valid enum value
-    // Let's try 'text' since that's commonly used and was the default in your schema
-    const validPostType = 'text';
-    console.log('Using post type:', validPostType);
+    // Test read access to see if authentication is working
+    console.log('Testing authentication with a simple query...');
+    const { data: testData, error: testError } = await supabase
+      .from('posts')
+      .select('id')
+      .limit(1);
+      
+    if (testError) {
+      console.error('Authentication test failed:', testError);
+      return NextResponse.json(
+        { error: 'Authentication failed: ' + testError.message },
+        { status: 401 }
+      );
+    }
+    
+    console.log('Authentication test successful');
 
-    // Store the tweet in the posts table
+    // Create the post with timestamps
+    const now = new Date().toISOString();
     const postData = {
       user_id: userId,
       content: tweet,
-      type: validPostType,
+      type: 'text',
+      created_at: now,
+      updated_at: now,
       metadata: {
         agent_id: agentId || null,
         twitter_status: 'pending',
@@ -98,35 +110,6 @@ export async function POST(request: Request) {
 
     if (postError) {
       console.error('Post creation error:', postError);
-      
-      // If we get an enum error, let's try other possible values
-      if (postError.code === '22P02' && postError.message.includes('post_type')) {
-        // Try common enum values one by one
-        for (const typeToTry of ['status', 'tweet', 'message', 'content']) {
-          console.log(`Trying alternative post type: ${typeToTry}`);
-          
-          const { data: retryPost, error: retryError } = await supabase
-            .from('posts')
-            .insert({
-              ...postData,
-              type: typeToTry
-            })
-            .select()
-            .single();
-            
-          if (!retryError) {
-            console.log(`Success with post type: ${typeToTry}`);
-            return NextResponse.json({ 
-              success: true,
-              message: "Tweet saved successfully",
-              post: retryPost
-            });
-          }
-          
-          console.log(`Failed with type ${typeToTry}:`, retryError.message);
-        }
-      }
-      
       return NextResponse.json(
         { error: 'Failed to save tweet: ' + postError.message },
         { status: 500 }
@@ -142,7 +125,6 @@ export async function POST(request: Request) {
         .maybeSingle();
       
       if (agent) {
-        const now = new Date().toISOString();
         const newTweetCount = (agent.performance_metrics?.total_tweets || 0) + 1;
         
         const { error: updateError } = await supabase
