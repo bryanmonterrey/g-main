@@ -56,6 +56,7 @@ const Page = () => {
   const [agent, setAgent] = useState<AIAgent | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSending, setIsSending] = useState(false); // Added the missing state
   const [tweetPreview, setTweetPreview] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -195,23 +196,45 @@ const Page = () => {
 
   const handleSendTweet = async () => {
     if (!tweetPreview.trim() || !agent) return;
-
+  
     try {
+      setIsSending(true);
+      
       const response = await fetch('/api/send-tweet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           tweet: tweetPreview, 
-          agentId: agent.id 
+          agentId: agent.id,
+          postToTwitter: true // Set this to false if you want to save without posting to Twitter
         }),
       });
-
+  
+      // Check if the response is actually JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        // Not JSON, likely an error HTML page
+        const text = await response.text();
+        console.error("Received non-JSON response:", text);
+        throw new Error("Received non-JSON response from server. Please check server logs.");
+      }
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to send tweet');
       }
-
-      setSuccess('Tweet sent successfully!');
+  
+      const data = await response.json();
+      
+      // Handle different statuses
+      if (data.twitterPosted) {
+        setSuccess('Tweet posted to Twitter and saved successfully!');
+      } else if (data.twitterError) {
+        setSuccess('Tweet saved but could not be posted to Twitter: ' + data.twitterError);
+      } else {
+        setSuccess('Tweet saved successfully!');
+      }
+      
       setTweetPreview("");
       setPrompt("");
       
@@ -227,6 +250,8 @@ const Page = () => {
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send tweet');
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -413,9 +438,10 @@ const Page = () => {
                     <div className="flex gap-2">
                       <Button 
                         onClick={handleSendTweet}
+                        disabled={isSending} // Add disabled state using isSending
                         className="flex-1"
                       >
-                        Send Tweet
+                        {isSending ? 'Sending...' : 'Send Tweet'} {/* Update button text based on sending state */}
                       </Button>
                       <Button 
                         variant="outline"
