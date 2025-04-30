@@ -326,7 +326,7 @@ const Page = () => {
         return (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center text-white gap-2">
                 <Bot className="w-5 h-5" />
                 Agent Status
               </CardTitle>
@@ -338,7 +338,7 @@ const Page = () => {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h3 className="font-medium">Agent Mode</h3>
+                    <h3 className="font-medium text-white">Agent Mode</h3>
                     <p className="text-sm text-gray-500">
                       {agent?.mode === 'auto' ? 'Agent tweets automatically' : 'Manual control only'}
                     </p>
@@ -350,22 +350,22 @@ const Page = () => {
                 </div>
 
                 <div>
-                  <h3 className="font-medium mb-2">Activity</h3>
+                  <h3 className="font-medium mb-2 text-white">Activity</h3>
                   <div className="text-sm text-gray-500">
                     Last tweet: {agent?.last_tweet_at ? new Date(agent.last_tweet_at).toLocaleString() : 'Never'}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-medium mb-2">Performance</h3>
+                  <h3 className="font-medium mb-2 text-white">Performance</h3>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="text-gray-500">Total Tweets</div>
-                      <div className="font-semibold">{agent?.performance_metrics?.total_tweets || 0}</div>
+                      <div className="font-semibold text-white">{agent?.performance_metrics?.total_tweets || 0}</div>
                     </div>
                     <div>
                       <div className="text-gray-500">Avg. Engagement</div>
-                      <div className="font-semibold">
+                      <div className="font-semibold text-white">
                         {agent?.performance_metrics?.avg_engagement_rate 
                           ? `${agent.performance_metrics.avg_engagement_rate.toFixed(1)}%` 
                           : '0%'}
@@ -382,7 +382,7 @@ const Page = () => {
         return (
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center text-white gap-2">
                 <Twitter className="w-5 h-5" />
                 Tweet Generation
               </CardTitle>
@@ -393,11 +393,11 @@ const Page = () => {
             <CardContent>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm text-white font-medium mb-2">
                     AI Model
                   </label>
                   <select 
-                    className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
+                    className="w-full p-2 border  rounded-xl bg-zinc-900 text-white border-zinc-700"
                     value={selectedModel}
                     onChange={(e) => setSelectedModel(e.target.value as 'openai' | 'claude')}
                   >
@@ -406,7 +406,7 @@ const Page = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">
+                  <label className="block text-sm text-white font-medium mb-2">
                     Prompt for tweet
                   </label>
                   <Textarea
@@ -414,14 +414,14 @@ const Page = () => {
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     rows={4}
-                    className="bg-zinc-900 border-zinc-700"
+                    className="text-white bg-zinc-900 border-zinc-700"
                   />
                 </div>
 
                 <Button 
                   onClick={handleGenerateTweet}
                   disabled={isGenerating || !prompt.trim()}
-                  className="w-full"
+                  className="w-full border border-zinc-900"
                 >
                   {isGenerating ? 'Generating...' : 'Generate Tweet'}
                 </Button>
@@ -429,7 +429,7 @@ const Page = () => {
                 {tweetPreview && (
                   <div className="p-4 bg-zinc-800 rounded-lg">
                     <div className="flex justify-between items-start mb-4">
-                      <h3 className="font-medium">Tweet Preview</h3>
+                      <h3 className="font-medium text-white">Tweet Preview</h3>
                       <span className="text-sm text-gray-500">
                         {tweetPreview.length}/280
                       </span>
@@ -462,7 +462,7 @@ const Page = () => {
         return (
           <Card>
             <CardHeader>
-              <CardTitle>Agent Configuration</CardTitle>
+              <CardTitle className="text-white">Agent Configuration</CardTitle>
               <CardDescription>
                 Fine-tune your agent's personality and behavior
               </CardDescription>
@@ -470,7 +470,7 @@ const Page = () => {
             <CardContent>
               <div className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Agent Name</label>
+                  <label className="text-white block text-sm font-medium mb-2">Agent Name</label>
                   <input
                     type="text"
                     className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
@@ -480,7 +480,7 @@ const Page = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Tweet Style</label>
+                  <label className="block text-white text-sm font-medium mb-2">Tweet Style</label>
                   <select 
                     className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
                     value={agent?.settings?.tone || 'professional'}
@@ -489,18 +489,18 @@ const Page = () => {
                       settings: {...prev.settings, tone: e.target.value}
                     } : null)}
                   >
-                    <option value="professional">Professional</option>
-                    <option value="casual">Casual</option>
-                    <option value="humorous">Humorous</option>
-                    <option value="educational">Educational</option>
-                    <option value="absurdist">Absurdist</option>
-                    <option value="philosophical">Philosophical</option>
-                    <option value="chaotic">Chaotic</option>
+                    <option value="professional" className="text-white">Professional</option>
+                    <option value="casual" className="text-white">Casual</option>
+                    <option value="humorous" className="text-white">Humorous</option>
+                    <option value="educational" className="text-white">Educational</option>
+                    <option value="absurdist" className="text-white">Absurdist</option>
+                    <option value="philosophical" className="text-white">Philosophical</option>
+                    <option value="chaotic" className="text-white">Chaotic</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Emotional State</label>
+                  <label className="block text-sm text-white font-medium mb-2">Emotional State</label>
                   <select 
                     className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
                     value={agent?.settings?.emotionalState || 'neutral'}
@@ -509,8 +509,8 @@ const Page = () => {
                       settings: {...prev.settings, emotionalState: e.target.value}
                     } : null)}
                   >
-                    <option value="neutral">Neutral</option>
-                    <option value="excited">Excited</option>
+                    <option value="neutral" className="text-white">Neutral</option>
+                    <option value="excited" className="text-white">Excited</option>
                     <option value="contemplative">Contemplative</option>
                     <option value="chaotic">Chaotic</option>
                     <option value="manic">Manic</option>
@@ -520,12 +520,12 @@ const Page = () => {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="block text-sm font-medium">Personality Traits</label>
+                  <label className="block text-sm text-white font-medium">Personality Traits</label>
                   
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-xs">Technical Depth</span>
-                      <span className="text-xs">{agent?.settings?.technical_depth || 5}</span>
+                      <span className="text-xs text-white" >Technical Depth</span>
+                      <span className="text-xs text-white">{agent?.settings?.technical_depth || 5}</span>
                     </div>
                     <input
                       type="range"
@@ -542,8 +542,8 @@ const Page = () => {
                   
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-xs">Provocative Tendency</span>
-                      <span className="text-xs">{agent?.settings?.provocative_tendency || 5}</span>
+                      <span className="text-xs text-white">Provocative Tendency</span>
+                      <span className="text-xs text-white">{agent?.settings?.provocative_tendency || 5}</span>
                     </div>
                     <input
                       type="range"
@@ -560,8 +560,8 @@ const Page = () => {
                   
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-xs">Chaos Threshold</span>
-                      <span className="text-xs">{agent?.settings?.chaos_threshold || 5}</span>
+                      <span className="text-xs text-white">Chaos Threshold</span>
+                      <span className="text-xs text-white">{agent?.settings?.chaos_threshold || 5}</span>
                     </div>
                     <input
                       type="range"
@@ -578,8 +578,8 @@ const Page = () => {
                   
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-xs">Philosophical Inclination</span>
-                      <span className="text-xs">{agent?.settings?.philosophical_inclination || 5}</span>
+                      <span className="text-xs text-white">Philosophical Inclination</span>
+                      <span className="text-xs text-white">{agent?.settings?.philosophical_inclination || 5}</span>
                     </div>
                     <input
                       type="range"
@@ -596,8 +596,8 @@ const Page = () => {
                   
                   <div>
                     <div className="flex justify-between mb-1">
-                      <span className="text-xs">Meme Affinity</span>
-                      <span className="text-xs">{agent?.settings?.meme_affinity || 5}</span>
+                      <span className="text-xs text-white">Meme Affinity</span>
+                      <span className="text-xs text-white">{agent?.settings?.meme_affinity || 5}</span>
                     </div>
                     <input
                       type="range"
@@ -614,7 +614,7 @@ const Page = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-2">Topics</label>
+                  <label className="block text-sm text-white font-medium mb-2">Topics</label>
                   <Textarea
                     placeholder="Enter topics, separated by commas"
                     value={agent?.settings?.topics?.join(', ') || ''}
@@ -623,7 +623,7 @@ const Page = () => {
                       settings: {...prev.settings, topics: e.target.value.split(',').map(t => t.trim())}
                     } : null)}
                     rows={3}
-                    className="bg-zinc-900 border-zinc-700"
+                    className="bg-zinc-900 text-white border-zinc-700"
                   />
                 </div>
 
@@ -647,7 +647,7 @@ const Page = () => {
                       setError(err instanceof Error ? err.message : 'Failed to save settings');
                     }
                   }}
-                  className="w-full"
+                  className="w-full border border-zinc-900"
                 >
                   Save Settings
                 </Button>
