@@ -4,14 +4,87 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { randomUUID } from 'crypto'
 import { createClient } from '@supabase/supabase-js'
+import crypto from 'crypto'
 
-// Use a regular CommonJS require for the Twitter API
-// This avoids the initialization error
-let twitterApi;
-try {
-  twitterApi = require('twitter-api-v2');
-} catch (error) {
-  console.warn('Twitter API package not available:', error.message);
+// Simple Twitter client for just posting tweets
+class SimpleTwitterClient {
+  private apiKey: string;
+  private apiSecret: string;
+  private accessToken: string;
+  private accessSecret: string;
+
+  constructor(credentials: {
+    apiKey: string;
+    apiSecret: string;
+    accessToken: string;
+    accessSecret: string;
+  }) {
+    this.apiKey = credentials.apiKey;
+    this.apiSecret = credentials.apiSecret;
+    this.accessToken = credentials.accessToken;
+    this.accessSecret = credentials.accessSecret;
+  }
+
+  // Create OAuth 1.0a signature
+  private createSignature(method: string, url: string, params: Record<string, string>): string {
+    const paramString = Object.keys(params)
+      .sort()
+      .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+      .join('&');
+    
+    const signatureBaseString = `${method.toUpperCase()}&${encodeURIComponent(url)}&${encodeURIComponent(paramString)}`;
+    const signingKey = `${encodeURIComponent(this.apiSecret)}&${encodeURIComponent(this.accessSecret)}`;
+    
+    return crypto
+      .createHmac('sha1', signingKey)
+      .update(signatureBaseString)
+      .digest('base64');
+  }
+
+  // Post a tweet
+  async tweet(text: string): Promise<{ id: string }> {
+    const url = 'https://api.twitter.com/2/tweets';
+    const method = 'POST';
+    const timestamp = Math.floor(Date.now() / 1000).toString();
+    const nonce = crypto.randomBytes(16).toString('hex');
+
+    // OAuth parameters
+    const oauthParams: Record<string, string> = {
+      oauth_consumer_key: this.apiKey,
+      oauth_nonce: nonce,
+      oauth_signature_method: 'HMAC-SHA1',
+      oauth_timestamp: timestamp,
+      oauth_token: this.accessToken,
+      oauth_version: '1.0'
+    };
+
+    // Add signature
+    const signature = this.createSignature(method, url, oauthParams);
+    oauthParams.oauth_signature = signature;
+
+    // Create Authorization header
+    const authHeader = 'OAuth ' + Object.keys(oauthParams)
+      .map(key => `${encodeURIComponent(key)}="${encodeURIComponent(oauthParams[key])}"`)
+      .join(', ');
+
+    // Send the request
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ text })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Twitter API error: ${response.status} ${errorText}`);
+    }
+
+    const data = await response.json();
+    return { id: data.data.id };
+  }
 }
 
 export async function POST(request: Request) {
@@ -56,9 +129,8 @@ export async function POST(request: Request) {
     
     console.log('Creating post with ID:', postId);
     
-    // Step 1: If postToTwitter is true and Twitter API is available, attempt to post to Twitter
-    if (postToTwitter && twitterApi) {
-      console.log('Twitter API is available, attempting to post to Twitter');
+    // Step 1: If postToTwitter is true, attempt to post to Twitter
+    if (postToTwitter) {
       try {
         const supabase = createClient(
           process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -72,6 +144,8 @@ export async function POST(request: Request) {
           .eq('user_id', userId)
           .single();
           
+        console.log('API keys retrieved:', !!apiKeys, 'Error:', !!apiKeysError);
+          
         if (apiKeysError || !apiKeys) {
           console.error(`Twitter API keys not found for user ${userId}:`, apiKeysError);
           twitterStatus = 'failed';
@@ -82,20 +156,20 @@ export async function POST(request: Request) {
           twitterStatus = 'failed';
           twitterError = 'Incomplete Twitter API configuration';
         } else {
-          // Initialize Twitter client with user credentials
-          const TwitterApi = twitterApi.TwitterApi;
-          const twitterClient = new TwitterApi({
-            appKey: apiKeys.twitter_api_key,
-            appSecret: apiKeys.twitter_api_secret,
+          console.log('Creating Twitter client with API keys');
+          // Initialize our simple Twitter client
+          const twitterClient = new SimpleTwitterClient({
+            apiKey: apiKeys.twitter_api_key,
+            apiSecret: apiKeys.twitter_api_secret,
             accessToken: apiKeys.twitter_access_token,
             accessSecret: apiKeys.twitter_access_secret
           });
           
           // Post the tweet to Twitter
           console.log(`Posting tweet to Twitter: ${tweet}`);
-          const twitterResponse = await twitterClient.v2.tweet(tweet);
+          const twitterResponse = await twitterClient.tweet(tweet);
           
-          twitterId = twitterResponse.data.id;
+          twitterId = twitterResponse.id;
           twitterStatus = 'sent';
           console.log(`Tweet successfully posted to Twitter with ID: ${twitterId}`);
         }
@@ -105,7 +179,7 @@ export async function POST(request: Request) {
         twitterError = error instanceof Error ? error.message : String(error);
       }
     } else {
-      console.log('Skipping Twitter posting - postToTwitter is', postToTwitter, 'twitterApi available:', !!twitterApi);
+      console.log('Skipping Twitter posting - postToTwitter is false');
     }
     
     // Step 2: Save the tweet to the database
