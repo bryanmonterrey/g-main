@@ -12,6 +12,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Bot, AlertCircle, CheckCircle2, Twitter } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Slider } from "@/components/ui/slider";
+import { PersonalityConfigEditor } from "./_components/PersonalityConfigEditor";
 
 interface AIAgent {
   id: string;
@@ -56,7 +59,7 @@ const Page = () => {
   const [agent, setAgent] = useState<AIAgent | null>(null);
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isSending, setIsSending] = useState(false); // Added the missing state
+  const [isSending, setIsSending] = useState(false); 
   const [tweetPreview, setTweetPreview] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -438,10 +441,10 @@ const Page = () => {
                     <div className="flex gap-2">
                       <Button 
                         onClick={handleSendTweet}
-                        disabled={isSending} // Add disabled state using isSending
+                        disabled={isSending}
                         className="flex-1"
                       >
-                        {isSending ? 'Sending...' : 'Send Tweet'} {/* Update button text based on sending state */}
+                        {isSending ? 'Sending...' : 'Send Tweet'}
                       </Button>
                       <Button 
                         variant="outline"
@@ -468,194 +471,207 @@ const Page = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <label className="text-white block text-sm font-medium mb-2">Agent Name</label>
-                  <input
-                    type="text"
-                    className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
-                    value={agent?.name || ''}
-                    onChange={(e) => setAgent(prev => prev ? {...prev, name: e.target.value} : null)}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-white text-sm font-medium mb-2">Tweet Style</label>
-                  <select 
-                    className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
-                    value={agent?.settings?.tone || 'professional'}
-                    onChange={(e) => setAgent(prev => prev ? {
-                      ...prev, 
-                      settings: {...prev.settings, tone: e.target.value}
-                    } : null)}
-                  >
-                    <option value="professional" className="text-white">Professional</option>
-                    <option value="casual" className="text-white">Casual</option>
-                    <option value="humorous" className="text-white">Humorous</option>
-                    <option value="educational" className="text-white">Educational</option>
-                    <option value="absurdist" className="text-white">Absurdist</option>
-                    <option value="philosophical" className="text-white">Philosophical</option>
-                    <option value="chaotic" className="text-white">Chaotic</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-white font-medium mb-2">Emotional State</label>
-                  <select 
-                    className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
-                    value={agent?.settings?.emotionalState || 'neutral'}
-                    onChange={(e) => setAgent(prev => prev ? {
-                      ...prev, 
-                      settings: {...prev.settings, emotionalState: e.target.value}
-                    } : null)}
-                  >
-                    <option value="neutral" className="text-white">Neutral</option>
-                    <option value="excited" className="text-white">Excited</option>
-                    <option value="contemplative">Contemplative</option>
-                    <option value="chaotic">Chaotic</option>
-                    <option value="manic">Manic</option>
-                    <option value="nihilistic">Nihilistic</option>
-                    <option value="enlightened">Enlightened</option>
-                  </select>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="block text-sm text-white font-medium">Personality Traits</label>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-white" >Technical Depth</span>
-                      <span className="text-xs text-white">{agent?.settings?.technical_depth || 5}</span>
+              <Tabs defaultValue="basic" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="basic">Basic Settings</TabsTrigger>
+                  <TabsTrigger value="personality">Personality</TabsTrigger>
+                </TabsList>
+      
+                <TabsContent value="basic">
+                  <div className="space-y-6">
+                    <div>
+                      <label className="text-white block text-sm font-medium mb-2">Agent Name</label>
+                      <input
+                        type="text"
+                        className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
+                        value={agent?.name || ''}
+                        onChange={(e) => setAgent(prev => prev ? {...prev, name: e.target.value} : null)}
+                      />
                     </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={agent?.settings?.technical_depth || 5}
-                      onChange={(e) => setAgent(prev => prev ? {
-                        ...prev, 
-                        settings: {...prev.settings, technical_depth: parseInt(e.target.value)}
-                      } : null)}
-                      className="w-full "
-                    />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-white">Provocative Tendency</span>
-                      <span className="text-xs text-white">{agent?.settings?.provocative_tendency || 5}</span>
+      
+                    <div>
+                      <label className="block text-white text-sm font-medium mb-2">Tweet Style</label>
+                      <select 
+                        className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
+                        value={agent?.settings?.tone || 'professional'}
+                        onChange={(e) => setAgent(prev => prev ? {
+                          ...prev, 
+                          settings: {...prev.settings, tone: e.target.value}
+                        } : null)}
+                      >
+                        <option value="professional" className="text-white">Professional</option>
+                        <option value="casual" className="text-white">Casual</option>
+                        <option value="humorous" className="text-white">Humorous</option>
+                        <option value="educational" className="text-white">Educational</option>
+                        <option value="absurdist" className="text-white">Absurdist</option>
+                        <option value="philosophical" className="text-white">Philosophical</option>
+                        <option value="chaotic" className="text-white">Chaotic</option>
+                      </select>
                     </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={agent?.settings?.provocative_tendency || 5}
-                      onChange={(e) => setAgent(prev => prev ? {
-                        ...prev, 
-                        settings: {...prev.settings, provocative_tendency: parseInt(e.target.value)}
-                      } : null)}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-white">Chaos Threshold</span>
-                      <span className="text-xs text-white">{agent?.settings?.chaos_threshold || 5}</span>
+      
+                    <div>
+                      <label className="block text-sm text-white font-medium mb-2">Emotional State</label>
+                      <select 
+                        className="w-full p-2 border rounded-md bg-zinc-900 text-white border-zinc-700"
+                        value={agent?.settings?.emotionalState || 'neutral'}
+                        onChange={(e) => setAgent(prev => prev ? {
+                          ...prev, 
+                          settings: {...prev.settings, emotionalState: e.target.value}
+                        } : null)}
+                      >
+                        <option value="neutral" className="text-white">Neutral</option>
+                        <option value="excited" className="text-white">Excited</option>
+                        <option value="contemplative">Contemplative</option>
+                        <option value="chaotic">Chaotic</option>
+                        <option value="manic">Manic</option>
+                        <option value="nihilistic">Nihilistic</option>
+                        <option value="enlightened">Enlightened</option>
+                      </select>
                     </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={agent?.settings?.chaos_threshold || 5}
-                      onChange={(e) => setAgent(prev => prev ? {
-                        ...prev, 
-                        settings: {...prev.settings, chaos_threshold: parseInt(e.target.value)}
-                      } : null)}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-white">Philosophical Inclination</span>
-                      <span className="text-xs text-white">{agent?.settings?.philosophical_inclination || 5}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={agent?.settings?.philosophical_inclination || 5}
-                      onChange={(e) => setAgent(prev => prev ? {
-                        ...prev, 
-                        settings: {...prev.settings, philosophical_inclination: parseInt(e.target.value)}
-                      } : null)}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div>
-                    <div className="flex justify-between mb-1">
-                      <span className="text-xs text-white">Meme Affinity</span>
-                      <span className="text-xs text-white">{agent?.settings?.meme_affinity || 5}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="10"
-                      value={agent?.settings?.meme_affinity || 5}
-                      onChange={(e) => setAgent(prev => prev ? {
-                        ...prev, 
-                        settings: {...prev.settings, meme_affinity: parseInt(e.target.value)}
-                      } : null)}
-                      className="w-full"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-white font-medium mb-2">Topics</label>
-                  <Textarea
-                    placeholder="Enter topics, separated by commas"
-                    value={agent?.settings?.topics?.join(', ') || ''}
-                    onChange={(e) => setAgent(prev => prev ? {
-                      ...prev, 
-                      settings: {...prev.settings, topics: e.target.value.split(',').map(t => t.trim())}
-                    } : null)}
-                    rows={3}
-                    className="bg-zinc-900 text-white border-zinc-700"
-                  />
-                </div>
-
-                <Button 
-                  onClick={async () => {
-                    if (!agent) return;
-                    try {
-                      const { error } = await supabase
-                        .from('ai_agents')
-                        .update({
-                          name: agent.name,
-                          settings: agent.settings,
-                          updated_at: new Date().toISOString()
-                        })
-                        .eq('id', agent.id);
+      
+                    <div className="space-y-4">
+                      <label className="block text-sm text-white font-medium">Personality Traits</label>
                       
-                      if (error) throw error;
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs text-white">Technical Depth</span>
+                          <span className="text-xs text-white">{agent?.settings?.technical_depth || 5}</span>
+                        </div>
+                        <Slider
+                          min={1}
+                          max={10}
+                          step={1}
+                          value={[agent?.settings?.technical_depth || 5]}
+                          onValueChange={(value) => setAgent(prev => prev ? {
+                            ...prev, 
+                            settings: {...prev.settings, technical_depth: value[0]}
+                          } : null)}
+                          className="w-full"
+                        />
+                      </div>
                       
-                      setSuccess('Settings saved successfully!');
-                    } catch (err) {
-                      setError(err instanceof Error ? err.message : 'Failed to save settings');
-                    }
-                  }}
-                  className="w-full border border-zinc-900"
-                >
-                  Save Settings
-                </Button>
-              </div>
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs text-white">Provocative Tendency</span>
+                          <span className="text-xs text-white">{agent?.settings?.provocative_tendency || 5}</span>
+                        </div>
+                        <Slider
+                          min={1}
+                          max={10}
+                          step={1}
+                          value={[agent?.settings?.provocative_tendency || 5]}
+                          onValueChange={(value) => setAgent(prev => prev ? {
+                            ...prev, 
+                            settings: {...prev.settings, provocative_tendency: value[0]}
+                          } : null)}
+                          className="w-full"
+                        />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs text-white">Chaos Threshold</span>
+                          <span className="text-xs text-white">{agent?.settings?.chaos_threshold || 5}</span>
+                        </div>
+                        <Slider
+                          min={1}
+                          max={10}
+                          step={1}
+                          value={[agent?.settings?.chaos_threshold || 5]}
+                          onValueChange={(value) => setAgent(prev => prev ? {
+                            ...prev, 
+                            settings: {...prev.settings, chaos_threshold: value[0]}
+                          } : null)}
+                          className="w-full"
+                        />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs text-white">Philosophical Inclination</span>
+                          <span className="text-xs text-white">{agent?.settings?.philosophical_inclination || 5}</span>
+                        </div>
+                        <Slider
+                          min={1}
+                          max={10}
+                          step={1}
+                          value={[agent?.settings?.philosophical_inclination || 5]}
+                          onValueChange={(value) => setAgent(prev => prev ? {
+                            ...prev, 
+                            settings: {...prev.settings, philosophical_inclination: value[0]}
+                          } : null)}
+                          className="w-full"
+                        />
+                      </div>
+                      
+                      <div>
+                        <div className="flex justify-between mb-1">
+                          <span className="text-xs text-white">Meme Affinity</span>
+                          <span className="text-xs text-white">{agent?.settings?.meme_affinity || 5}</span>
+                        </div>
+                        <Slider
+                          min={1}
+                          max={10}
+                          step={1}
+                          value={[agent?.settings?.meme_affinity || 5]}
+                          onValueChange={(value) => setAgent(prev => prev ? {
+                            ...prev, 
+                            settings: {...prev.settings, meme_affinity: value[0]}
+                          } : null)}
+                          className="w-full"
+                        />
+                      </div>
+                    </div>
+      
+                    <div>
+                      <label className="block text-sm text-white font-medium mb-2">Topics</label>
+                      <Textarea
+                        placeholder="Enter topics, separated by commas"
+                        value={agent?.settings?.topics?.join(', ') || ''}
+                        onChange={(e) => setAgent(prev => prev ? {
+                          ...prev, 
+                          settings: {...prev.settings, topics: e.target.value.split(',').map(t => t.trim())}
+                        } : null)}
+                        rows={3}
+                        className="bg-zinc-900 text-white border-zinc-700"
+                      />
+                    </div>
+      
+                    <Button 
+                      onClick={async () => {
+                        if (!agent) return;
+                        try {
+                          const { error } = await supabase
+                            .from('ai_agents')
+                            .update({
+                              name: agent.name,
+                              settings: agent.settings,
+                              updated_at: new Date().toISOString()
+                            })
+                            .eq('id', agent.id);
+                          
+                          if (error) throw error;
+                          
+                          setSuccess('Settings saved successfully!');
+                        } catch (err) {
+                          setError(err instanceof Error ? err.message : 'Failed to save settings');
+                        }
+                      }}
+                      className="w-full border border-zinc-900"
+                    >
+                      Save Basic Settings
+                    </Button>
+                  </div>
+                </TabsContent>
+      
+                <TabsContent value="personality">
+                  {agent?.id && <PersonalityConfigEditor agentId={agent.id} />}
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         );
-
+      
       default:
         return null;
     }

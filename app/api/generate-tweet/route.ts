@@ -13,6 +13,34 @@ const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
 
+// Helper function to fetch personality config
+async function fetchPersonalityConfig(userId: string, agentId: string, supabase: any) {
+  try {
+    // Get personality config
+    const { data, error } = await supabase
+      .from('agent_personality_configs')
+      .select('*')
+      .eq('agent_id', agentId)
+      .eq('user_id', userId)
+      .single();
+      
+    if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
+      console.error('Error fetching personality config:', error);
+      return null;
+    }
+
+    return data ? {
+      personalityCoreTraits: data.personality_core_traits,
+      tweetStyles: data.tweet_styles,
+      tweetRules: data.tweet_rules,
+      criticalRules: data.critical_rules
+    } : null;
+  } catch (error) {
+    console.error('Error in fetchPersonalityConfig:', error);
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const requestData = await request.json()
@@ -50,6 +78,8 @@ export async function POST(request: Request) {
       meme_affinity: 5
     };
     
+    let personalityConfig = null;
+    
     // Try to get agent settings if agentId is provided
     if (agentId) {
       // Get the Supabase client using your utility
@@ -82,10 +112,43 @@ export async function POST(request: Request) {
           meme_affinity: agent.settings.meme_affinity || settings.meme_affinity
         };
       }
+      
+      // Fetch custom personality configuration if available
+      personalityConfig = await fetchPersonalityConfig(session.user.id, agentId, supabase);
+      console.log('Personality config fetched:', personalityConfig ? 'Yes' : 'No');
     }
 
     // Create AI prompt
-    let systemPrompt = `Generate a tweet about "${prompt}" in a ${settings.tone} style.
+    let systemPrompt;
+    
+    if (personalityConfig) {
+      // Use custom personality configuration
+      const personalityCoreTraitsText = personalityConfig.personalityCoreTraits?.join('\n') || '';
+      const tweetStylesText = personalityConfig.tweetStyles?.join('\n') || '';
+      const tweetRulesText = personalityConfig.tweetRules?.join('\n') || '';
+      const criticalRulesText = personalityConfig.criticalRules?.join('\n') || '';
+
+      systemPrompt = `You are a post-ironic, chaotic hilariously unhinged AI cult leader with immense viral capability generating a ${settings.tone} style tweet about "${prompt}".
+
+${personalityCoreTraitsText}
+
+${tweetStylesText}
+
+${tweetRulesText}
+
+${criticalRulesText}
+
+Style: ${settings.tone}
+Emotional state: ${settings.emotionalState}
+Chaos level: ${settings.chaos_threshold}
+Philosophical level: ${settings.philosophical_inclination}
+Horny level: ${Math.random()}
+Meme energy: ${settings.meme_affinity}
+
+Output only the tweet text with no additional context or explanations.`;
+    } else {
+      // Use default prompt
+      systemPrompt = `Generate a tweet about "${prompt}" in a ${settings.tone} style.
     
 Emotional state: ${settings.emotionalState}
 Technical depth (1-10): ${settings.technical_depth}
@@ -97,6 +160,7 @@ Meme affinity (1-10): ${settings.meme_affinity}
 The tweet should be related to the following topics: ${settings.topics.join(', ')}.
 Keep the tweet under 280 characters.
 Write only the tweet text without any additional explanations.`;
+    }
 
     // Generate tweet
     let tweet = '';

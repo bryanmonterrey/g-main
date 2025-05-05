@@ -1151,6 +1151,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_personality_configs: {
+        Row: {
+          agent_id: string
+          created_at: string
+          critical_rules: string[] | null
+          id: string
+          personality_core_traits: string[] | null
+          tweet_rules: string[] | null
+          tweet_styles: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          agent_id: string
+          created_at?: string
+          critical_rules?: string[] | null
+          id?: string
+          personality_core_traits?: string[] | null
+          tweet_rules?: string[] | null
+          tweet_styles?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          critical_rules?: string[] | null
+          id?: string
+          personality_core_traits?: string[] | null
+          tweet_rules?: string[] | null
+          tweet_styles?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_personality_configs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: true
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_agents: {
         Row: {
           created_at: string | null
@@ -1600,6 +1644,29 @@ export type Database = {
           is_authenticated: boolean
         }[]
       }
+      execute_tweet_insert: {
+        Args:
+          | {
+              p_post_id: string
+              p_user_id: string
+              p_content: string
+              p_agent_id: string
+              p_created_at: string
+              p_updated_at: string
+            }
+          | {
+              p_post_id: string
+              p_user_id: string
+              p_content: string
+              p_agent_id: string
+              p_created_at: string
+              p_updated_at: string
+              p_twitter_status?: string
+              p_twitter_id?: string
+              p_error_message?: string
+            }
+        Returns: Json
+      }
       expire_sessions: {
         Args: Record<PropertyKey, never>
         Returns: undefined
@@ -1607,6 +1674,27 @@ export type Database = {
       follow_user: {
         Args: { follower_id_param: string; following_id_param: string }
         Returns: Json
+      }
+      get_pending_tweets: {
+        Args: { limit_count: number }
+        Returns: {
+          content: string | null
+          created_at: string | null
+          id: string
+          is_pinned: boolean | null
+          is_sensitive: boolean | null
+          likes_count: number | null
+          media_url: string[] | null
+          metadata: Json | null
+          parent_id: string | null
+          replies_count: number | null
+          retweet_id: string | null
+          retweets_count: number | null
+          type: Database["public"]["Enums"]["post_type"] | null
+          updated_at: string | null
+          user_id: string | null
+          views_count: number | null
+        }[]
       }
       sync_avatar_to_next_auth: {
         Args: { user_id: string; new_avatar_url: string }
@@ -1619,6 +1707,30 @@ export type Database = {
       sync_username_to_next_auth: {
         Args: { user_id: string; new_username: string }
         Returns: undefined
+      }
+      update_agent_tweet_stats: {
+        Args: { p_agent_id: string; p_timestamp: string }
+        Returns: undefined
+      }
+      update_tweet_status: {
+        Args: {
+          p_post_id: string
+          p_status: string
+          p_twitter_id?: string
+          p_error_message?: string
+        }
+        Returns: undefined
+      }
+      upsert_agent_personality_config: {
+        Args: {
+          p_user_id: string
+          p_agent_id: string
+          p_personality_core_traits: string[]
+          p_tweet_styles: string[]
+          p_tweet_rules: string[]
+          p_critical_rules: string[]
+        }
+        Returns: Json
       }
     }
     Enums: {
